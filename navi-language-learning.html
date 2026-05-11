@@ -162,7 +162,10 @@ h1 span{color:var(--teal)}
 .vc{border-radius:14px;overflow:hidden;position:relative}
 .vc img{width:100%;height:168px;object-fit:cover;display:block;filter:saturate(1.15) brightness(.82);transition:transform .4s,filter .4s}
 .vc:hover img{transform:scale(1.06);filter:saturate(1.4) brightness(.92)}
-.vc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,100,180,.28) 0%,rgba(80,0,160,.18) 100%);mix-blend-mode:multiply;z-index:1;pointer-events:none}
+.vc-scene{width:100%;height:168px;display:block;overflow:hidden;transition:transform .45s ease}
+.vc-scene svg{width:100%;height:100%;display:block}
+.vc:hover .vc-scene{transform:scale(1.05)}
+.vc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,100,180,.18) 0%,rgba(80,0,160,.1) 100%);mix-blend-mode:multiply;z-index:1;pointer-events:none}
 .vc .ov{
   position:absolute;inset:0;z-index:2;
   background:linear-gradient(to top,rgba(5,18,46,.92) 0%,transparent 52%);
@@ -526,30 +529,272 @@ footer span{color:var(--cyan)}
     <p class="lead reveal">Pandora'da bir gün hayatta kalmak için bilmen gerekenler.</p>
 
     <div class="vc-grid">
+
+      <!-- 1. UTRAL — Hometree -->
       <div class="vc reveal">
-        <img src="https://images.unsplash.com/photo-1476231682828-37e571bc172f?auto=format&fit=crop&w=400&q=80" alt="Hometree — Na'vi kutsal ağacı"/>
+        <div class="vc-scene">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="ht-sky" cx="50%" cy="0%" r="90%"><stop offset="0%" stop-color="#1a3848"/><stop offset="100%" stop-color="#060e1c"/></radialGradient>
+            </defs>
+            <rect width="400" height="168" fill="url(#ht-sky)"/>
+            <ellipse cx="200" cy="168" rx="230" ry="55" fill="rgba(0,80,50,.45)"/>
+            <!-- bg trees -->
+            <rect x="8" y="45" width="26" height="123" rx="6" fill="#021a10"/>
+            <rect x="362" y="38" width="33" height="130" rx="6" fill="#021a10"/>
+            <rect x="278" y="62" width="18" height="106" rx="4" fill="#031808"/>
+            <rect x="82" y="72" width="15" height="96" rx="4" fill="#031808"/>
+            <!-- Hometree trunk (massive) -->
+            <path d="M178 168 Q183 112 186 68 Q193 24 200 10 Q207 24 214 68 Q217 112 222 168Z" fill="#041e0a"/>
+            <path d="M181 168 Q186 118 189 76 Q195 32 200 14 Q205 32 211 76 Q214 118 219 168Z" fill="#052612"/>
+            <!-- Canopy -->
+            <ellipse cx="200" cy="44" rx="95" ry="56" fill="#031c0e"/>
+            <ellipse cx="200" cy="58" rx="75" ry="42" fill="#042212"/>
+            <ellipse cx="200" cy="70" rx="58" ry="32" fill="#052a14"/>
+            <!-- glow halo -->
+            <ellipse cx="200" cy="90" rx="32" ry="82" fill="rgba(0,120,80,.07)"/>
+            <!-- vines -->
+            <path d="M163 82 Q156 104 160 132 Q162 150 156 168" stroke="#00d4ff" stroke-width="1.5" fill="none" opacity=".42"/>
+            <path d="M236 88 Q244 112 240 138 Q237 156 243 168" stroke="#00d4ff" stroke-width="1.3" fill="none" opacity=".36"/>
+            <path d="M195 52 Q188 80 191 114 Q193 135 188 158" stroke="#00ffe0" stroke-width="1" fill="none" opacity=".3"/>
+            <!-- bio dots -->
+            <circle cx="188" cy="90" r="2.2" fill="#00e5ff" opacity=".85"/><circle cx="213" cy="74" r="2" fill="#00e5ff" opacity=".78"/><circle cx="200" cy="57" r="2.4" fill="#00e5ff" opacity=".9"/>
+            <circle cx="177" cy="114" r="1.8" fill="#00e5ff" opacity=".65"/><circle cx="224" cy="104" r="1.8" fill="#00e5ff" opacity=".65"/>
+            <!-- Atokirina spirit seeds -->
+            <circle cx="118" cy="78" r="4" fill="white" opacity=".28"/><circle cx="118" cy="78" r="1.8" fill="white" opacity=".85"/>
+            <circle cx="312" cy="62" r="3.5" fill="white" opacity=".25"/><circle cx="312" cy="62" r="1.4" fill="white" opacity=".8"/>
+            <circle cx="68" cy="118" r="3" fill="white" opacity=".22"/><circle cx="68" cy="118" r="1.2" fill="white" opacity=".75"/>
+            <!-- stars -->
+            <circle cx="38" cy="16" r="1" fill="white" opacity=".6"/><circle cx="338" cy="10" r="1" fill="white" opacity=".7"/><circle cx="148" cy="7" r="1" fill="white" opacity=".5"/><circle cx="380" cy="24" r="1.2" fill="white" opacity=".6"/>
+          </svg>
+        </div>
         <div class="ov"><span class="nw">Utral — Ağaç</span><span class="sc">Avatar — Hometree sahnesi</span></div>
       </div>
+
+      <!-- 2. TXON — Pandora Night -->
       <div class="vc reveal">
-        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80" alt="Pandora biyolüminesans gecesi"/>
-        <div class="ov"><span class="nw">Txon — Gece</span><span class="sc">Biyolüminesans orman, Pandora</span></div>
+        <div class="vc-scene">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="pn-g1" cx="25%" cy="60%" r="40%"><stop offset="0%" stop-color="rgba(0,200,160,.38)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <radialGradient id="pn-g2" cx="75%" cy="55%" r="35%"><stop offset="0%" stop-color="rgba(120,0,255,.3)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <radialGradient id="pn-g3" cx="52%" cy="82%" r="28%"><stop offset="0%" stop-color="rgba(0,150,255,.25)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            </defs>
+            <rect width="400" height="168" fill="#020810"/>
+            <rect width="400" height="168" fill="url(#pn-g1)"/>
+            <rect width="400" height="168" fill="url(#pn-g2)"/>
+            <rect width="400" height="168" fill="url(#pn-g3)"/>
+            <!-- ground -->
+            <path d="M0 155 Q80 142 160 152 Q240 158 320 148 Q360 142 400 150 L400 168 L0 168Z" fill="#030d18"/>
+            <!-- Mushroom L -->
+            <rect x="77" y="108" width="5" height="50" rx="2.5" fill="#0a2820"/><ellipse cx="79" cy="108" rx="30" ry="19" fill="#062820"/><ellipse cx="79" cy="111" rx="24" ry="15" fill="rgba(0,220,180,.22)"/>
+            <ellipse cx="79" cy="155" rx="36" ry="12" fill="rgba(0,200,160,.22)"/>
+            <!-- Mushroom C -->
+            <rect x="199" y="122" width="4" height="40" rx="2" fill="#0a2030"/><ellipse cx="201" cy="122" rx="22" ry="14" fill="#061828"/><ellipse cx="201" cy="125" rx="17" ry="11" fill="rgba(0,180,255,.2)"/>
+            <ellipse cx="201" cy="160" rx="26" ry="9" fill="rgba(0,150,255,.2)"/>
+            <!-- Mushroom R -->
+            <rect x="328" y="118" width="4" height="42" rx="2" fill="#1a0830"/><ellipse cx="330" cy="118" rx="24" ry="15" fill="#120620"/><ellipse cx="330" cy="121" rx="18" ry="11" fill="rgba(180,50,255,.2)"/>
+            <ellipse cx="330" cy="158" rx="28" ry="10" fill="rgba(180,0,255,.2)"/>
+            <!-- glow plants -->
+            <path d="M50 155 Q44 128 54 106" stroke="#00a080" stroke-width="2.2" fill="none" opacity=".6"/><circle cx="54" cy="104" r="4.5" fill="#00e5c0" opacity=".72"/>
+            <path d="M148 155 Q146 126 150 104" stroke="#0080a0" stroke-width="2" fill="none" opacity=".55"/><circle cx="150" cy="102" r="4" fill="#00c8ff" opacity=".65"/>
+            <path d="M258 155 Q252 122 264 98" stroke="#8000d0" stroke-width="2" fill="none" opacity=".5"/><circle cx="264" cy="96" r="4.5" fill="#b050ff" opacity=".68"/>
+            <path d="M372 155 Q368 128 378 110" stroke="#00a0c0" stroke-width="2" fill="none" opacity=".5"/><circle cx="378" cy="108" r="3.5" fill="#00d4ff" opacity=".62"/>
+            <!-- floating particles -->
+            <circle cx="100" cy="58" r="3" fill="#00e5ff" opacity=".45"/><circle cx="280" cy="38" r="2.5" fill="#a050ff" opacity=".42"/><circle cx="180" cy="28" r="2.2" fill="#00e5c0" opacity=".5"/>
+            <circle cx="340" cy="78" r="2.5" fill="#00c8ff" opacity=".42"/><circle cx="58" cy="85" r="2" fill="#00e5c0" opacity=".46"/>
+            <!-- stars -->
+            <circle cx="200" cy="14" r="1.2" fill="white" opacity=".7"/><circle cx="118" cy="22" r="1" fill="white" opacity=".6"/><circle cx="322" cy="17" r="1" fill="white" opacity=".65"/><circle cx="48" cy="30" r=".8" fill="white" opacity=".5"/>
+            <!-- moon hint -->
+            <circle cx="360" cy="18" r="11" fill="rgba(255,230,150,.07)"/><circle cx="360" cy="18" r="8" fill="rgba(255,230,150,.05)"/>
+          </svg>
+        </div>
+        <div class="ov"><span class="nw">Txon — Gece</span><span class="sc">Pandora biyolüminesans gecesi</span></div>
       </div>
+
+      <!-- 3. IKRAN -->
       <div class="vc reveal">
-        <img src="https://images.unsplash.com/photo-1497206365907-f5e630693df0?auto=format&fit=crop&w=400&q=80" alt="Ikran — Pandora'nın uçan yaratıkları"/>
+        <div class="vc-scene">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="ik-sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#08121e"/><stop offset="55%" stop-color="#112030"/><stop offset="100%" stop-color="#1a3045"/></linearGradient>
+              <radialGradient id="ik-light" cx="60%" cy="22%" r="32%"><stop offset="0%" stop-color="rgba(80,150,255,.3)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            </defs>
+            <rect width="400" height="168" fill="url(#ik-sky)"/>
+            <rect width="400" height="168" fill="url(#ik-light)"/>
+            <!-- mountains base -->
+            <path d="M0 168 Q55 78 108 115 Q155 85 198 128 Q238 92 278 116 Q328 76 400 92 L400 168Z" fill="#0a1828" opacity=".95"/>
+            <path d="M0 168 Q48 108 95 132 Q138 112 175 142 Q218 115 255 136 Q308 105 378 118 L400 168Z" fill="#0d2038" opacity=".9"/>
+            <!-- Hallelujah floating rock hint -->
+            <ellipse cx="95" cy="112" rx="52" ry="20" fill="#0d2030" opacity=".82"/>
+            <ellipse cx="298" cy="104" rx="62" ry="22" fill="#0d2030" opacity=".82"/>
+            <!-- Ikran body -->
+            <ellipse cx="235" cy="68" rx="38" ry="13" fill="#050c16" transform="rotate(-8 235 68)"/>
+            <!-- head/beak -->
+            <path d="M262 58 Q280 50 295 53 Q300 58 293 64 Q280 61 267 67Z" fill="#050c16"/>
+            <!-- wings spread -->
+            <path d="M235 70 Q178 40 128 54 Q108 60 96 73 Q118 65 150 61 Q192 53 228 73Z" fill="#08101e"/>
+            <path d="M238 70 Q298 40 338 50 Q358 56 368 69 Q348 63 326 59 Q290 51 246 73Z" fill="#08101e"/>
+            <!-- wing membrane lighter -->
+            <path d="M228 73 Q183 56 142 61 Q122 66 106 75 Q128 68 158 65 Q200 59 230 75Z" fill="#0c1828" opacity=".8"/>
+            <path d="M246 73 Q290 56 326 62 Q348 67 360 75 Q340 67 316 65 Q278 60 248 75Z" fill="#0c1828" opacity=".8"/>
+            <!-- tail -->
+            <path d="M208 75 Q193 87 185 98 Q190 84 206 77Z" fill="#050c16"/>
+            <!-- bio dots on Ikran -->
+            <circle cx="255" cy="62" r="2.2" fill="#00d4ff" opacity=".68"/><circle cx="248" cy="70" r="1.6" fill="#00d4ff" opacity=".55"/>
+            <!-- 2nd distant Ikran -->
+            <ellipse cx="96" cy="44" rx="17" ry="5" fill="#0a1820" opacity=".72" transform="rotate(-6 96 44)"/>
+            <path d="M96 44 Q74 34 56 42" fill="#0a1820" opacity=".7"/><path d="M96 44 Q118 34 136 40" fill="#0a1820" opacity=".7"/>
+            <!-- 3rd Ikran far -->
+            <ellipse cx="340" cy="36" rx="11" ry="3.5" fill="#0a1820" opacity=".55" transform="rotate(5 340 36)"/>
+            <path d="M340 36 Q325 28 314 34" fill="#0a1820" opacity=".5"/><path d="M340 36 Q355 28 364 33" fill="#0a1820" opacity=".5"/>
+            <!-- storm clouds -->
+            <ellipse cx="72" cy="24" rx="62" ry="18" fill="#0a1828" opacity=".62"/>
+            <ellipse cx="350" cy="19" rx="52" ry="14" fill="#0a1828" opacity=".55"/>
+            <!-- stars -->
+            <circle cx="28" cy="14" r="1" fill="white" opacity=".5"/><circle cx="198" cy="7" r="1" fill="white" opacity=".6"/><circle cx="378" cy="11" r="1" fill="white" opacity=".52"/>
+          </svg>
+        </div>
         <div class="ov"><span class="nw">Ikran — Uçan At</span><span class="sc">Jake'in ilk Ikran uçuşu</span></div>
       </div>
+
+      <!-- 4. TSKXE — Hallelujah Mountains -->
       <div class="vc reveal">
-        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80" alt="Hallelujah Dağları"/>
+        <div class="vc-scene">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="hm-sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0d1e30"/><stop offset="45%" stop-color="#142840"/><stop offset="100%" stop-color="#1a3248"/></linearGradient>
+            </defs>
+            <rect width="400" height="168" fill="url(#hm-sky)"/>
+            <!-- mist layers -->
+            <ellipse cx="200" cy="168" rx="240" ry="42" fill="rgba(100,180,220,.09)"/>
+            <ellipse cx="200" cy="142" rx="220" ry="28" fill="rgba(100,200,255,.06)"/>
+            <!-- Main floating mountain -->
+            <path d="M75 115 Q115 56 158 82 Q178 70 200 92 Q188 58 213 46 Q242 35 262 62 Q282 46 303 67 Q322 56 362 87 L368 132 Q300 128 200 130 Q128 132 75 132Z" fill="#0d2030"/>
+            <path d="M80 117 Q118 60 160 84 Q180 72 202 94 Q190 60 215 48 Q243 37 263 64 Q284 48 305 69 Q322 58 362 89 L365 130 Q296 126 202 128 Q130 130 80 130Z" fill="#102535"/>
+            <!-- forest on mountain top -->
+            <path d="M118 115 Q122 102 127 110 Q132 98 137 108 Q142 96 147 107 Q153 97 158 108 Q164 98 169 112" stroke="#031808" stroke-width="5.5" fill="none"/>
+            <path d="M222 94 Q227 82 232 90 Q237 80 242 88 Q247 80 252 89" stroke="#031808" stroke-width="4.5" fill="none"/>
+            <!-- Floating mountain left bg -->
+            <path d="M18 88 Q48 46 88 66 Q108 52 130 72 L135 103 Q90 101 18 102Z" fill="#0a1e2c" opacity=".88"/>
+            <path d="M20 90 Q50 49 90 68 Q110 54 130 73 L132 101 Q90 99 20 100Z" fill="#0d2232" opacity=".82"/>
+            <!-- hanging vines from left -->
+            <path d="M58 100 Q54 115 56 134 Q58 152 52 168" stroke="#042010" stroke-width="3.2" fill="none"/><path d="M84 102 Q81 120 83 142 Q84 158 80 168" stroke="#042010" stroke-width="2.6" fill="none"/>
+            <circle cx="52" cy="168" r="3.5" fill="#00e0c0" opacity=".48"/><circle cx="80" cy="168" r="2.8" fill="#00e0c0" opacity=".42"/>
+            <!-- Floating mountain right bg -->
+            <path d="M282 77 Q312 40 352 59 Q372 49 392 64 L396 97 Q352 95 282 97Z" fill="#0a1e2c" opacity=".82"/>
+            <!-- vines right -->
+            <path d="M302 95 Q298 114 300 135" stroke="#042010" stroke-width="3" fill="none"/><path d="M332 96 Q330 118 332 142" stroke="#042010" stroke-width="2.2" fill="none"/>
+            <circle cx="300" cy="137" r="2.8" fill="#00e5ff" opacity=".44"/>
+            <!-- mist between mountains -->
+            <ellipse cx="200" cy="112" rx="200" ry="22" fill="rgba(150,210,255,.07)"/>
+            <!-- distant Ikran -->
+            <ellipse cx="200" cy="54" rx="15" ry="4.5" fill="#0a1828" opacity=".72" transform="rotate(-5 200 54)"/>
+            <path d="M200 54 Q180 44 166 50" fill="#0a1828" opacity=".65"/><path d="M200 54 Q220 44 234 50" fill="#0a1828" opacity=".65"/>
+            <!-- stars -->
+            <circle cx="48" cy="18" r="1" fill="white" opacity=".62"/><circle cx="200" cy="10" r="1" fill="white" opacity=".72"/><circle cx="362" cy="16" r="1" fill="white" opacity=".62"/><circle cx="282" cy="7" r=".9" fill="white" opacity=".5"/>
+          </svg>
+        </div>
         <div class="ov"><span class="nw">Tskxe — Kaya</span><span class="sc">Hallelujah Dağları, Pandora</span></div>
       </div>
+
+      <!-- 5. KILVAN — Metkayina Water -->
       <div class="vc reveal">
-        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80" alt="Metkayina suları — Avatar 2"/>
-        <div class="ov"><span class="nw">Kilvan — Nehir</span><span class="sc">Avatar 2 — Metkayina kabilesi</span></div>
+        <div class="vc-scene">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="mw-sea" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0a2030"/><stop offset="35%" stop-color="#063048"/><stop offset="100%" stop-color="#020e1c"/></linearGradient>
+              <radialGradient id="mw-g1" cx="30%" cy="40%" r="38%"><stop offset="0%" stop-color="rgba(0,200,180,.28)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <radialGradient id="mw-g2" cx="70%" cy="58%" r="32%"><stop offset="0%" stop-color="rgba(0,100,255,.22)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            </defs>
+            <rect width="400" height="168" fill="url(#mw-sea)"/>
+            <rect width="400" height="168" fill="url(#mw-g1)"/>
+            <rect width="400" height="168" fill="url(#mw-g2)"/>
+            <!-- ocean surface -->
+            <path d="M0 0 Q100 9 200 5 Q300 1 400 7 L400 26 Q300 19 200 23 Q100 27 0 21Z" fill="#0a2535" opacity=".75"/>
+            <!-- light rays from surface -->
+            <path d="M95 14 L72 168" stroke="rgba(0,200,255,.06)" stroke-width="16" fill="none"/>
+            <path d="M198 9 L172 168" stroke="rgba(0,200,255,.05)" stroke-width="13" fill="none"/>
+            <path d="M298 11 L282 168" stroke="rgba(0,200,255,.06)" stroke-width="10" fill="none"/>
+            <!-- coral left -->
+            <path d="M18 168 L21 132 Q17 112 23 97 Q26 110 28 92 Q31 106 33 87 Q36 102 38 132 L41 168Z" fill="#0e2a20"/>
+            <ellipse cx="29" cy="93" rx="13" ry="9" fill="rgba(0,200,140,.16)"/>
+            <!-- coral right -->
+            <path d="M360 168 L362 138 Q358 118 364 103 Q367 115 369 98 Q372 111 374 94 Q377 108 379 138 L382 168Z" fill="#0e2a20"/>
+            <ellipse cx="370" cy="100" rx="13" ry="9" fill="rgba(0,200,140,.16)"/>
+            <!-- Jellyfish 1 (cyan) -->
+            <ellipse cx="155" cy="78" rx="22" ry="15" fill="rgba(0,200,220,.2)"/>
+            <path d="M143 80 Q140 102 137 124" stroke="rgba(0,200,220,.32)" stroke-width="1.6" fill="none"/>
+            <path d="M152 83 Q150 108 148 132" stroke="rgba(0,200,220,.26)" stroke-width="1.3" fill="none"/>
+            <path d="M163 83 Q163 110 162 136" stroke="rgba(0,200,220,.26)" stroke-width="1.3" fill="none"/>
+            <path d="M168 80 Q172 104 176 128" stroke="rgba(0,200,220,.32)" stroke-width="1.6" fill="none"/>
+            <!-- Jellyfish 2 (purple) -->
+            <ellipse cx="278" cy="108" rx="17" ry="11" fill="rgba(160,0,255,.18)"/>
+            <path d="M268 111 Q266 132 264 152" stroke="rgba(150,0,255,.28)" stroke-width="1.3" fill="none"/>
+            <path d="M278 113 Q277 135 276 155" stroke="rgba(150,0,255,.22)" stroke-width="1.1" fill="none"/>
+            <path d="M288 111 Q290 132 294 152" stroke="rgba(150,0,255,.28)" stroke-width="1.3" fill="none"/>
+            <!-- bio particles -->
+            <circle cx="78" cy="58" r="2.5" fill="#00e5ff" opacity=".52"/><circle cx="220" cy="44" r="2.2" fill="#00e5ff" opacity=".48"/>
+            <circle cx="338" cy="68" r="2.5" fill="#00e0ff" opacity=".5"/><circle cx="128" cy="122" r="2" fill="#80a0ff" opacity=".42"/>
+            <circle cx="318" cy="142" r="2" fill="#00e0c0" opacity=".42"/><circle cx="58" cy="148" r="1.8" fill="#00e5ff" opacity=".45"/>
+            <!-- school of fish -->
+            <ellipse cx="98" cy="94" rx="26" ry="8" fill="rgba(0,180,200,.14)"/>
+            <ellipse cx="298" cy="80" rx="20" ry="6" fill="rgba(0,180,200,.12)"/>
+            <!-- Na'vi swimmer silhouette (Avatar 2) -->
+            <path d="M200 52 Q212 58 220 52 Q214 45 207 48Z" fill="rgba(26,130,150,.52)"/>
+          </svg>
+        </div>
+        <div class="ov"><span class="nw">Kilvan — Nehir</span><span class="sc">Avatar 2 — Metkayina suları</span></div>
       </div>
+
+      <!-- 6. EYWA — Tree of Souls -->
       <div class="vc reveal">
-        <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=400&q=80" alt="Eywa — Tree of Souls enerjisi"/>
+        <div class="vc-scene">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="ts-halo" cx="50%" cy="68%" r="55%"><stop offset="0%" stop-color="rgba(180,245,255,.28)"/><stop offset="55%" stop-color="rgba(0,100,200,.14)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+              <radialGradient id="ts-core" cx="50%" cy="68%" r="22%"><stop offset="0%" stop-color="rgba(220,255,255,.45)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            </defs>
+            <rect width="400" height="168" fill="#030810"/>
+            <rect width="400" height="168" fill="url(#ts-halo)"/>
+            <!-- roots -->
+            <path d="M148 168 Q158 152 163 136 Q172 150 178 132 Q183 150 190 136 Q194 150 200 142 Q206 150 210 136 Q217 150 222 132 Q228 150 237 136 Q242 152 252 168Z" fill="#0a1e10"/>
+            <!-- trunk -->
+            <path d="M184 168 Q188 133 190 103 Q195 73 200 54 Q205 73 210 103 Q212 133 216 168Z" fill="#081a0e"/>
+            <path d="M186 168 Q190 137 192 107 Q196 77 200 58 Q204 77 208 107 Q210 137 214 168Z" fill="#0a2012"/>
+            <!-- branches -->
+            <path d="M200 82 Q173 66 152 73 Q138 80 128 92" stroke="#081a10" stroke-width="8.5" fill="none" stroke-linecap="round"/>
+            <path d="M200 82 Q227 66 248 73 Q262 80 272 92" stroke="#081a10" stroke-width="8.5" fill="none" stroke-linecap="round"/>
+            <path d="M200 67 Q183 49 169 53 Q156 57 151 65" stroke="#081a10" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+            <path d="M200 67 Q217 49 231 53 Q244 57 249 65" stroke="#081a10" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+            <!-- halo core -->
+            <rect width="400" height="168" fill="url(#ts-core)"/>
+            <ellipse cx="200" cy="78" rx="58" ry="68" fill="rgba(100,0,200,.07)"/>
+            <!-- Eywa tendrils (neural) -->
+            <path d="M153 92 Q148 112 151 134 Q153 150 147 165" stroke="#00e5ff" stroke-width="1.6" fill="none" opacity=".58"/>
+            <path d="M164 87 Q158 110 160 134" stroke="#00d4e0" stroke-width="1.3" fill="none" opacity=".52"/>
+            <path d="M188 102 Q183 124 185 148 Q186 160 182 168" stroke="#00e5ff" stroke-width="1.1" fill="none" opacity=".47"/>
+            <path d="M212 102 Q217 125 215 150" stroke="#00e5ff" stroke-width="1.1" fill="none" opacity=".47"/>
+            <path d="M236 90 Q241 114 239 138" stroke="#00d4e0" stroke-width="1.3" fill="none" opacity=".52"/>
+            <path d="M247 92 Q252 115 250 140 Q248 156 253 168" stroke="#00e5ff" stroke-width="1.6" fill="none" opacity=".58"/>
+            <!-- branch glow nodes -->
+            <circle cx="132" cy="90" r="3.8" fill="#00e5ff" opacity=".72"/><circle cx="153" cy="72" r="3" fill="#80f0ff" opacity=".68"/>
+            <circle cx="247" cy="70" r="3" fill="#80f0ff" opacity=".68"/><circle cx="268" cy="92" r="3.8" fill="#00e5ff" opacity=".72"/>
+            <!-- Atokirina spirit seeds -->
+            <circle cx="88" cy="48" r="5.5" fill="white" opacity=".28"/><circle cx="88" cy="48" r="2.5" fill="white" opacity=".75"/>
+            <circle cx="312" cy="38" r="5" fill="white" opacity=".26"/><circle cx="312" cy="38" r="2.2" fill="white" opacity=".72"/>
+            <circle cx="46" cy="88" r="4.5" fill="white" opacity=".24"/><circle cx="46" cy="88" r="1.9" fill="white" opacity=".7"/>
+            <circle cx="358" cy="68" r="4" fill="white" opacity=".24"/><circle cx="358" cy="68" r="1.7" fill="white" opacity=".68"/>
+            <circle cx="178" cy="23" r="3.5" fill="white" opacity=".3"/><circle cx="178" cy="23" r="1.4" fill="white" opacity=".78"/>
+            <circle cx="242" cy="28" r="3.5" fill="white" opacity=".28"/><circle cx="242" cy="28" r="1.4" fill="white" opacity=".75"/>
+            <!-- Na'vi kneeling silhouettes -->
+            <path d="M98 168 L100 150 Q102 144 98 139 Q94 144 96 150Z" fill="rgba(0,100,80,.42)"/>
+            <path d="M302 168 L304 148 Q306 142 302 137 Q298 142 300 148Z" fill="rgba(0,100,80,.42)"/>
+          </svg>
+        </div>
         <div class="ov"><span class="nw">Eywa — Ruh Ağı</span><span class="sc">Tree of Souls · Anılar Ağacı</span></div>
       </div>
+
     </div>
 
     <div class="vc-table-wrap reveal">
@@ -690,61 +935,100 @@ footer span{color:var(--cyan)}
   </div>
   <div id="jake-icon-wrap">
     <div id="jake-icon" onclick="toggleBubble()" title="Jake Sully — Rehberin">
-      <!-- Na'vi Jake SVG -->
+      <!-- Na'vi Jake SVG — movie-accurate -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130">
-        <!-- Glow bg -->
-        <circle cx="60" cy="65" r="55" fill="rgba(0,160,190,.1)"/>
-        <!-- Shoulders -->
-        <ellipse cx="60" cy="118" rx="38" ry="16" fill="#157888"/>
+        <defs>
+          <radialGradient id="jk-bg" cx="50%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#062030"/>
+            <stop offset="100%" stop-color="#010810"/>
+          </radialGradient>
+          <radialGradient id="jk-face" cx="50%" cy="42%" r="65%">
+            <stop offset="0%" stop-color="#238a9a"/>
+            <stop offset="55%" stop-color="#1a7888"/>
+            <stop offset="100%" stop-color="#0e5868"/>
+          </radialGradient>
+        </defs>
+        <!-- Dark Pandora bg -->
+        <rect width="120" height="130" fill="url(#jk-bg)"/>
+        <ellipse cx="60" cy="70" rx="50" ry="56" fill="rgba(0,150,190,.06)"/>
+        <!-- Body/shoulders -->
+        <path d="M0 130 L0 114 Q18 102 34 100 Q46 97 60 99 Q74 97 86 100 Q102 102 120 114 L120 130Z" fill="#0c5868"/>
         <!-- Neck -->
-        <path d="M48 90 Q60 98 72 90 L74 108 Q60 116 46 108Z" fill="#1a8898"/>
-        <!-- Head -->
-        <ellipse cx="60" cy="60" rx="38" ry="42" fill="#1a8898"/>
-        <!-- Forehead darker -->
-        <path d="M22 50 Q60 38 98 50 Q90 34 60 30 Q30 34 22 50Z" fill="#167585"/>
-        <!-- Ears pointed -->
-        <path d="M22 56 L8 40 L16 28 L26 48Z" fill="#1a8898"/>
-        <path d="M98 56 L112 40 L104 28 L94 48Z" fill="#1a8898"/>
-        <path d="M22 53 L12 40 L18 31 L24 46Z" fill="#126872"/>
-        <path d="M98 53 L108 40 L102 31 L96 46Z" fill="#126872"/>
+        <path d="M44 90 Q52 98 60 100 Q68 98 76 90 L78 108 Q70 116 60 118 Q50 116 42 108Z" fill="#1a7888"/>
+        <!-- Auburn hair (drawn before face) -->
+        <path d="M24 52 Q18 30 24 12 Q34 0 60 0 Q86 0 96 12 Q102 30 96 52 Q90 36 82 26 Q74 18 60 16 Q46 18 38 26 Q30 36 24 52Z" fill="#5c2a06"/>
+        <path d="M26 50 Q24 36 28 22 Q36 10 60 8 Q84 10 92 22 Q96 36 94 50 Q90 38 82 30 Q74 22 60 20 Q46 22 38 30 Q30 38 26 50Z" fill="#6e3208"/>
+        <path d="M40 10 Q52 6 60 6 Q68 6 80 10" stroke="#8a4510" stroke-width="2.5" fill="none" opacity=".7" stroke-linecap="round"/>
+        <path d="M28 46 Q24 32 30 16" stroke="#7a3a0a" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
+        <path d="M92 46 Q96 32 90 16" stroke="#7a3a0a" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
+        <!-- Queue braid at crown -->
+        <path d="M54 7 Q49 -3 52 -11" stroke="#3a1800" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M66 7 Q71 -3 68 -11" stroke="#4a2200" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M60 5 Q60 -5 60 -13" stroke="#5a3000" stroke-width="5" fill="none" stroke-linecap="round" opacity=".5"/>
+        <!-- Na'vi head — tall & elongated -->
+        <path d="M24 54 Q22 38 26 26 Q34 10 60 8 Q86 10 94 26 Q98 38 96 54 Q96 72 90 85 Q80 99 60 101 Q40 99 30 85 Q24 72 24 54Z" fill="url(#jk-face)"/>
+        <!-- Forehead depth -->
+        <path d="M30 22 Q44 16 60 14 Q76 16 90 22 Q82 17 60 15 Q38 17 30 22Z" fill="#0d5464" opacity=".5"/>
+        <!-- Prominent brow ridge -->
+        <path d="M28 46 Q37 38 52 39 Q58 40 60 44" fill="#126878"/>
+        <path d="M92 46 Q83 38 68 39 Q62 40 60 44" fill="#126878"/>
+        <path d="M28 46 Q39 40 54 41 Q58 42 60 45" stroke="#0a5060" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M92 46 Q81 40 66 41 Q62 42 60 45" stroke="#0a5060" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Pointed ears -->
+        <path d="M24 54 L6 35 L14 21 L28 46Z" fill="#1a7888"/>
+        <path d="M96 54 L114 35 L106 21 L92 46Z" fill="#1a7888"/>
+        <path d="M24 51 L10 37 L16 25 L26 46Z" fill="#116070"/>
+        <path d="M96 51 L110 37 L104 25 L94 46Z" fill="#116070"/>
+        <path d="M14 28 L22 44" stroke="#0d5060" stroke-width="1.5" fill="none" opacity=".45"/>
+        <path d="M106 28 L98 44" stroke="#0d5060" stroke-width="1.5" fill="none" opacity=".45"/>
         <!-- Eye sockets -->
-        <ellipse cx="44" cy="60" rx="15" ry="15" fill="#0d5060"/>
-        <ellipse cx="76" cy="60" rx="15" ry="15" fill="#0d5060"/>
-        <!-- Amber iris -->
-        <ellipse cx="44" cy="60" rx="13" ry="13" fill="#e8a000"/>
-        <ellipse cx="76" cy="60" rx="13" ry="13" fill="#e8a000"/>
-        <ellipse cx="44" cy="60" rx="10" ry="11" fill="#c07800"/>
-        <ellipse cx="76" cy="60" rx="10" ry="11" fill="#c07800"/>
-        <!-- Cat pupils -->
-        <ellipse cx="44" cy="60" rx="4.5" ry="10" fill="#080400"/>
-        <ellipse cx="76" cy="60" rx="4.5" ry="10" fill="#080400"/>
-        <!-- Highlights -->
-        <circle cx="40" cy="55" r="3.5" fill="rgba(255,255,255,.72)"/>
-        <circle cx="72" cy="55" r="3.5" fill="rgba(255,255,255,.72)"/>
-        <circle cx="48" cy="64" r="1.8" fill="rgba(255,255,255,.28)"/>
-        <circle cx="80" cy="64" r="1.8" fill="rgba(255,255,255,.28)"/>
-        <!-- Nose -->
-        <path d="M52 70 Q60 76 68 70 Q66 80 60 82 Q54 80 52 70Z" fill="#157080"/>
-        <ellipse cx="55" cy="78" rx="4.5" ry="3.2" fill="#0d5868"/>
-        <ellipse cx="65" cy="78" rx="4.5" ry="3.2" fill="#0d5868"/>
-        <!-- Smile -->
-        <path d="M46 88 Q60 97 74 88" stroke="#0d5060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="43" cy="55" rx="15" ry="14" fill="#0b4858"/>
+        <ellipse cx="77" cy="55" rx="15" ry="14" fill="#0b4858"/>
+        <!-- Yellow-green iris -->
+        <ellipse cx="43" cy="55" rx="13" ry="13" fill="#9ab800"/>
+        <ellipse cx="77" cy="55" rx="13" ry="13" fill="#9ab800"/>
+        <ellipse cx="43" cy="55" rx="10" ry="11" fill="#7a9400"/>
+        <ellipse cx="77" cy="55" rx="10" ry="11" fill="#7a9400"/>
+        <ellipse cx="43" cy="55" rx="7" ry="8" fill="#6a8000"/>
+        <ellipse cx="77" cy="55" rx="7" ry="8" fill="#6a8000"/>
+        <!-- Vertical cat pupils -->
+        <ellipse cx="43" cy="55" rx="3.5" ry="12" fill="#040300"/>
+        <ellipse cx="77" cy="55" rx="3.5" ry="12" fill="#040300"/>
+        <!-- Eye highlights -->
+        <circle cx="38" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
+        <circle cx="72" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
+        <circle cx="47" cy="59" r="2" fill="rgba(255,255,255,.28)"/>
+        <circle cx="81" cy="59" r="2" fill="rgba(255,255,255,.28)"/>
+        <!-- Na'vi nose — flat, wide -->
+        <path d="M50 71 Q56 76 60 77 Q64 76 70 71 Q68 81 60 84 Q52 81 50 71Z" fill="#157080"/>
+        <ellipse cx="52" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
+        <ellipse cx="68" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
+        <ellipse cx="52" cy="79" rx="3" ry="2" fill="#0a3a48"/>
+        <ellipse cx="68" cy="79" rx="3" ry="2" fill="#0a3a48"/>
+        <!-- Mouth -->
+        <path d="M47 89 Q60 97 73 89" stroke="#0a5060" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M50 89 Q60 94 70 89" stroke="#1a7888" stroke-width="1.5" fill="none" stroke-linecap="round"/>
         <!-- Bioluminescent dots -->
-        <circle cx="26" cy="58" r="3.2" fill="#00e5ff" opacity=".92"/>
-        <circle cx="94" cy="58" r="3.2" fill="#00e5ff" opacity=".92"/>
-        <circle cx="29" cy="68" r="2.2" fill="#00e5ff" opacity=".75"/>
-        <circle cx="91" cy="68" r="2.2" fill="#00e5ff" opacity=".75"/>
-        <circle cx="60" cy="44" r="2.8" fill="#00e5ff" opacity=".85"/>
-        <circle cx="49" cy="40" r="2" fill="#00e5ff" opacity=".68"/>
-        <circle cx="71" cy="40" r="2" fill="#00e5ff" opacity=".68"/>
-        <circle cx="60" cy="90" r="1.8" fill="#00e5ff" opacity=".6"/>
+        <circle cx="28" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
+        <circle cx="92" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
+        <circle cx="30" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
+        <circle cx="90" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
+        <circle cx="32" cy="70" r="1.6" fill="#80f0ff" opacity=".75"/>
+        <circle cx="88" cy="70" r="1.6" fill="#80f0ff" opacity=".75"/>
+        <circle cx="60" cy="28" r="2.8" fill="#b8ffff" opacity=".9"/>
+        <circle cx="47" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
+        <circle cx="73" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
+        <circle cx="44" cy="85" r="1.4" fill="#90f0ff" opacity=".6"/>
+        <circle cx="76" cy="85" r="1.4" fill="#90f0ff" opacity=".6"/>
+        <circle cx="60" cy="92" r="1.6" fill="#80eeff" opacity=".65"/>
+        <circle cx="10" cy="33" r="1.5" fill="#a0ffff" opacity=".7"/>
+        <circle cx="110" cy="33" r="1.5" fill="#a0ffff" opacity=".7"/>
         <!-- Stripe markings -->
-        <path d="M24 52 Q28 55 26 62" stroke="#00ccdd" stroke-width="1.5" fill="none" opacity=".55"/>
-        <path d="M96 52 Q92 55 94 62" stroke="#00ccdd" stroke-width="1.5" fill="none" opacity=".55"/>
-        <!-- Queue -->
-        <path d="M60 20 Q53 9 57 0" stroke="#082838" stroke-width="7" fill="none" stroke-linecap="round"/>
-        <path d="M60 20 Q67 7 63 -2" stroke="#082838" stroke-width="5" fill="none" stroke-linecap="round"/>
-        <path d="M58 18 Q50 5 55 -4" stroke="#0a3848" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>
+        <path d="M26 46 Q31 52 28 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
+        <path d="M94 46 Q89 52 92 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
+        <path d="M32 58 Q36 62 34 70" stroke="#00909a" stroke-width="1.5" fill="none" opacity=".4" stroke-linecap="round"/>
+        <path d="M88 58 Q84 62 86 70" stroke="#00909a" stroke-width="1.5" fill="none" opacity=".4" stroke-linecap="round"/>
+        <path d="M54 18 Q60 16 66 18" stroke="#007888" stroke-width="1.5" fill="none" opacity=".35" stroke-linecap="round"/>
       </svg>
     </div>
     <div id="jake-dot"></div>
@@ -762,26 +1046,75 @@ footer span{color:var(--cyan)}
     <div id="name-gate">
       <div class="gate-ring">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130">
-          <circle cx="60" cy="65" r="55" fill="rgba(0,160,190,.1)"/>
-          <ellipse cx="60" cy="118" rx="38" ry="16" fill="#157888"/>
-          <path d="M48 90 Q60 98 72 90 L74 108 Q60 116 46 108Z" fill="#1a8898"/>
-          <ellipse cx="60" cy="60" rx="38" ry="42" fill="#1a8898"/>
-          <path d="M22 50 Q60 38 98 50 Q90 34 60 30 Q30 34 22 50Z" fill="#167585"/>
-          <path d="M22 56 L8 40 L16 28 L26 48Z" fill="#1a8898"/>
-          <path d="M98 56 L112 40 L104 28 L94 48Z" fill="#1a8898"/>
-          <ellipse cx="44" cy="60" rx="15" ry="15" fill="#0d5060"/>
-          <ellipse cx="76" cy="60" rx="15" ry="15" fill="#0d5060"/>
-          <ellipse cx="44" cy="60" rx="13" ry="13" fill="#e8a000"/>
-          <ellipse cx="76" cy="60" rx="13" ry="13" fill="#e8a000"/>
-          <ellipse cx="44" cy="60" rx="4.5" ry="10" fill="#080400"/>
-          <ellipse cx="76" cy="60" rx="4.5" ry="10" fill="#080400"/>
-          <circle cx="40" cy="55" r="3.5" fill="rgba(255,255,255,.72)"/>
-          <circle cx="72" cy="55" r="3.5" fill="rgba(255,255,255,.72)"/>
-          <circle cx="26" cy="58" r="3.2" fill="#00e5ff" opacity=".92"/>
-          <circle cx="94" cy="58" r="3.2" fill="#00e5ff" opacity=".92"/>
-          <circle cx="60" cy="44" r="2.8" fill="#00e5ff" opacity=".85"/>
-          <path d="M46 88 Q60 97 74 88" stroke="#0d5060" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <path d="M60 20 Q53 9 57 0" stroke="#082838" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <defs>
+            <radialGradient id="gk-bg" cx="50%" cy="30%" r="80%">
+              <stop offset="0%" stop-color="#062030"/>
+              <stop offset="100%" stop-color="#010810"/>
+            </radialGradient>
+            <radialGradient id="gk-face" cx="50%" cy="42%" r="65%">
+              <stop offset="0%" stop-color="#238a9a"/>
+              <stop offset="55%" stop-color="#1a7888"/>
+              <stop offset="100%" stop-color="#0e5868"/>
+            </radialGradient>
+          </defs>
+          <rect width="120" height="130" fill="url(#gk-bg)"/>
+          <ellipse cx="60" cy="70" rx="50" ry="56" fill="rgba(0,150,190,.06)"/>
+          <path d="M0 130 L0 114 Q18 102 34 100 Q46 97 60 99 Q74 97 86 100 Q102 102 120 114 L120 130Z" fill="#0c5868"/>
+          <path d="M44 90 Q52 98 60 100 Q68 98 76 90 L78 108 Q70 116 60 118 Q50 116 42 108Z" fill="#1a7888"/>
+          <!-- Auburn hair -->
+          <path d="M24 52 Q18 30 24 12 Q34 0 60 0 Q86 0 96 12 Q102 30 96 52 Q90 36 82 26 Q74 18 60 16 Q46 18 38 26 Q30 36 24 52Z" fill="#5c2a06"/>
+          <path d="M26 50 Q24 36 28 22 Q36 10 60 8 Q84 10 92 22 Q96 36 94 50 Q90 38 82 30 Q74 22 60 20 Q46 22 38 30 Q30 38 26 50Z" fill="#6e3208"/>
+          <path d="M40 10 Q60 6 80 10" stroke="#8a4510" stroke-width="2.5" fill="none" opacity=".7" stroke-linecap="round"/>
+          <!-- Queue braid -->
+          <path d="M54 7 Q49 -3 52 -11" stroke="#3a1800" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <path d="M66 7 Q71 -3 68 -11" stroke="#4a2200" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M60 5 Q60 -5 60 -13" stroke="#5a3000" stroke-width="5" fill="none" stroke-linecap="round" opacity=".5"/>
+          <!-- Head -->
+          <path d="M24 54 Q22 38 26 26 Q34 10 60 8 Q86 10 94 26 Q98 38 96 54 Q96 72 90 85 Q80 99 60 101 Q40 99 30 85 Q24 72 24 54Z" fill="url(#gk-face)"/>
+          <!-- Brow ridge -->
+          <path d="M28 46 Q37 38 52 39 Q58 40 60 44" fill="#126878"/>
+          <path d="M92 46 Q83 38 68 39 Q62 40 60 44" fill="#126878"/>
+          <!-- Ears -->
+          <path d="M24 54 L6 35 L14 21 L28 46Z" fill="#1a7888"/>
+          <path d="M96 54 L114 35 L106 21 L92 46Z" fill="#1a7888"/>
+          <path d="M24 51 L10 37 L16 25 L26 46Z" fill="#116070"/>
+          <path d="M96 51 L110 37 L104 25 L94 46Z" fill="#116070"/>
+          <!-- Eye sockets -->
+          <ellipse cx="43" cy="55" rx="15" ry="14" fill="#0b4858"/>
+          <ellipse cx="77" cy="55" rx="15" ry="14" fill="#0b4858"/>
+          <!-- Yellow-green iris -->
+          <ellipse cx="43" cy="55" rx="13" ry="13" fill="#9ab800"/>
+          <ellipse cx="77" cy="55" rx="13" ry="13" fill="#9ab800"/>
+          <ellipse cx="43" cy="55" rx="10" ry="11" fill="#7a9400"/>
+          <ellipse cx="77" cy="55" rx="10" ry="11" fill="#7a9400"/>
+          <ellipse cx="43" cy="55" rx="7" ry="8" fill="#6a8000"/>
+          <ellipse cx="77" cy="55" rx="7" ry="8" fill="#6a8000"/>
+          <!-- Vertical cat pupils -->
+          <ellipse cx="43" cy="55" rx="3.5" ry="12" fill="#040300"/>
+          <ellipse cx="77" cy="55" rx="3.5" ry="12" fill="#040300"/>
+          <!-- Highlights -->
+          <circle cx="38" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
+          <circle cx="72" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
+          <!-- Nose -->
+          <path d="M50 71 Q56 76 60 77 Q64 76 70 71 Q68 81 60 84 Q52 81 50 71Z" fill="#157080"/>
+          <ellipse cx="52" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
+          <ellipse cx="68" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
+          <ellipse cx="52" cy="79" rx="3" ry="2" fill="#0a3a48"/>
+          <ellipse cx="68" cy="79" rx="3" ry="2" fill="#0a3a48"/>
+          <!-- Mouth -->
+          <path d="M47 89 Q60 97 73 89" stroke="#0a5060" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Bioluminescent dots -->
+          <circle cx="28" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
+          <circle cx="92" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
+          <circle cx="30" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
+          <circle cx="90" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
+          <circle cx="60" cy="28" r="2.8" fill="#b8ffff" opacity=".9"/>
+          <circle cx="47" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
+          <circle cx="73" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
+          <circle cx="60" cy="92" r="1.6" fill="#80eeff" opacity=".65"/>
+          <!-- Stripe markings -->
+          <path d="M26 46 Q31 52 28 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
+          <path d="M94 46 Q89 52 92 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
         </svg>
       </div>
       <div class="gate-title">Omatikaya'ya Hoş Geldin</div>
