@@ -3,326 +3,83 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Na'vi Dili — Jake Sully ile Pandora</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
+  <title>Na'vi Dili — Mini Test</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --bg:      #07192e;
-  --bg2:     #0c2340;
-  --card:    rgba(12,45,85,.65);
-  --cyan:    #00d4ff;
-  --teal:    #00fff0;
-  --purple:  #9b6eff;
-  --amber:   #f0a800;
-  --green:   #3dff7a;
-  --text:    #c5e4f8;
-  --glow:    0 0 22px rgba(0,212,255,.5);
-  --pglow:   0 0 18px rgba(155,110,255,.5);
+  --cyan:#00d4ff;
+  --teal:#00fff0;
+  --green:#3dff7a;
+  --glow:0 0 22px rgba(0,212,255,.5);
 }
-
-html{scroll-behavior:smooth}
-body{background:#020810;color:var(--text);font-family:'Raleway',sans-serif;font-weight:400;overflow-x:hidden}
+body{background:#020810;color:#c5e4f8;font-family:'Raleway',sans-serif;overflow-x:hidden}
 #pandora-bg{position:fixed;inset:0;z-index:-2;overflow:hidden}
 #pandora-bg svg{width:100%;height:100%;display:block}
-
-/* ── CANVAS ── */
 #pc{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.45}
 
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:300;
-  background:rgba(5,18,36,.92);backdrop-filter:blur(16px);
-  border-bottom:1px solid rgba(0,212,255,.15);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:.85rem 2.5rem;
+/* ── LANDING ── */
+#landing{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:2rem 1.5rem;
 }
-.nav-brand{font-family:'Cinzel',serif;font-size:1.15rem;color:var(--teal);text-shadow:var(--glow);letter-spacing:.14em}
-.nav-links{display:flex;gap:1.8rem;list-style:none}
-.nav-links a{color:#7ab8d8;text-decoration:none;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;transition:color .2s;background:none;border:none;cursor:pointer;font-family:'Raleway',sans-serif}
-.nav-links a:hover{color:var(--teal);text-shadow:var(--glow)}
-@media(max-width:640px){.nav-links{display:none};nav{padding:.85rem 1.2rem}}
-
-/* ── SECTION ── */
-section{position:relative;z-index:1}
-.wrap{max-width:1060px;margin:0 auto;padding:6rem 1.5rem}
-.stag{display:inline-block;font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--cyan);border:1px solid rgba(0,212,255,.3);padding:.32rem .95rem;border-radius:50px;margin-bottom:1rem;background:rgba(0,212,255,.07)}
-h2{font-family:'Cinzel',serif;font-size:clamp(1.7rem,4vw,2.5rem);color:#eef8ff;margin-bottom:1.1rem;line-height:1.2}
-h2 em{color:var(--teal);font-style:normal}
-.lead{font-size:1.03rem;color:#88bdd8;line-height:1.82;max-width:640px;margin-bottom:2.8rem}
-
-/* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s ease,transform .65s ease}
-.reveal.in{opacity:1;transform:none}
-.reveal-l{opacity:0;transform:translateX(-32px);transition:opacity .65s ease,transform .65s ease}
-.reveal-l.in{opacity:1;transform:none}
-.reveal-r{opacity:0;transform:translateX(32px);transition:opacity .65s ease,transform .65s ease}
-.reveal-r.in{opacity:1;transform:none}
+.land-inner{max-width:520px}
+.land-tag{
+  display:inline-block;font-family:'Cinzel',serif;font-size:.7rem;
+  letter-spacing:.32em;text-transform:uppercase;color:var(--cyan);
+  border:1px solid rgba(0,212,255,.3);padding:.32rem .95rem;
+  border-radius:50px;margin-bottom:1.4rem;background:rgba(0,212,255,.07);
+}
+.land-title{
+  font-family:'Cinzel',serif;font-size:clamp(2rem,6vw,3.6rem);
+  line-height:1.1;color:#fff;
+  text-shadow:0 0 40px rgba(0,212,255,.55),0 0 80px rgba(0,212,255,.2);
+  margin-bottom:1rem;
+}
+.land-title span{color:var(--teal)}
+.land-sub{color:#7ab8d8;font-size:1rem;line-height:1.7;margin-bottom:2rem}
+.land-sub em{color:var(--cyan);font-style:italic}
 
 /* ── BUTTONS ── */
-.btn{display:inline-block;padding:.82rem 2.2rem;border-radius:50px;font-family:'Raleway',sans-serif;font-weight:600;font-size:.93rem;letter-spacing:.07em;text-decoration:none;cursor:pointer;border:none;transition:all .3s}
+.btn{display:inline-block;padding:.85rem 2.4rem;border-radius:50px;font-family:'Raleway',sans-serif;font-weight:600;font-size:.95rem;letter-spacing:.07em;cursor:pointer;border:none;transition:all .3s}
 .btn-p{background:linear-gradient(135deg,#0077aa,var(--cyan));color:#fff;box-shadow:0 0 22px rgba(0,212,255,.45)}
 .btn-p:hover{transform:translateY(-3px);box-shadow:0 0 38px rgba(0,212,255,.7)}
 .btn-o{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
 .btn-o:hover{background:rgba(0,212,255,.1);box-shadow:0 0 22px rgba(0,212,255,.35);transform:translateY(-2px)}
 
-/* ═══════ HERO ═══════ */
-#hero{
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
-  padding:6rem 1.5rem 4rem;
-  background:
-    radial-gradient(ellipse 90% 60% at 50% 30%,rgba(0,80,180,.28) 0%,transparent 65%),
-    radial-gradient(ellipse 50% 45% at 85% 70%,rgba(120,60,255,.15) 0%,transparent 55%);
-}
-#hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(3,10,22,.3) 0%,rgba(3,10,22,.7) 100%)}
-.hero-inner{position:relative;z-index:2;max-width:800px}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:.5rem;
-  background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);
-  border-radius:50px;padding:.38rem 1.1rem;margin-bottom:1.4rem;
-  font-size:.75rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);
-}
-.hero-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:hpulse 2s infinite}
-@keyframes hpulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,240,.5)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,240,0)}}
-h1{font-family:'Cinzel',serif;font-size:clamp(2.4rem,7vw,4.8rem);line-height:1.08;color:#fff;text-shadow:0 0 40px rgba(0,212,255,.55),0 0 80px rgba(0,212,255,.2);margin-bottom:1.4rem}
-h1 span{color:var(--teal)}
-.hero-sub{font-size:1.1rem;color:#94cee6;max-width:520px;margin:0 auto 2.5rem;line-height:1.78}
-.hero-sub em{color:var(--amber);font-style:italic}
-.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-
-/* ═══════ BG SECTION ═══════ */
-#background{background:rgba(4,12,28,.82)}
-.bg-scene{
-  border-radius:20px;overflow:hidden;margin-bottom:2.8rem;
-  box-shadow:0 0 50px rgba(0,212,255,.2);position:relative;height:300px;
-  background:rgba(2,8,20,.5);
-}
-.bg-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,100,180,.35) 0%,rgba(100,0,200,.2) 100%);mix-blend-mode:multiply}
-.bg-scene-label{position:absolute;bottom:1rem;left:1.4rem;z-index:2;font-family:'Cinzel',serif;font-size:.78rem;color:var(--teal);letter-spacing:.14em;text-shadow:var(--glow)}
-.bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem}
-@media(max-width:680px){.bg-grid{grid-template-columns:1fr}}
-.icard{
-  background:var(--card);border:1px solid rgba(0,212,255,.16);border-radius:16px;padding:1.6rem;
-  backdrop-filter:blur(10px);transition:transform .3s,box-shadow .3s;
-}
-.icard:hover{transform:translateY(-4px);box-shadow:var(--glow)}
-.icard h3{font-family:'Cinzel',serif;font-size:.95rem;color:var(--teal);margin-bottom:.75rem;letter-spacing:.08em}
-.icard p{color:#8ec8e0;line-height:1.78;font-size:.93rem}
-.icard strong{color:#cde8f8}
-
-/* Jake note */
-.jake-note{
-  background:rgba(61,255,122,.07);border:1px solid rgba(61,255,122,.18);
-  border-left:3px solid var(--green);border-radius:0 14px 14px 0;
-  padding:1rem 1.4rem;margin-top:1.8rem;
-}
-.jake-note-hd{font-size:.72rem;color:var(--green);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;font-family:'Cinzel',serif}
-.jake-note p{font-family:'Caveat',cursive;font-size:1.05rem;color:#aaeac0;line-height:1.65}
-
-/* ═══════ GRAMMAR ═══════ */
-#grammar{background:rgba(6,14,34,.84)}
-.gr-row{display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:start}
-@media(max-width:680px){.gr-row{grid-template-columns:1fr}}
-.gr-img{
-  border-radius:18px;overflow:hidden;
-  box-shadow:0 0 55px rgba(155,110,255,.3);
-  position:sticky;top:100px;
-}
-.gr-img img{width:100%;display:block;height:380px;object-fit:cover;filter:saturate(1.2) brightness(.88)}
-.gr-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(7,25,46,.9) 100%);pointer-events:none}
-.gr-img-caption{
-  position:absolute;bottom:1rem;left:1.2rem;right:1.2rem;
-  font-family:'Caveat',cursive;font-size:1.05rem;color:#c8a8ff;z-index:2;
-}
-.rule{
-  background:var(--card);border-left:3px solid var(--purple);
-  border-radius:0 12px 12px 0;padding:1.1rem 1.4rem;margin-bottom:1.1rem;
-  backdrop-filter:blur(8px);
-}
-.rule h4{font-family:'Cinzel',serif;font-size:.86rem;color:var(--purple);letter-spacing:.1em;margin-bottom:.55rem}
-.rule p,.rule ul{color:#b0d2e8;font-size:.91rem;line-height:1.72}
-.rule ul{padding-left:1.2rem}
-.rule li{margin-bottom:.2rem}
-.navi{font-family:'Cinzel',serif;color:var(--teal);font-weight:600}
-.ex{
-  background:rgba(155,110,255,.1);border:1px solid rgba(155,110,255,.28);
-  border-radius:9px;padding:.8rem 1.1rem;font-family:monospace;
-  font-size:.93rem;color:#d4b8ff;margin-top:.5rem;letter-spacing:.04em;
-}
-
-/* ═══════ VOCAB ═══════ */
-#vocabulary{background:rgba(4,12,28,.82)}
-.vc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:3rem}
-@media(max-width:580px){.vc-grid{grid-template-columns:1fr 1fr}}
-.vc{border-radius:14px;overflow:hidden;position:relative}
-.vc img{width:100%;height:168px;object-fit:cover;display:block;filter:saturate(1.15) brightness(.82);transition:transform .4s,filter .4s}
-.vc:hover img{transform:scale(1.06);filter:saturate(1.4) brightness(.92)}
-.vc-scene{width:100%;height:168px;display:block;overflow:hidden;transition:transform .45s ease}
-.vc-scene svg{width:100%;height:100%;display:block}
-.vc:hover .vc-scene{transform:scale(1.05)}
-.vc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,100,180,.18) 0%,rgba(80,0,160,.1) 100%);mix-blend-mode:multiply;z-index:1;pointer-events:none}
-.vc .ov{
-  position:absolute;inset:0;z-index:2;
-  background:linear-gradient(to top,rgba(5,18,46,.92) 0%,transparent 52%);
-  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
-  padding:.8rem;
-}
-.vc .nw{font-family:'Cinzel',serif;font-size:.88rem;color:var(--teal);text-shadow:var(--glow)}
-.vc .sc{font-size:.68rem;color:rgba(160,210,240,.6);margin-top:.18rem;letter-spacing:.04em}
-.vc-table-wrap{overflow-x:auto;border-radius:16px}
-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:16px;overflow:hidden;backdrop-filter:blur(10px)}
-thead{background:rgba(0,212,255,.1)}
-th{font-family:'Cinzel',serif;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);padding:.95rem 1.3rem;text-align:left;border-bottom:1px solid rgba(0,212,255,.18)}
-td{padding:.85rem 1.3rem;font-size:.9rem;color:#a0d0e8;border-bottom:1px solid rgba(0,212,255,.06)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(0,212,255,.05)}
-.tag{display:inline-block;padding:.13rem .52rem;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.05em}
-.tg{background:rgba(61,255,122,.14);color:var(--green)}
-.tn{background:rgba(0,212,255,.14);color:var(--cyan)}
-.tb{background:rgba(155,110,255,.18);color:#c4a8ff}
-.ta{background:rgba(0,200,100,.16);color:#6ef7aa}
-.tp{background:rgba(240,168,0,.14);color:#ffd080}
-
-/* ═══════ PRONUNCIATION ═══════ */
-#pronunciation{background:rgba(6,14,34,.84)}
-.pron-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1.4rem;margin-bottom:2.5rem}
-.pcard{
-  background:var(--card);border:1px solid rgba(0,212,255,.16);
-  border-radius:16px;padding:1.5rem;backdrop-filter:blur(10px);
-  transition:transform .3s,box-shadow .3s;
-}
-.pcard:hover{transform:translateY(-4px);box-shadow:var(--glow)}
-.psym{font-family:'Cinzel',serif;font-size:2.1rem;color:var(--teal);text-shadow:var(--glow);margin-bottom:.45rem}
-.pcard h4{font-size:.83rem;color:#7ac4dc;margin-bottom:.45rem}
-.pcard p{font-size:.87rem;color:#7aa8c0;line-height:1.65}
-.ptip{
-  background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);
-  border-radius:14px;padding:1.3rem 1.7rem;display:flex;gap:.9rem;align-items:flex-start;
-}
-.ptip-ic{font-size:1.5rem;flex-shrink:0}
-.ptip p{color:#96d0e8;font-size:.92rem;line-height:1.7}
-
-/* ═══════ JAKE FAVORITES ═══════ */
-#favorites{background:rgba(4,12,28,.82)}
-.fav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.6rem}
-.fcard{
-  background:var(--card);border:1px solid rgba(240,168,0,.2);
-  border-radius:18px;padding:1.6rem;backdrop-filter:blur(10px);
-  transition:transform .3s,box-shadow .3s;
-  position:relative;overflow:hidden;
-}
-.fcard::before{
-  content:'';position:absolute;top:-40px;right:-40px;
-  width:120px;height:120px;border-radius:50%;
-  background:radial-gradient(circle,rgba(240,168,0,.12) 0%,transparent 70%);
-  pointer-events:none;
-}
-.fcard:hover{transform:translateY(-4px);box-shadow:0 0 22px rgba(240,168,0,.3)}
-.fcard-navi{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--amber);margin-bottom:.3rem;text-shadow:0 0 18px rgba(240,168,0,.4)}
-.fcard-tr{font-size:.88rem;color:#b8d8e8;margin-bottom:.5rem}
-.fcard-context{font-family:'Caveat',cursive;font-size:.98rem;color:#88a8c0;line-height:1.6;border-top:1px solid rgba(240,168,0,.1);padding-top:.6rem;margin-top:.6rem}
-
-/* ═══════ QUIZ CTA ═══════ */
-#quiz-section{background:rgba(4,12,28,.82);text-align:center}
-#quiz-section .lead{margin:0 auto 2.4rem}
-
-/* ═══════ FOOTER ═══════ */
-footer{
-  position:relative;z-index:1;
-  background:rgba(0,5,14,.92);border-top:1px solid rgba(0,212,255,.1);
-  text-align:center;padding:2rem 1.5rem;
-}
-footer p{color:#285068;font-size:.77rem;letter-spacing:.06em}
-footer span{color:var(--cyan)}
-
-/* ═══════ JAKE GUIDE ═══════ */
-#jake-guide{
-  position:fixed;bottom:1.8rem;right:1.6rem;z-index:400;
-  display:flex;flex-direction:column;align-items:flex-end;gap:.8rem;
-}
-#jake-icon{
-  width:72px;height:72px;border-radius:50%;cursor:pointer;
-  border:2px solid rgba(0,212,255,.45);
-  box-shadow:0 0 30px rgba(0,212,255,.4),0 0 60px rgba(0,212,255,.15);
-  background:radial-gradient(circle at 40% 35%,#1b9aae 0%,#0d5060 100%);
-  overflow:hidden;animation:jake-bob 3.5s ease-in-out infinite;
-  transition:box-shadow .3s,transform .2s;
-  flex-shrink:0;
-}
-#jake-icon:hover{box-shadow:0 0 40px rgba(0,212,255,.7);transform:scale(1.08) !important}
-@keyframes jake-bob{
-  0%,100%{transform:translateY(0) rotate(-1.5deg)}
-  50%{transform:translateY(-8px) rotate(1.5deg)}
-}
-#jake-dot{
-  position:absolute;top:2px;right:2px;
-  width:12px;height:12px;border-radius:50%;
-  background:var(--teal);border:2px solid var(--bg);
-  animation:notif 1.8s infinite;display:none;
-}
-@keyframes notif{0%,100%{transform:scale(1)}50%{transform:scale(1.3);box-shadow:0 0 8px var(--teal)}}
-#jake-icon-wrap{position:relative;flex-shrink:0}
-#jake-bubble{
-  display:none;
-  background:rgba(6,20,45,.97);
-  border:1.5px solid rgba(0,212,255,.28);
-  border-radius:18px 18px 4px 18px;
-  padding:1rem 1.15rem;
-  width:260px;
-  box-shadow:0 8px 40px rgba(0,0,0,.5),var(--glow);
-  animation:bubbleIn .3s ease;
-}
-@keyframes bubbleIn{from{opacity:0;transform:scale(.9) translateY(8px)}to{opacity:1;transform:none}}
-#jake-bubble.show{display:block}
-.jb-hd{font-family:'Cinzel',serif;font-size:.72rem;color:var(--teal);letter-spacing:.1em;margin-bottom:.5rem;text-transform:uppercase}
-#jake-msg{font-size:.88rem;color:#a8d0e8;line-height:1.6;min-height:3.5rem}
-.jb-close{
-  display:block;margin-top:.8rem;text-align:right;
-  font-size:.72rem;color:#4a80a0;cursor:pointer;letter-spacing:.05em;
-}
-.jb-close:hover{color:var(--teal)}
-
-/* ═══════ QUIZ OVERLAY ═══════ */
+/* ── QUIZ OVERLAY ── */
 #quiz-overlay{
-  position:fixed;inset:0;z-index:950;
-  display:none;flex-direction:column;align-items:center;overflow-y:auto;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 20%,rgba(0,90,160,.38) 0%,transparent 60%),
-    radial-gradient(ellipse 45% 40% at 10% 80%,rgba(155,110,255,.18) 0%,transparent 50%),
-    url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat fixed;
+  position:fixed;inset:0;z-index:950;display:none;
+  flex-direction:column;align-items:center;overflow-y:auto;
+  background:rgba(2,8,20,.96);backdrop-filter:blur(16px);
+  opacity:0;transition:opacity .4s ease;
 }
 #quiz-overlay::before{content:'';position:fixed;inset:0;background:rgba(5,14,28,.88);pointer-events:none;z-index:0}
-#quiz-overlay.visible{animation:ovIn .4s ease forwards}
+#quiz-overlay.visible{opacity:1}
 @keyframes ovIn{from{opacity:0}to{opacity:1}}
 .qov-hd{
-  position:sticky;top:0;width:100%;z-index:10;
-  background:rgba(5,18,38,.93);backdrop-filter:blur(16px);
-  border-bottom:1px solid rgba(0,212,255,.14);
+  position:sticky;top:0;z-index:10;width:100%;
   display:flex;align-items:center;justify-content:space-between;
-  padding:.95rem 2rem;
+  padding:.9rem 2rem;background:rgba(2,8,22,.85);
+  border-bottom:1px solid rgba(0,212,255,.14);backdrop-filter:blur(10px);
 }
-.qov-brand{font-family:'Cinzel',serif;color:var(--teal);font-size:.98rem;letter-spacing:.12em;text-shadow:var(--glow)}
-.qov-close{
-  background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.28);
-  color:#88c8e8;font-size:.78rem;padding:.48rem 1.1rem;border-radius:50px;
-  cursor:pointer;font-family:'Raleway',sans-serif;letter-spacing:.05em;transition:all .2s;
-}
-.qov-close:hover{background:rgba(0,212,255,.2);color:var(--teal);box-shadow:var(--glow)}
-#qov-body{position:relative;z-index:2;width:100%;max-width:660px;padding:2.5rem 1.5rem 4rem}
+.qov-brand{font-family:'Cinzel',serif;font-size:.82rem;color:var(--teal);letter-spacing:.18em;text-transform:uppercase}
+.qov-close{background:none;border:1px solid rgba(0,212,255,.3);color:#7ab8d8;padding:.42rem 1.1rem;border-radius:50px;cursor:pointer;font-size:.8rem;font-family:'Raleway',sans-serif;transition:all .2s}
+.qov-close:hover{border-color:var(--teal);color:var(--teal)}
+#qov-body{position:relative;z-index:2;width:100%;max-width:620px;padding:2.5rem 1.5rem 4rem}
 
-/* Name gate */
+/* name-gate */
 #name-gate{text-align:center;padding:1rem 0}
 .gate-title{font-family:'Cinzel',serif;font-size:1.7rem;color:#eef8ff;margin-bottom:.55rem}
 .gate-sub{color:#7ab8d8;margin-bottom:1.8rem;font-size:.95rem;line-height:1.65}
 
-/* Quiz card */
+/* question card */
 #qcard{display:none}
 .qpbar{background:rgba(0,212,255,.1);border-radius:50px;height:5px;margin-bottom:1.8rem;overflow:hidden}
 .qpfill{height:100%;background:linear-gradient(90deg,#0070aa,var(--teal));border-radius:50px;transition:width .5s ease}
-.qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
-.qnum{font-size:.76rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
-.qcat{font-size:.73rem;color:#5a90b0;letter-spacing:.06em}
+.qmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem}
+.qnum{font-family:'Cinzel',serif;font-size:.78rem;color:var(--teal);letter-spacing:.1em}
+.qcat{font-size:.75rem;color:#5090b0;background:rgba(0,212,255,.08);padding:.22rem .75rem;border-radius:20px}
 .qtxt{font-family:'Cinzel',serif;font-size:1.15rem;color:#eef8ff;line-height:1.48;margin-bottom:1.6rem}
 .qopts{display:flex;flex-direction:column;gap:.8rem}
 .qopt{
@@ -338,19 +95,10 @@ footer span{color:var(--cyan)}
 .qfb{margin-top:.9rem;padding:.75rem 1.1rem;border-radius:10px;font-size:.88rem;text-align:center;min-height:2.4rem}
 .qfb.ok{background:rgba(61,255,122,.09);color:#90ff90}
 .qfb.bad{background:rgba(255,77,106,.09);color:#ff99aa}
-.qnav{display:flex;justify-content:flex-end;margin-top:1.4rem}
+.qnav{margin-top:1.2rem;text-align:center}
 
-/* Results */
-#rcard{display:none;text-align:center;padding:2rem 0}
-.scircle{
-  width:130px;height:130px;border-radius:50%;
-  border:4px solid var(--teal);
-  box-shadow:0 0 50px rgba(0,212,255,.5),inset 0 0 40px rgba(0,212,255,.08);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  margin:0 auto 1.6rem;
-}
-.snum{font-family:'Cinzel',serif;font-size:2.5rem;color:var(--teal);text-shadow:var(--glow);line-height:1}
-.stot{font-size:.83rem;color:#5090b0}
+/* result card */
+#rcard{display:none;text-align:center}
 .rscore-big{font-family:'Cinzel',serif;font-size:3.5rem;color:var(--teal);text-shadow:var(--glow);line-height:1;margin-bottom:.4rem;animation:scorePop .6s cubic-bezier(.2,1.4,.5,1) both}
 @keyframes scorePop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 .rscore-lbl{font-size:.85rem;color:#5090b0;margin-bottom:1.2rem}
@@ -362,6 +110,7 @@ footer span{color:var(--cyan)}
 .rans.bad{background:rgba(255,77,106,.07);color:#ffb0bc}
 .rans-ic{font-size:.92rem;flex-shrink:0;margin-top:.08rem}
 .rbtns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.4rem}
+
 @keyframes qSlideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   </style>
 </head>
@@ -409,16 +158,11 @@ footer span{color:var(--cyan)}
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-
-  <!-- Sky base -->
   <rect width="1440" height="900" fill="url(#pbg-sky)"/>
-  <!-- Atmospheric mist layers -->
   <rect width="1440" height="900" fill="url(#pbg-mist1)"/>
   <rect width="1440" height="900" fill="url(#pbg-mist2)"/>
   <rect width="1440" height="900" fill="url(#pbg-mist3)"/>
   <rect width="1440" height="900" fill="url(#pbg-mist4)"/>
-
-  <!-- ── BACKGROUND TREE TRUNKS (dark silhouettes) ── -->
   <rect x="18"   y="0" width="22" height="750" rx="5" fill="#030a1a"/>
   <rect x="52"   y="20" width="14" height="730" rx="4" fill="#040c1e"/>
   <rect x="84"   y="0" width="26" height="760" rx="5" fill="#030a1a"/>
@@ -440,40 +184,30 @@ footer span{color:var(--cyan)}
   <rect x="1310" y="0" width="24" height="760" rx="5" fill="#030a1a"/>
   <rect x="1360" y="30" width="14" height="720" rx="4" fill="#050d20"/>
   <rect x="1400" y="0" width="22" height="740" rx="5" fill="#030a1a"/>
-
-  <!-- Dark canopy ceiling -->
   <path d="M0 0 L1440 0 L1440 130 Q1360 90 1260 110 Q1160 135 1060 95 Q960 60 860 108 Q760 150 660 95 Q560 48 460 118 Q360 165 260 105 Q160 55 60 125 Q30 138 0 130Z" fill="#020710"/>
-
-  <!-- ── HANGING TENDRILS — the iconic Pandora glowing wisps ── -->
   <g filter="url(#pbg-glow-sm)">
-    <!-- Left cluster -->
     <line x1="175" y1="100" x2="173" y2="490" stroke="#68ccf0" stroke-width="1.8"/>
     <line x1="196" y1="85"  x2="194" y2="430" stroke="#88dcff" stroke-width="1.2"/>
     <line x1="214" y1="95"  x2="216" y2="510" stroke="#58bfe0" stroke-width="2.2"/>
     <line x1="232" y1="78"  x2="230" y2="400" stroke="#78d4ff" stroke-width="1.5"/>
     <line x1="252" y1="90"  x2="254" y2="460" stroke="#98e4ff" stroke-width="1.1"/>
-    <!-- Center-left cluster -->
     <line x1="438" y1="88"  x2="436" y2="440" stroke="#78d6ff" stroke-width="1.8"/>
     <line x1="458" y1="75"  x2="460" y2="500" stroke="#58c0e8" stroke-width="2.2"/>
     <line x1="478" y1="90"  x2="476" y2="420" stroke="#98e8ff" stroke-width="1.2"/>
     <line x1="498" y1="82"  x2="500" y2="470" stroke="#68d0f0" stroke-width="1.6"/>
-    <!-- Center cluster -->
     <line x1="672" y1="92"  x2="670" y2="460" stroke="#78d6ff" stroke-width="2.2"/>
     <line x1="694" y1="78"  x2="696" y2="520" stroke="#58bfe8" stroke-width="1.6"/>
     <line x1="716" y1="88"  x2="714" y2="445" stroke="#88e0ff" stroke-width="1.2"/>
     <line x1="736" y1="74"  x2="738" y2="490" stroke="#68ccf0" stroke-width="2"/>
     <line x1="758" y1="92"  x2="756" y2="420" stroke="#98eaff" stroke-width="1.1"/>
-    <!-- Right-center cluster -->
     <line x1="898" y1="85"  x2="896" y2="510" stroke="#78d0f8" stroke-width="1.8"/>
     <line x1="918" y1="72"  x2="920" y2="440" stroke="#58c0e8" stroke-width="2.2"/>
     <line x1="940" y1="88"  x2="938" y2="480" stroke="#88dcff" stroke-width="1.3"/>
-    <!-- Right cluster -->
     <line x1="1142" y1="90" x2="1140" y2="460" stroke="#68ccf0" stroke-width="1.8"/>
     <line x1="1162" y1="76" x2="1164" y2="500" stroke="#78d4ff" stroke-width="2.2"/>
     <line x1="1182" y1="88" x2="1180" y2="430" stroke="#98e4ff" stroke-width="1.2"/>
     <line x1="1202" y1="80" x2="1204" y2="470" stroke="#58bfe0" stroke-width="1.6"/>
   </g>
-  <!-- Extra bright core of main tendrils -->
   <g filter="url(#pbg-glow-md)" opacity=".65">
     <line x1="214"  y1="95"  x2="216" y2="510" stroke="#c8f4ff" stroke-width=".8"/>
     <line x1="458"  y1="75"  x2="460" y2="500" stroke="#c8f4ff" stroke-width=".8"/>
@@ -482,30 +216,20 @@ footer span{color:var(--cyan)}
     <line x1="918"  y1="72"  x2="920" y2="440" stroke="#c8f4ff" stroke-width=".8"/>
     <line x1="1162" y1="76"  x2="1164" y2="500" stroke="#c8f4ff" stroke-width=".8"/>
   </g>
-
-  <!-- ── GROUND TERRAIN ── -->
   <path d="M0 760 Q90 730 190 748 Q310 770 430 740 Q560 712 690 730 Q820 750 950 718 Q1080 692 1200 710 Q1320 728 1440 695 L1440 900 L0 900Z" fill="url(#pbg-ground)"/>
   <path d="M0 818 Q110 800 230 815 Q370 832 510 808 Q650 786 790 804 Q930 822 1070 800 Q1210 780 1340 800 Q1400 810 1440 806 L1440 900 L0 900Z" fill="#020610"/>
-
-  <!-- Rocky terrain bumps -->
   <ellipse cx="110"  cy="775" rx="88"  ry="24" fill="#030812"/>
   <ellipse cx="360"  cy="798" rx="65"  ry="18" fill="#030912"/>
   <ellipse cx="610"  cy="768" rx="95"  ry="22" fill="#030812"/>
   <ellipse cx="870"  cy="785" rx="75"  ry="20" fill="#030812"/>
   <ellipse cx="1120" cy="772" rx="88"  ry="23" fill="#030912"/>
   <ellipse cx="1360" cy="788" rx="68"  ry="18" fill="#030812"/>
-
-  <!-- Ground foliage (low dark bushes) -->
   <ellipse cx="160"  cy="808" rx="58" ry="14" fill="#040a1c"/>
   <ellipse cx="420"  cy="824" rx="48" ry="12" fill="#040a1c"/>
   <ellipse cx="680"  cy="814" rx="62" ry="14" fill="#040a1c"/>
   <ellipse cx="940"  cy="820" rx="52" ry="13" fill="#040a1c"/>
   <ellipse cx="1190" cy="808" rx="58" ry="14" fill="#040a1c"/>
-
-  <!-- ── CYAN BIOLUMINESCENT FLOWERS ── -->
   <g filter="url(#pbg-glow-md)" opacity=".96">
-    <!-- Flower helper: 6 petals as rotated ellipses around center -->
-    <!-- Cyan 1 — far left (x=168,y=798) -->
     <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(-30 168 798)"/>
     <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(30 168 798)"/>
     <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00c0ec"/>
@@ -513,7 +237,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(-60 168 798)"/>
     <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(90 168 798)"/>
     <circle cx="168" cy="798" r="7" fill="#90f0ff"/>
-    <!-- Cyan 2 — (x=478,y=778) -->
     <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(18 478 778)"/>
     <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(-22 478 778)"/>
     <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00c8f2"/>
@@ -521,7 +244,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(-52 478 778)"/>
     <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(82 478 778)"/>
     <circle cx="478" cy="778" r="8" fill="#a0f8ff"/>
-    <!-- Cyan 3 — center (x=752,y=768) -->
     <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(-8 752 768)"/>
     <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(32 752 768)"/>
     <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00bae8"/>
@@ -529,7 +251,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(-62 752 768)"/>
     <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(92 752 768)"/>
     <circle cx="752" cy="768" r="7" fill="#80f0ff"/>
-    <!-- Cyan 4 — right-center (x=1042,y=776) -->
     <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(14 1042 776)"/>
     <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(-24 1042 776)"/>
     <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00c0ea"/>
@@ -537,7 +258,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(-56 1042 776)"/>
     <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(86 1042 776)"/>
     <circle cx="1042" cy="776" r="7" fill="#82f2ff"/>
-    <!-- Cyan 5 — far right (x=1338,y=783) -->
     <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(-5 1338 783)"/>
     <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(38 1338 783)"/>
     <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00b8e2"/>
@@ -546,10 +266,7 @@ footer span{color:var(--cyan)}
     <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(95 1338 783)"/>
     <circle cx="1338" cy="783" r="6" fill="#88f2ff"/>
   </g>
-
-  <!-- ── MAGENTA FLOWERS ── -->
   <g filter="url(#pbg-glow-lg)" opacity=".90">
-    <!-- Magenta 1 (x=318,y=788) -->
     <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(18 318 788)"/>
     <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(-22 318 788)"/>
     <ellipse cx="318" cy="788" rx="17" ry="7" fill="#d200b0"/>
@@ -557,7 +274,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(-58 318 788)"/>
     <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(88 318 788)"/>
     <circle cx="318" cy="788" r="6" fill="#ff84e0"/>
-    <!-- Magenta 2 (x=618,y=773) -->
     <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(-15 618 773)"/>
     <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(25 618 773)"/>
     <ellipse cx="618" cy="773" rx="19" ry="7" fill="#cc00b8"/>
@@ -565,7 +281,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(-55 618 773)"/>
     <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(85 618 773)"/>
     <circle cx="618" cy="773" r="6" fill="#ff72d8"/>
-    <!-- Magenta 3 (x=918,y=780) -->
     <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(10 918 780)"/>
     <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(-28 918 780)"/>
     <ellipse cx="918" cy="780" rx="15" ry="6" fill="#d800b8"/>
@@ -573,7 +288,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(-60 918 780)"/>
     <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(90 918 780)"/>
     <circle cx="918" cy="780" r="5" fill="#ff80e2"/>
-    <!-- Magenta 4 (x=1218,y=786) -->
     <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(5 1218 786)"/>
     <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(45 1218 786)"/>
     <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ce00b2"/>
@@ -582,10 +296,7 @@ footer span{color:var(--cyan)}
     <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(-78 1218 786)"/>
     <circle cx="1218" cy="786" r="5" fill="#ff82e0"/>
   </g>
-
-  <!-- ── PURPLE FLOWERS ── -->
   <g filter="url(#pbg-glow-md)" opacity=".86">
-    <!-- Purple 1 (x=98,y=818) -->
     <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(16 98 818)"/>
     <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(-24 98 818)"/>
     <ellipse cx="98" cy="818" rx="14" ry="6" fill="#6e30cc"/>
@@ -593,7 +304,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(-58 98 818)"/>
     <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(88 98 818)"/>
     <circle cx="98" cy="818" r="5" fill="#b280ff"/>
-    <!-- Purple 2 (x=558,y=793) -->
     <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(-10 558 793)"/>
     <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(32 558 793)"/>
     <ellipse cx="558" cy="793" rx="16" ry="6" fill="#6428c4"/>
@@ -601,7 +311,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(-62 558 793)"/>
     <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(92 558 793)"/>
     <circle cx="558" cy="793" r="6" fill="#a060ff"/>
-    <!-- Purple 3 (x=1148,y=790) -->
     <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(20 1148 790)"/>
     <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(-20 1148 790)"/>
     <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#6632c8"/>
@@ -610,8 +319,6 @@ footer span{color:var(--cyan)}
     <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(85 1148 790)"/>
     <circle cx="1148" cy="790" r="5" fill="#a262ff"/>
   </g>
-
-  <!-- Scattered small bioluminescent glow dots -->
   <g filter="url(#pbg-glow-sm)" opacity=".72">
     <circle cx="248"  cy="803" r="3.5" fill="#40d0ff"/>
     <circle cx="408"  cy="814" r="4"   fill="#00b8e0"/>
@@ -621,653 +328,25 @@ footer span{color:var(--cyan)}
     <circle cx="978"  cy="801" r="4"   fill="#40d0ff"/>
     <circle cx="1080" cy="810" r="3"   fill="#00b8e0"/>
     <circle cx="1278" cy="803" r="3.5" fill="#40d0ff"/>
-    <circle cx="1440" cy="800" r="3"   fill="#40d0ff"/>
     <circle cx="368"  cy="798" r="3.5" fill="#ff60d0"/>
     <circle cx="648"  cy="795" r="3"   fill="#ff60d0"/>
     <circle cx="1188" cy="798" r="3.5" fill="#ff60d0"/>
     <circle cx="848"  cy="796" r="3"   fill="#8042ff"/>
     <circle cx="128"  cy="808" r="3.5" fill="#8042ff"/>
-    <circle cx="1400" cy="806" r="3"   fill="#40d0ff"/>
   </g>
-
-  <!-- Top dark overlay -->
   <rect width="1440" height="55" fill="url(#pbg-sky)" opacity=".9"/>
 </svg>
 </div>
 
 <canvas id="pc"></canvas>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-brand">Na'vi · Pandora</div>
-  <ul class="nav-links">
-    <li><a href="#background">Tarih</a></li>
-    <li><a href="#grammar">Gramer</a></li>
-    <li><a href="#vocabulary">Kelimeler</a></li>
-    <li><a href="#pronunciation">Telaffuz</a></li>
-    <li><a href="#favorites">Jake'in Seçkileri</a></li>
-    <li><a href="#" onclick="openQuiz();return false">Test</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-inner">
-    <div class="hero-badge"><span class="hero-dot"></span>Pandora · Eywa'nın Dili · Avatar</div>
-    <h1>Na'vi Dilini<br/><span>Öğrenmeye Başla</span></h1>
-    <p class="hero-sub">
-      Pandora'nın ormanlarında yankılanan dili keşfet.<br/>
-      <em>"Oel ngati kameie"</em> — Seni görüyorum.
-    </p>
-    <div class="hero-btns">
-      <a href="#background" class="btn btn-p">Keşfetmeye Başla</a>
-      <button class="btn btn-o" onclick="openQuiz()">Teste Gir</button>
-    </div>
-  </div>
-</section>
-
-<!-- BACKGROUND -->
-<section id="background">
-  <div class="wrap">
-    <div class="stag reveal">Arka Plan</div>
-    <h2 class="reveal">Na'vi Dilinin <em>Tarihi</em></h2>
-    <p class="lead reveal">Na'vi, hayalden doğmuş ama gerçek dilbilim kurallarıyla işlenmiş — konuşulabilir, yaşayan bir dil.</p>
-
-    <div class="bg-scene reveal">
-      <span class="bg-scene-label">Pandora — Hometree Ormanı, Avatar (2009)</span>
-    </div>
-
-    <div class="bg-grid">
-      <div class="icard reveal">
-        <h3>Paul Frommer</h3>
-        <p>Na'vi dilini USC dilbilimcisi <strong>Paul Frommer</strong> yarattı. James Cameron 2005'te ona tek bir istek iletti: "Gerçek bir dil olsun." Frommer, çekim başlamadan önce tam işleyen bir sistem kurdu.</p>
-      </div>
-      <div class="icard reveal">
-        <h3>Neden Gerçek Bir Dil?</h3>
-        <p>Cameron, Zoe Saldana ve Sam Worthington'ın sahneye çıkmadan önce <strong>gerçekten Na'vi konuşmasını</strong> istedi. Dublaj değil, set üzerinde doğal konuşma. Bu yüzden dil tutarlı gramer ve kök-kelimelerle örüldü.</p>
-      </div>
-      <div class="icard reveal">
-        <h3>2009'dan Bugüne</h3>
-        <p>İlk filmde ~1000 kelime vardı. Avatar 2 ile birlikte dil su altı yaşamını, Metkayina kültürünü kapsayacak şekilde genişledi. Bugün <strong>learnNavi.org</strong> topluluğu 2500+ kelimeyle dili yaşatıyor.</p>
-      </div>
-      <div class="icard reveal">
-        <h3>Eywa ve Dil Bağı</h3>
-        <p>Na'vi'de doğa ve dil ayrılmaz. Pandora'nın her bitkisi, hayvanı, enerji akışı için özel sözcükler var. "Eywa" yalnızca bir isim değil — tüm yaşamın birbirine bağlı olduğu gerçeğinin adı.</p>
-      </div>
-    </div>
-
-    <div class="jake-note reveal">
-      <div class="jake-note-hd">📓 Jake'in Notu — Pandora Günlüğü</div>
-      <p>"Neytiri bana dili öğretmeye başladığında şunu söyledi: 'Sen konuşmadan önce dinlemeyi öğren.' Üç ay boyunca sadece dinledim. Sonra bir sabah ormanda ona baktım ve 'Oel ngati kameie' dedim. Durdu. Gülümsedi. İşte o an başladı her şey."</p>
-    </div>
-  </div>
-</section>
-
-<!-- GRAMMAR -->
-<section id="grammar">
-  <div class="wrap">
-    <div class="stag reveal">Gramer</div>
-    <h2 class="reveal">Cümle Yapısı &amp; <em>Gramer</em></h2>
-    <p class="lead reveal">Na'vi grameri Türkçeye sandığından daha yakın — ama infix sistemi seni şaşırtacak.</p>
-
-    <div class="gr-row">
-      <div>
-        <div class="rule reveal">
-          <h4>SOV — Özne · Nesne · Eylem</h4>
-          <p>Temel kelime sırası <strong>Özne → Nesne → Eylem</strong>'dir. Türkçeyle aynı sıra! Ama gramer ekleri sayesinde sözcükler serbestçe yer değiştirebilir.</p>
-          <div class="ex">Oe · nga · 'efu<br/><small style="color:#9a88cc">Ben · seni · hissediyorum</small></div>
-        </div>
-        <div class="rule reveal">
-          <h4>Hâl Ekleri — Triptot Sistemi</h4>
-          <p>Kelimenin cümledeki rolü eke göre belirlenir:</p>
-          <ul>
-            <li><span class="navi">-ìl</span> → özne (eylemi yapan)</li>
-            <li><span class="navi">-ti / -t</span> → nesne (etkilenen)</li>
-            <li><span class="navi">-ur / -r</span> → dolaylı nesne</li>
-            <li><span class="navi">-ä</span> → tamlayan (iyelik)</li>
-          </ul>
-          <div class="ex">Pawl-ìl · Na'vi-t · eyawr pivlltxe<br/><small style="color:#9a88cc">Paul, Na'vi'yi doğru konuşur</small></div>
-        </div>
-        <div class="rule reveal">
-          <h4>İnfix Sistemi — Fiil İçine Ek</h4>
-          <p>Na'vi'de fiil çekimi öne ya da arkaya ek değil, <em>kelimenin içine</em> infix yerleştirerek yapılır.</p>
-          <ul>
-            <li><span class="navi">&lt;er&gt;</span> süregelen · <span class="navi">&lt;ol&gt;</span> tamamlanmış</li>
-            <li><span class="navi">&lt;ay&gt;</span> gelecek · <span class="navi">&lt;ìm&gt;</span> yakın geçmiş</li>
-          </ul>
-          <div class="ex">taron → t&lt;er&gt;aron → "avlamakta"<br/>taron → t&lt;ol&gt;aron → "avladı"</div>
-        </div>
-        <div class="rule reveal">
-          <h4>Çoğul &amp; Sıfat</h4>
-          <p>Çoğul için kelime başına <span class="navi">ay+</span> eklenir. Sıfatlar ismin önünde durur ve <span class="navi">-a-</span> infixi ile bağlanır.</p>
-          <div class="ex">ikran → ayikran → "banshee'ler"<br/>ngima utral → "uzun ağaç"</div>
-        </div>
-        <div class="jake-note reveal">
-          <div class="jake-note-hd">📓 Jake'in Grameri</div>
-          <p>"İnfix sistemini öğrendiğimde kafam patladı. Kelimeyi içten değiştiriyorsun. Ama Neytiri dedi ki: 'Hisset, düşünme.' Bir süre sonra infix'ler doğal gelmeye başladı."</p>
-        </div>
-      </div>
-      <div class="reveal-r" style="position:relative">
-        <div class="gr-img">
-          <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80" alt="Pandora ormanu — Na'vi yurdu"/>
-          <div class="gr-img-caption">"Pandora seni dinlemeye başlar — sen de onu dinlemelisin." — Neytiri</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- VOCABULARY -->
-<section id="vocabulary">
-  <div class="wrap">
-    <div class="stag reveal">Kelimeler</div>
-    <h2 class="reveal">Temel <em>Kelime Hazinesi</em></h2>
-    <p class="lead reveal">Pandora'da bir gün hayatta kalmak için bilmen gerekenler.</p>
-
-    <div class="vc-grid">
-
-      <!-- 1. UTRAL — Hometree -->
-      <div class="vc reveal">
-        <div class="vc-scene">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <radialGradient id="ht-sky" cx="50%" cy="0%" r="90%"><stop offset="0%" stop-color="#1a3848"/><stop offset="100%" stop-color="#060e1c"/></radialGradient>
-            </defs>
-            <rect width="400" height="168" fill="url(#ht-sky)"/>
-            <ellipse cx="200" cy="168" rx="230" ry="55" fill="rgba(0,80,50,.45)"/>
-            <!-- bg trees -->
-            <rect x="8" y="45" width="26" height="123" rx="6" fill="#021a10"/>
-            <rect x="362" y="38" width="33" height="130" rx="6" fill="#021a10"/>
-            <rect x="278" y="62" width="18" height="106" rx="4" fill="#031808"/>
-            <rect x="82" y="72" width="15" height="96" rx="4" fill="#031808"/>
-            <!-- Hometree trunk (massive) -->
-            <path d="M178 168 Q183 112 186 68 Q193 24 200 10 Q207 24 214 68 Q217 112 222 168Z" fill="#041e0a"/>
-            <path d="M181 168 Q186 118 189 76 Q195 32 200 14 Q205 32 211 76 Q214 118 219 168Z" fill="#052612"/>
-            <!-- Canopy -->
-            <ellipse cx="200" cy="44" rx="95" ry="56" fill="#031c0e"/>
-            <ellipse cx="200" cy="58" rx="75" ry="42" fill="#042212"/>
-            <ellipse cx="200" cy="70" rx="58" ry="32" fill="#052a14"/>
-            <!-- glow halo -->
-            <ellipse cx="200" cy="90" rx="32" ry="82" fill="rgba(0,120,80,.07)"/>
-            <!-- vines -->
-            <path d="M163 82 Q156 104 160 132 Q162 150 156 168" stroke="#00d4ff" stroke-width="1.5" fill="none" opacity=".42"/>
-            <path d="M236 88 Q244 112 240 138 Q237 156 243 168" stroke="#00d4ff" stroke-width="1.3" fill="none" opacity=".36"/>
-            <path d="M195 52 Q188 80 191 114 Q193 135 188 158" stroke="#00ffe0" stroke-width="1" fill="none" opacity=".3"/>
-            <!-- bio dots -->
-            <circle cx="188" cy="90" r="2.2" fill="#00e5ff" opacity=".85"/><circle cx="213" cy="74" r="2" fill="#00e5ff" opacity=".78"/><circle cx="200" cy="57" r="2.4" fill="#00e5ff" opacity=".9"/>
-            <circle cx="177" cy="114" r="1.8" fill="#00e5ff" opacity=".65"/><circle cx="224" cy="104" r="1.8" fill="#00e5ff" opacity=".65"/>
-            <!-- Atokirina spirit seeds -->
-            <circle cx="118" cy="78" r="4" fill="white" opacity=".28"/><circle cx="118" cy="78" r="1.8" fill="white" opacity=".85"/>
-            <circle cx="312" cy="62" r="3.5" fill="white" opacity=".25"/><circle cx="312" cy="62" r="1.4" fill="white" opacity=".8"/>
-            <circle cx="68" cy="118" r="3" fill="white" opacity=".22"/><circle cx="68" cy="118" r="1.2" fill="white" opacity=".75"/>
-            <!-- stars -->
-            <circle cx="38" cy="16" r="1" fill="white" opacity=".6"/><circle cx="338" cy="10" r="1" fill="white" opacity=".7"/><circle cx="148" cy="7" r="1" fill="white" opacity=".5"/><circle cx="380" cy="24" r="1.2" fill="white" opacity=".6"/>
-          </svg>
-        </div>
-        <div class="ov"><span class="nw">Utral — Ağaç</span><span class="sc">Avatar — Hometree sahnesi</span></div>
-      </div>
-
-      <!-- 2. TXON — Pandora Night -->
-      <div class="vc reveal">
-        <div class="vc-scene">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <radialGradient id="pn-g1" cx="25%" cy="60%" r="40%"><stop offset="0%" stop-color="rgba(0,200,160,.38)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-              <radialGradient id="pn-g2" cx="75%" cy="55%" r="35%"><stop offset="0%" stop-color="rgba(120,0,255,.3)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-              <radialGradient id="pn-g3" cx="52%" cy="82%" r="28%"><stop offset="0%" stop-color="rgba(0,150,255,.25)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            </defs>
-            <rect width="400" height="168" fill="#020810"/>
-            <rect width="400" height="168" fill="url(#pn-g1)"/>
-            <rect width="400" height="168" fill="url(#pn-g2)"/>
-            <rect width="400" height="168" fill="url(#pn-g3)"/>
-            <!-- ground -->
-            <path d="M0 155 Q80 142 160 152 Q240 158 320 148 Q360 142 400 150 L400 168 L0 168Z" fill="#030d18"/>
-            <!-- Mushroom L -->
-            <rect x="77" y="108" width="5" height="50" rx="2.5" fill="#0a2820"/><ellipse cx="79" cy="108" rx="30" ry="19" fill="#062820"/><ellipse cx="79" cy="111" rx="24" ry="15" fill="rgba(0,220,180,.22)"/>
-            <ellipse cx="79" cy="155" rx="36" ry="12" fill="rgba(0,200,160,.22)"/>
-            <!-- Mushroom C -->
-            <rect x="199" y="122" width="4" height="40" rx="2" fill="#0a2030"/><ellipse cx="201" cy="122" rx="22" ry="14" fill="#061828"/><ellipse cx="201" cy="125" rx="17" ry="11" fill="rgba(0,180,255,.2)"/>
-            <ellipse cx="201" cy="160" rx="26" ry="9" fill="rgba(0,150,255,.2)"/>
-            <!-- Mushroom R -->
-            <rect x="328" y="118" width="4" height="42" rx="2" fill="#1a0830"/><ellipse cx="330" cy="118" rx="24" ry="15" fill="#120620"/><ellipse cx="330" cy="121" rx="18" ry="11" fill="rgba(180,50,255,.2)"/>
-            <ellipse cx="330" cy="158" rx="28" ry="10" fill="rgba(180,0,255,.2)"/>
-            <!-- glow plants -->
-            <path d="M50 155 Q44 128 54 106" stroke="#00a080" stroke-width="2.2" fill="none" opacity=".6"/><circle cx="54" cy="104" r="4.5" fill="#00e5c0" opacity=".72"/>
-            <path d="M148 155 Q146 126 150 104" stroke="#0080a0" stroke-width="2" fill="none" opacity=".55"/><circle cx="150" cy="102" r="4" fill="#00c8ff" opacity=".65"/>
-            <path d="M258 155 Q252 122 264 98" stroke="#8000d0" stroke-width="2" fill="none" opacity=".5"/><circle cx="264" cy="96" r="4.5" fill="#b050ff" opacity=".68"/>
-            <path d="M372 155 Q368 128 378 110" stroke="#00a0c0" stroke-width="2" fill="none" opacity=".5"/><circle cx="378" cy="108" r="3.5" fill="#00d4ff" opacity=".62"/>
-            <!-- floating particles -->
-            <circle cx="100" cy="58" r="3" fill="#00e5ff" opacity=".45"/><circle cx="280" cy="38" r="2.5" fill="#a050ff" opacity=".42"/><circle cx="180" cy="28" r="2.2" fill="#00e5c0" opacity=".5"/>
-            <circle cx="340" cy="78" r="2.5" fill="#00c8ff" opacity=".42"/><circle cx="58" cy="85" r="2" fill="#00e5c0" opacity=".46"/>
-            <!-- stars -->
-            <circle cx="200" cy="14" r="1.2" fill="white" opacity=".7"/><circle cx="118" cy="22" r="1" fill="white" opacity=".6"/><circle cx="322" cy="17" r="1" fill="white" opacity=".65"/><circle cx="48" cy="30" r=".8" fill="white" opacity=".5"/>
-            <!-- moon hint -->
-            <circle cx="360" cy="18" r="11" fill="rgba(255,230,150,.07)"/><circle cx="360" cy="18" r="8" fill="rgba(255,230,150,.05)"/>
-          </svg>
-        </div>
-        <div class="ov"><span class="nw">Txon — Gece</span><span class="sc">Pandora biyolüminesans gecesi</span></div>
-      </div>
-
-      <!-- 3. IKRAN -->
-      <div class="vc reveal">
-        <div class="vc-scene">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="ik-sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#08121e"/><stop offset="55%" stop-color="#112030"/><stop offset="100%" stop-color="#1a3045"/></linearGradient>
-              <radialGradient id="ik-light" cx="60%" cy="22%" r="32%"><stop offset="0%" stop-color="rgba(80,150,255,.3)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            </defs>
-            <rect width="400" height="168" fill="url(#ik-sky)"/>
-            <rect width="400" height="168" fill="url(#ik-light)"/>
-            <!-- mountains base -->
-            <path d="M0 168 Q55 78 108 115 Q155 85 198 128 Q238 92 278 116 Q328 76 400 92 L400 168Z" fill="#0a1828" opacity=".95"/>
-            <path d="M0 168 Q48 108 95 132 Q138 112 175 142 Q218 115 255 136 Q308 105 378 118 L400 168Z" fill="#0d2038" opacity=".9"/>
-            <!-- Hallelujah floating rock hint -->
-            <ellipse cx="95" cy="112" rx="52" ry="20" fill="#0d2030" opacity=".82"/>
-            <ellipse cx="298" cy="104" rx="62" ry="22" fill="#0d2030" opacity=".82"/>
-            <!-- Ikran body -->
-            <ellipse cx="235" cy="68" rx="38" ry="13" fill="#050c16" transform="rotate(-8 235 68)"/>
-            <!-- head/beak -->
-            <path d="M262 58 Q280 50 295 53 Q300 58 293 64 Q280 61 267 67Z" fill="#050c16"/>
-            <!-- wings spread -->
-            <path d="M235 70 Q178 40 128 54 Q108 60 96 73 Q118 65 150 61 Q192 53 228 73Z" fill="#08101e"/>
-            <path d="M238 70 Q298 40 338 50 Q358 56 368 69 Q348 63 326 59 Q290 51 246 73Z" fill="#08101e"/>
-            <!-- wing membrane lighter -->
-            <path d="M228 73 Q183 56 142 61 Q122 66 106 75 Q128 68 158 65 Q200 59 230 75Z" fill="#0c1828" opacity=".8"/>
-            <path d="M246 73 Q290 56 326 62 Q348 67 360 75 Q340 67 316 65 Q278 60 248 75Z" fill="#0c1828" opacity=".8"/>
-            <!-- tail -->
-            <path d="M208 75 Q193 87 185 98 Q190 84 206 77Z" fill="#050c16"/>
-            <!-- bio dots on Ikran -->
-            <circle cx="255" cy="62" r="2.2" fill="#00d4ff" opacity=".68"/><circle cx="248" cy="70" r="1.6" fill="#00d4ff" opacity=".55"/>
-            <!-- 2nd distant Ikran -->
-            <ellipse cx="96" cy="44" rx="17" ry="5" fill="#0a1820" opacity=".72" transform="rotate(-6 96 44)"/>
-            <path d="M96 44 Q74 34 56 42" fill="#0a1820" opacity=".7"/><path d="M96 44 Q118 34 136 40" fill="#0a1820" opacity=".7"/>
-            <!-- 3rd Ikran far -->
-            <ellipse cx="340" cy="36" rx="11" ry="3.5" fill="#0a1820" opacity=".55" transform="rotate(5 340 36)"/>
-            <path d="M340 36 Q325 28 314 34" fill="#0a1820" opacity=".5"/><path d="M340 36 Q355 28 364 33" fill="#0a1820" opacity=".5"/>
-            <!-- storm clouds -->
-            <ellipse cx="72" cy="24" rx="62" ry="18" fill="#0a1828" opacity=".62"/>
-            <ellipse cx="350" cy="19" rx="52" ry="14" fill="#0a1828" opacity=".55"/>
-            <!-- stars -->
-            <circle cx="28" cy="14" r="1" fill="white" opacity=".5"/><circle cx="198" cy="7" r="1" fill="white" opacity=".6"/><circle cx="378" cy="11" r="1" fill="white" opacity=".52"/>
-          </svg>
-        </div>
-        <div class="ov"><span class="nw">Ikran — Uçan At</span><span class="sc">Jake'in ilk Ikran uçuşu</span></div>
-      </div>
-
-      <!-- 4. TSKXE — Hallelujah Mountains -->
-      <div class="vc reveal">
-        <div class="vc-scene">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="hm-sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0d1e30"/><stop offset="45%" stop-color="#142840"/><stop offset="100%" stop-color="#1a3248"/></linearGradient>
-            </defs>
-            <rect width="400" height="168" fill="url(#hm-sky)"/>
-            <!-- mist layers -->
-            <ellipse cx="200" cy="168" rx="240" ry="42" fill="rgba(100,180,220,.09)"/>
-            <ellipse cx="200" cy="142" rx="220" ry="28" fill="rgba(100,200,255,.06)"/>
-            <!-- Main floating mountain -->
-            <path d="M75 115 Q115 56 158 82 Q178 70 200 92 Q188 58 213 46 Q242 35 262 62 Q282 46 303 67 Q322 56 362 87 L368 132 Q300 128 200 130 Q128 132 75 132Z" fill="#0d2030"/>
-            <path d="M80 117 Q118 60 160 84 Q180 72 202 94 Q190 60 215 48 Q243 37 263 64 Q284 48 305 69 Q322 58 362 89 L365 130 Q296 126 202 128 Q130 130 80 130Z" fill="#102535"/>
-            <!-- forest on mountain top -->
-            <path d="M118 115 Q122 102 127 110 Q132 98 137 108 Q142 96 147 107 Q153 97 158 108 Q164 98 169 112" stroke="#031808" stroke-width="5.5" fill="none"/>
-            <path d="M222 94 Q227 82 232 90 Q237 80 242 88 Q247 80 252 89" stroke="#031808" stroke-width="4.5" fill="none"/>
-            <!-- Floating mountain left bg -->
-            <path d="M18 88 Q48 46 88 66 Q108 52 130 72 L135 103 Q90 101 18 102Z" fill="#0a1e2c" opacity=".88"/>
-            <path d="M20 90 Q50 49 90 68 Q110 54 130 73 L132 101 Q90 99 20 100Z" fill="#0d2232" opacity=".82"/>
-            <!-- hanging vines from left -->
-            <path d="M58 100 Q54 115 56 134 Q58 152 52 168" stroke="#042010" stroke-width="3.2" fill="none"/><path d="M84 102 Q81 120 83 142 Q84 158 80 168" stroke="#042010" stroke-width="2.6" fill="none"/>
-            <circle cx="52" cy="168" r="3.5" fill="#00e0c0" opacity=".48"/><circle cx="80" cy="168" r="2.8" fill="#00e0c0" opacity=".42"/>
-            <!-- Floating mountain right bg -->
-            <path d="M282 77 Q312 40 352 59 Q372 49 392 64 L396 97 Q352 95 282 97Z" fill="#0a1e2c" opacity=".82"/>
-            <!-- vines right -->
-            <path d="M302 95 Q298 114 300 135" stroke="#042010" stroke-width="3" fill="none"/><path d="M332 96 Q330 118 332 142" stroke="#042010" stroke-width="2.2" fill="none"/>
-            <circle cx="300" cy="137" r="2.8" fill="#00e5ff" opacity=".44"/>
-            <!-- mist between mountains -->
-            <ellipse cx="200" cy="112" rx="200" ry="22" fill="rgba(150,210,255,.07)"/>
-            <!-- distant Ikran -->
-            <ellipse cx="200" cy="54" rx="15" ry="4.5" fill="#0a1828" opacity=".72" transform="rotate(-5 200 54)"/>
-            <path d="M200 54 Q180 44 166 50" fill="#0a1828" opacity=".65"/><path d="M200 54 Q220 44 234 50" fill="#0a1828" opacity=".65"/>
-            <!-- stars -->
-            <circle cx="48" cy="18" r="1" fill="white" opacity=".62"/><circle cx="200" cy="10" r="1" fill="white" opacity=".72"/><circle cx="362" cy="16" r="1" fill="white" opacity=".62"/><circle cx="282" cy="7" r=".9" fill="white" opacity=".5"/>
-          </svg>
-        </div>
-        <div class="ov"><span class="nw">Tskxe — Kaya</span><span class="sc">Hallelujah Dağları, Pandora</span></div>
-      </div>
-
-      <!-- 5. KILVAN — Metkayina Water -->
-      <div class="vc reveal">
-        <div class="vc-scene">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="mw-sea" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0a2030"/><stop offset="35%" stop-color="#063048"/><stop offset="100%" stop-color="#020e1c"/></linearGradient>
-              <radialGradient id="mw-g1" cx="30%" cy="40%" r="38%"><stop offset="0%" stop-color="rgba(0,200,180,.28)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-              <radialGradient id="mw-g2" cx="70%" cy="58%" r="32%"><stop offset="0%" stop-color="rgba(0,100,255,.22)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            </defs>
-            <rect width="400" height="168" fill="url(#mw-sea)"/>
-            <rect width="400" height="168" fill="url(#mw-g1)"/>
-            <rect width="400" height="168" fill="url(#mw-g2)"/>
-            <!-- ocean surface -->
-            <path d="M0 0 Q100 9 200 5 Q300 1 400 7 L400 26 Q300 19 200 23 Q100 27 0 21Z" fill="#0a2535" opacity=".75"/>
-            <!-- light rays from surface -->
-            <path d="M95 14 L72 168" stroke="rgba(0,200,255,.06)" stroke-width="16" fill="none"/>
-            <path d="M198 9 L172 168" stroke="rgba(0,200,255,.05)" stroke-width="13" fill="none"/>
-            <path d="M298 11 L282 168" stroke="rgba(0,200,255,.06)" stroke-width="10" fill="none"/>
-            <!-- coral left -->
-            <path d="M18 168 L21 132 Q17 112 23 97 Q26 110 28 92 Q31 106 33 87 Q36 102 38 132 L41 168Z" fill="#0e2a20"/>
-            <ellipse cx="29" cy="93" rx="13" ry="9" fill="rgba(0,200,140,.16)"/>
-            <!-- coral right -->
-            <path d="M360 168 L362 138 Q358 118 364 103 Q367 115 369 98 Q372 111 374 94 Q377 108 379 138 L382 168Z" fill="#0e2a20"/>
-            <ellipse cx="370" cy="100" rx="13" ry="9" fill="rgba(0,200,140,.16)"/>
-            <!-- Jellyfish 1 (cyan) -->
-            <ellipse cx="155" cy="78" rx="22" ry="15" fill="rgba(0,200,220,.2)"/>
-            <path d="M143 80 Q140 102 137 124" stroke="rgba(0,200,220,.32)" stroke-width="1.6" fill="none"/>
-            <path d="M152 83 Q150 108 148 132" stroke="rgba(0,200,220,.26)" stroke-width="1.3" fill="none"/>
-            <path d="M163 83 Q163 110 162 136" stroke="rgba(0,200,220,.26)" stroke-width="1.3" fill="none"/>
-            <path d="M168 80 Q172 104 176 128" stroke="rgba(0,200,220,.32)" stroke-width="1.6" fill="none"/>
-            <!-- Jellyfish 2 (purple) -->
-            <ellipse cx="278" cy="108" rx="17" ry="11" fill="rgba(160,0,255,.18)"/>
-            <path d="M268 111 Q266 132 264 152" stroke="rgba(150,0,255,.28)" stroke-width="1.3" fill="none"/>
-            <path d="M278 113 Q277 135 276 155" stroke="rgba(150,0,255,.22)" stroke-width="1.1" fill="none"/>
-            <path d="M288 111 Q290 132 294 152" stroke="rgba(150,0,255,.28)" stroke-width="1.3" fill="none"/>
-            <!-- bio particles -->
-            <circle cx="78" cy="58" r="2.5" fill="#00e5ff" opacity=".52"/><circle cx="220" cy="44" r="2.2" fill="#00e5ff" opacity=".48"/>
-            <circle cx="338" cy="68" r="2.5" fill="#00e0ff" opacity=".5"/><circle cx="128" cy="122" r="2" fill="#80a0ff" opacity=".42"/>
-            <circle cx="318" cy="142" r="2" fill="#00e0c0" opacity=".42"/><circle cx="58" cy="148" r="1.8" fill="#00e5ff" opacity=".45"/>
-            <!-- school of fish -->
-            <ellipse cx="98" cy="94" rx="26" ry="8" fill="rgba(0,180,200,.14)"/>
-            <ellipse cx="298" cy="80" rx="20" ry="6" fill="rgba(0,180,200,.12)"/>
-            <!-- Na'vi swimmer silhouette (Avatar 2) -->
-            <path d="M200 52 Q212 58 220 52 Q214 45 207 48Z" fill="rgba(26,130,150,.52)"/>
-          </svg>
-        </div>
-        <div class="ov"><span class="nw">Kilvan — Nehir</span><span class="sc">Avatar 2 — Metkayina suları</span></div>
-      </div>
-
-      <!-- 6. EYWA — Tree of Souls -->
-      <div class="vc reveal">
-        <div class="vc-scene">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 168" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <radialGradient id="ts-halo" cx="50%" cy="68%" r="55%"><stop offset="0%" stop-color="rgba(180,245,255,.28)"/><stop offset="55%" stop-color="rgba(0,100,200,.14)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-              <radialGradient id="ts-core" cx="50%" cy="68%" r="22%"><stop offset="0%" stop-color="rgba(220,255,255,.45)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-            </defs>
-            <rect width="400" height="168" fill="#030810"/>
-            <rect width="400" height="168" fill="url(#ts-halo)"/>
-            <!-- roots -->
-            <path d="M148 168 Q158 152 163 136 Q172 150 178 132 Q183 150 190 136 Q194 150 200 142 Q206 150 210 136 Q217 150 222 132 Q228 150 237 136 Q242 152 252 168Z" fill="#0a1e10"/>
-            <!-- trunk -->
-            <path d="M184 168 Q188 133 190 103 Q195 73 200 54 Q205 73 210 103 Q212 133 216 168Z" fill="#081a0e"/>
-            <path d="M186 168 Q190 137 192 107 Q196 77 200 58 Q204 77 208 107 Q210 137 214 168Z" fill="#0a2012"/>
-            <!-- branches -->
-            <path d="M200 82 Q173 66 152 73 Q138 80 128 92" stroke="#081a10" stroke-width="8.5" fill="none" stroke-linecap="round"/>
-            <path d="M200 82 Q227 66 248 73 Q262 80 272 92" stroke="#081a10" stroke-width="8.5" fill="none" stroke-linecap="round"/>
-            <path d="M200 67 Q183 49 169 53 Q156 57 151 65" stroke="#081a10" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-            <path d="M200 67 Q217 49 231 53 Q244 57 249 65" stroke="#081a10" stroke-width="6.5" fill="none" stroke-linecap="round"/>
-            <!-- halo core -->
-            <rect width="400" height="168" fill="url(#ts-core)"/>
-            <ellipse cx="200" cy="78" rx="58" ry="68" fill="rgba(100,0,200,.07)"/>
-            <!-- Eywa tendrils (neural) -->
-            <path d="M153 92 Q148 112 151 134 Q153 150 147 165" stroke="#00e5ff" stroke-width="1.6" fill="none" opacity=".58"/>
-            <path d="M164 87 Q158 110 160 134" stroke="#00d4e0" stroke-width="1.3" fill="none" opacity=".52"/>
-            <path d="M188 102 Q183 124 185 148 Q186 160 182 168" stroke="#00e5ff" stroke-width="1.1" fill="none" opacity=".47"/>
-            <path d="M212 102 Q217 125 215 150" stroke="#00e5ff" stroke-width="1.1" fill="none" opacity=".47"/>
-            <path d="M236 90 Q241 114 239 138" stroke="#00d4e0" stroke-width="1.3" fill="none" opacity=".52"/>
-            <path d="M247 92 Q252 115 250 140 Q248 156 253 168" stroke="#00e5ff" stroke-width="1.6" fill="none" opacity=".58"/>
-            <!-- branch glow nodes -->
-            <circle cx="132" cy="90" r="3.8" fill="#00e5ff" opacity=".72"/><circle cx="153" cy="72" r="3" fill="#80f0ff" opacity=".68"/>
-            <circle cx="247" cy="70" r="3" fill="#80f0ff" opacity=".68"/><circle cx="268" cy="92" r="3.8" fill="#00e5ff" opacity=".72"/>
-            <!-- Atokirina spirit seeds -->
-            <circle cx="88" cy="48" r="5.5" fill="white" opacity=".28"/><circle cx="88" cy="48" r="2.5" fill="white" opacity=".75"/>
-            <circle cx="312" cy="38" r="5" fill="white" opacity=".26"/><circle cx="312" cy="38" r="2.2" fill="white" opacity=".72"/>
-            <circle cx="46" cy="88" r="4.5" fill="white" opacity=".24"/><circle cx="46" cy="88" r="1.9" fill="white" opacity=".7"/>
-            <circle cx="358" cy="68" r="4" fill="white" opacity=".24"/><circle cx="358" cy="68" r="1.7" fill="white" opacity=".68"/>
-            <circle cx="178" cy="23" r="3.5" fill="white" opacity=".3"/><circle cx="178" cy="23" r="1.4" fill="white" opacity=".78"/>
-            <circle cx="242" cy="28" r="3.5" fill="white" opacity=".28"/><circle cx="242" cy="28" r="1.4" fill="white" opacity=".75"/>
-            <!-- Na'vi kneeling silhouettes -->
-            <path d="M98 168 L100 150 Q102 144 98 139 Q94 144 96 150Z" fill="rgba(0,100,80,.42)"/>
-            <path d="M302 168 L304 148 Q306 142 302 137 Q298 142 300 148Z" fill="rgba(0,100,80,.42)"/>
-          </svg>
-        </div>
-        <div class="ov"><span class="nw">Eywa — Ruh Ağı</span><span class="sc">Tree of Souls · Anılar Ağacı</span></div>
-      </div>
-
-    </div>
-
-    <div class="vc-table-wrap reveal">
-      <table>
-        <thead><tr><th>Na'vi</th><th>Türkçe</th><th>Fonetik</th><th>Kategori</th></tr></thead>
-        <tbody>
-          <tr><td class="navi">Kaltxì</td><td>Merhaba</td><td>kal-TXÌ</td><td><span class="tag tg">Selamlama</span></td></tr>
-          <tr><td class="navi">Irayo</td><td>Teşekkür ederim</td><td>i-RA-yo</td><td><span class="tag tg">Selamlama</span></td></tr>
-          <tr><td class="navi">Oel ngati kameie</td><td>Seni görüyorum (ruhunu)</td><td>o-EL nga-TI ka-ME-ye</td><td><span class="tag tp">İfade</span></td></tr>
-          <tr><td class="navi">Eyawr</td><td>Doğru / Haklı</td><td>E-YAWR</td><td><span class="tag tp">İfade</span></td></tr>
-          <tr><td class="navi">Oe / Nga</td><td>Ben / Sen</td><td>O-e / NGA</td><td><span class="tag tp">Zamir</span></td></tr>
-          <tr><td class="navi">Utral</td><td>Ağaç</td><td>UT-ral</td><td><span class="tag ta">Doğa</span></td></tr>
-          <tr><td class="navi">Txon</td><td>Gece</td><td>TXON</td><td><span class="tag ta">Doğa</span></td></tr>
-          <tr><td class="navi">Eywa</td><td>Ruh Ağı / Yaşam Tanrıçası</td><td>EY-wa</td><td><span class="tag ta">Doğa</span></td></tr>
-          <tr><td class="navi">Ikran</td><td>Banshee (uçan yaratık)</td><td>IK-ran</td><td><span class="tag ta">Hayvan</span></td></tr>
-          <tr><td class="navi">Toruk</td><td>Büyük ejder kuş</td><td>TO-ruk</td><td><span class="tag ta">Hayvan</span></td></tr>
-          <tr><td class="navi">Tswin</td><td>Bağlantı organı (kuyruk)</td><td>TSWIN</td><td><span class="tag tb">Vücut</span></td></tr>
-          <tr><td class="navi">Taron</td><td>Avlamak</td><td>TA-ron</td><td><span class="tag tp">Fiil</span></td></tr>
-          <tr><td class="navi">Mune / Pxey</td><td>İki / Üç</td><td>MU-ne / PXEY</td><td><span class="tag tn">Sayı</span></td></tr>
-          <tr><td class="navi">Nìprrte'</td><td>Rica ederim / Lütfen</td><td>nì-pRR-te</td><td><span class="tag tg">Selamlama</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- PRONUNCIATION -->
-<section id="pronunciation">
-  <div class="wrap">
-    <div class="stag reveal">Telaffuz</div>
-    <h2 class="reveal">Sesleri <em>Doğru Çıkar</em></h2>
-    <p class="lead reveal">Na'vi'nin en zorlu yanı ejektif ünsüzler — Türkçede yok, ama öğrenilebilir.</p>
-
-    <div class="pron-grid">
-      <div class="pcard reveal">
-        <div class="psym">px tx kx</div>
-        <h4>Ejektif Ünsüzler</h4>
-        <p>Gırtlaktan iten, patlayan sesler. Ağzını kapat, basınç oluştur, patlat. <em>px</em> ≈ "p" + gırtlak kapanması.</p>
-      </div>
-      <div class="pcard reveal">
-        <div class="psym">ng</div>
-        <h4>ng Sesi</h4>
-        <p>İngilizce "sing"in sonundaki tek ses. Na'vi'de kelime <em>başında</em> da kullanılır — Türkçede bu yok!</p>
-      </div>
-      <div class="pcard reveal">
-        <div class="psym">rr ll</div>
-        <h4>Heceli r ve l</h4>
-        <p><strong>rr</strong> — titreşimli uzun r (İspanyolca "perro"). <strong>ll</strong> — neredeyse hece olan uzun l.</p>
-      </div>
-      <div class="pcard reveal">
-        <div class="psym">'</div>
-        <h4>Gırtlak Kapanması</h4>
-        <p>Kesme işareti ayrı bir sestir. İngilizce "uh-oh" arasındaki o kısa duraksamayı düşün.</p>
-      </div>
-      <div class="pcard reveal">
-        <div class="psym">ì</div>
-        <h4>ì Sesi</h4>
-        <p>Türkçe "ı"ya yakın ama biraz daha ön. İngilizce "bit" kelimesindeki kısa "i" gibi.</p>
-      </div>
-      <div class="pcard reveal">
-        <div class="psym">ts</div>
-        <h4>ts Sesi</h4>
-        <p>Türkçe "c" gibi ama sızmalı. "tswin" kelimesinde kelime başında duyulur. Tek ses olarak okunur.</p>
-      </div>
-    </div>
-
-    <div class="ptip reveal">
-      <span class="ptip-ic">💡</span>
-      <p><strong>Jake'in Önerisi:</strong> Filmdeki sahneleri ses kapalı izle, sadece Na'vi'lerin ağız hareketlerine bak. Sonra aynı sahneyi sesli aç. Neytiri'nin "Kaltxì" derken dudaklarına dikkat et — tx sesi için alt dudak neredeyse titriyor.</p>
-    </div>
-  </div>
-</section>
-
-<!-- JAKE'S FAVORITES -->
-<section id="favorites">
-  <div class="wrap">
-    <div class="stag reveal">Jake'in Seçkileri</div>
-    <h2 class="reveal">Filmin <em>Unutulmaz</em> Na'vi Anları</h2>
-    <p class="lead reveal">Jake Sully'nin en çok kullandığı ve önem verdiği ifadeler — sahneleriyle birlikte.</p>
-
-    <div class="fav-grid">
-      <div class="fcard reveal">
-        <div class="fcard-navi">Oel ngati kameie</div>
-        <div class="fcard-tr">Seni görüyorum — ruhunu görüyorum</div>
-        <div class="fcard-context">"Jake, Neytiri'ye bu sözü söylediğinde kelimeler yetersiz kalıyordu. Na'vi'ler için bu cümle 'seni seviyorum'dan derin. Tüm benliğinle görülmek demek."</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fcard-navi">Eywa ngahu</div>
-        <div class="fcard-tr">Eywa seninle olsun</div>
-        <div class="fcard-context">"Mo'at bunu Jake'e söylediğinde Omatikaya kabilesine kabul edildiğinin işaretiydi. Veda, uğurlama ve kutsal dilek — hepsi bir arada."</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fcard-navi">Toruk Makto</div>
-        <div class="fcard-tr">Büyük Ejderin Süvarisi</div>
-        <div class="fcard-context">"Jake Toruk'u evcilleştirdiğinde beş kabilenin Na'vi'si hayrete düştü. Bu unvan 5 nesildir kimseye verilmemişti."</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fcard-navi">Tsaheylu</div>
-        <div class="fcard-tr">Nöral bağlantı — ruhsal köprü</div>
-        <div class="fcard-context">"Tswin'ini Eywa'ya, ikran'a ya da diğer canlılara bağladığında kurduğun ruhsal köprü. Avatar 2'de Metkayina bu bağı suyla da kurabiliyordu."</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fcard-navi">Teylu</div>
-        <div class="fcard-tr">Böcek larva — Pandora'nın "atıştırmalığı"</div>
-        <div class="fcard-context">"Jake'in yemeye çalıştığı o bölüm. Neytiri gülüyordu, tüm izleyiciler gülüyordu. Pandora'nın gerçeklik hissi bu küçük anlardan geliyordu."</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fcard-navi">Makto</div>
-        <div class="fcard-tr">Binmek / Sürmek</div>
-        <div class="fcard-context">"Jake, ikran'a ilk bindiğinde Neytiri ona 'Makto!' diye bağırdı. Film boyunca en heyecanlı Na'vi kelimelerinden biri. Tam anlamıyla özgürlüğün sesi."</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- QUIZ CTA -->
-<section id="quiz-section">
-  <div class="wrap">
-    <div class="stag reveal">Test</div>
-    <h2 class="reveal">Bilgini <em>Sına</em></h2>
-    <p class="lead reveal">10 soru — Na'vi dili ve Avatar filmi. Jake Sully bile terler.</p>
-    <button class="btn btn-p reveal" onclick="openQuiz()" style="font-size:1.02rem;padding:.95rem 3rem">Teste Gir</button>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <p>Na'vi Dil Rehberi &nbsp;·&nbsp; <span>Oel ngati kameie</span> &nbsp;·&nbsp; Pandora, Eywa'nın koruması altında</p>
-  <p style="margin-top:.35rem">Avatar © James Cameron / Disney. Bu site eğitim amaçlıdır.</p>
-</footer>
-
-<!-- ═══ JAKE GUIDE ═══ -->
-<div id="jake-guide">
-  <div id="jake-bubble">
-    <div class="jb-hd" id="jake-bubble-hd">Pandora'ya Hoş Geldin!</div>
-    <div id="jake-msg">Merhaba! Ben Jake Sully. Pandora'da sıfırdan öğrendim — sen de öğrenebilirsin!</div>
-    <span class="jb-close" onclick="closeBubble()">küçült ✕</span>
-  </div>
-  <div id="jake-icon-wrap">
-    <div id="jake-icon" onclick="toggleBubble()" title="Jake Sully — Rehberin">
-      <!-- Na'vi Jake SVG — movie-accurate -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130">
-        <defs>
-          <radialGradient id="jk-bg" cx="50%" cy="30%" r="80%">
-            <stop offset="0%" stop-color="#062030"/>
-            <stop offset="100%" stop-color="#010810"/>
-          </radialGradient>
-          <radialGradient id="jk-face" cx="50%" cy="42%" r="65%">
-            <stop offset="0%" stop-color="#238a9a"/>
-            <stop offset="55%" stop-color="#1a7888"/>
-            <stop offset="100%" stop-color="#0e5868"/>
-          </radialGradient>
-        </defs>
-        <!-- Dark Pandora bg -->
-        <rect width="120" height="130" fill="url(#jk-bg)"/>
-        <ellipse cx="60" cy="70" rx="50" ry="56" fill="rgba(0,150,190,.06)"/>
-        <!-- Body/shoulders -->
-        <path d="M0 130 L0 114 Q18 102 34 100 Q46 97 60 99 Q74 97 86 100 Q102 102 120 114 L120 130Z" fill="#0c5868"/>
-        <!-- Neck -->
-        <path d="M44 90 Q52 98 60 100 Q68 98 76 90 L78 108 Q70 116 60 118 Q50 116 42 108Z" fill="#1a7888"/>
-        <!-- Auburn hair (drawn before face) -->
-        <path d="M24 52 Q18 30 24 12 Q34 0 60 0 Q86 0 96 12 Q102 30 96 52 Q90 36 82 26 Q74 18 60 16 Q46 18 38 26 Q30 36 24 52Z" fill="#5c2a06"/>
-        <path d="M26 50 Q24 36 28 22 Q36 10 60 8 Q84 10 92 22 Q96 36 94 50 Q90 38 82 30 Q74 22 60 20 Q46 22 38 30 Q30 38 26 50Z" fill="#6e3208"/>
-        <path d="M40 10 Q52 6 60 6 Q68 6 80 10" stroke="#8a4510" stroke-width="2.5" fill="none" opacity=".7" stroke-linecap="round"/>
-        <path d="M28 46 Q24 32 30 16" stroke="#7a3a0a" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
-        <path d="M92 46 Q96 32 90 16" stroke="#7a3a0a" stroke-width="2" fill="none" opacity=".45" stroke-linecap="round"/>
-        <!-- Queue braid at crown -->
-        <path d="M54 7 Q49 -3 52 -11" stroke="#3a1800" stroke-width="8" fill="none" stroke-linecap="round"/>
-        <path d="M66 7 Q71 -3 68 -11" stroke="#4a2200" stroke-width="7" fill="none" stroke-linecap="round"/>
-        <path d="M60 5 Q60 -5 60 -13" stroke="#5a3000" stroke-width="5" fill="none" stroke-linecap="round" opacity=".5"/>
-        <!-- Na'vi head — tall & elongated -->
-        <path d="M24 54 Q22 38 26 26 Q34 10 60 8 Q86 10 94 26 Q98 38 96 54 Q96 72 90 85 Q80 99 60 101 Q40 99 30 85 Q24 72 24 54Z" fill="url(#jk-face)"/>
-        <!-- Forehead depth -->
-        <path d="M30 22 Q44 16 60 14 Q76 16 90 22 Q82 17 60 15 Q38 17 30 22Z" fill="#0d5464" opacity=".5"/>
-        <!-- Prominent brow ridge -->
-        <path d="M28 46 Q37 38 52 39 Q58 40 60 44" fill="#126878"/>
-        <path d="M92 46 Q83 38 68 39 Q62 40 60 44" fill="#126878"/>
-        <path d="M28 46 Q39 40 54 41 Q58 42 60 45" stroke="#0a5060" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <path d="M92 46 Q81 40 66 41 Q62 42 60 45" stroke="#0a5060" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <!-- Pointed ears -->
-        <path d="M24 54 L6 35 L14 21 L28 46Z" fill="#1a7888"/>
-        <path d="M96 54 L114 35 L106 21 L92 46Z" fill="#1a7888"/>
-        <path d="M24 51 L10 37 L16 25 L26 46Z" fill="#116070"/>
-        <path d="M96 51 L110 37 L104 25 L94 46Z" fill="#116070"/>
-        <path d="M14 28 L22 44" stroke="#0d5060" stroke-width="1.5" fill="none" opacity=".45"/>
-        <path d="M106 28 L98 44" stroke="#0d5060" stroke-width="1.5" fill="none" opacity=".45"/>
-        <!-- Eye sockets -->
-        <ellipse cx="43" cy="55" rx="15" ry="14" fill="#0b4858"/>
-        <ellipse cx="77" cy="55" rx="15" ry="14" fill="#0b4858"/>
-        <!-- Yellow-green iris -->
-        <ellipse cx="43" cy="55" rx="13" ry="13" fill="#9ab800"/>
-        <ellipse cx="77" cy="55" rx="13" ry="13" fill="#9ab800"/>
-        <ellipse cx="43" cy="55" rx="10" ry="11" fill="#7a9400"/>
-        <ellipse cx="77" cy="55" rx="10" ry="11" fill="#7a9400"/>
-        <ellipse cx="43" cy="55" rx="7" ry="8" fill="#6a8000"/>
-        <ellipse cx="77" cy="55" rx="7" ry="8" fill="#6a8000"/>
-        <!-- Vertical cat pupils -->
-        <ellipse cx="43" cy="55" rx="3.5" ry="12" fill="#040300"/>
-        <ellipse cx="77" cy="55" rx="3.5" ry="12" fill="#040300"/>
-        <!-- Eye highlights -->
-        <circle cx="38" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
-        <circle cx="72" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
-        <circle cx="47" cy="59" r="2" fill="rgba(255,255,255,.28)"/>
-        <circle cx="81" cy="59" r="2" fill="rgba(255,255,255,.28)"/>
-        <!-- Na'vi nose — flat, wide -->
-        <path d="M50 71 Q56 76 60 77 Q64 76 70 71 Q68 81 60 84 Q52 81 50 71Z" fill="#157080"/>
-        <ellipse cx="52" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
-        <ellipse cx="68" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
-        <ellipse cx="52" cy="79" rx="3" ry="2" fill="#0a3a48"/>
-        <ellipse cx="68" cy="79" rx="3" ry="2" fill="#0a3a48"/>
-        <!-- Mouth -->
-        <path d="M47 89 Q60 97 73 89" stroke="#0a5060" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <path d="M50 89 Q60 94 70 89" stroke="#1a7888" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <!-- Bioluminescent dots -->
-        <circle cx="28" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
-        <circle cx="92" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
-        <circle cx="30" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
-        <circle cx="90" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
-        <circle cx="32" cy="70" r="1.6" fill="#80f0ff" opacity=".75"/>
-        <circle cx="88" cy="70" r="1.6" fill="#80f0ff" opacity=".75"/>
-        <circle cx="60" cy="28" r="2.8" fill="#b8ffff" opacity=".9"/>
-        <circle cx="47" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
-        <circle cx="73" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
-        <circle cx="44" cy="85" r="1.4" fill="#90f0ff" opacity=".6"/>
-        <circle cx="76" cy="85" r="1.4" fill="#90f0ff" opacity=".6"/>
-        <circle cx="60" cy="92" r="1.6" fill="#80eeff" opacity=".65"/>
-        <circle cx="10" cy="33" r="1.5" fill="#a0ffff" opacity=".7"/>
-        <circle cx="110" cy="33" r="1.5" fill="#a0ffff" opacity=".7"/>
-        <!-- Stripe markings -->
-        <path d="M26 46 Q31 52 28 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
-        <path d="M94 46 Q89 52 92 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
-        <path d="M32 58 Q36 62 34 70" stroke="#00909a" stroke-width="1.5" fill="none" opacity=".4" stroke-linecap="round"/>
-        <path d="M88 58 Q84 62 86 70" stroke="#00909a" stroke-width="1.5" fill="none" opacity=".4" stroke-linecap="round"/>
-        <path d="M54 18 Q60 16 66 18" stroke="#007888" stroke-width="1.5" fill="none" opacity=".35" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div id="jake-dot"></div>
+<!-- ═══ LANDING ═══ -->
+<div id="landing">
+  <div class="land-inner">
+    <div class="land-tag">Na'vi · Pandora · Avatar</div>
+    <h1 class="land-title">Na'vi Dili<br/><span>Mini Test</span></h1>
+    <p class="land-sub">10 soru — dil ve Avatar dünyası hakkında.<br/><em>"Oel ngati kameie"</em> — Seni görüyorum.</p>
+    <button class="btn btn-p" onclick="openQuiz()">Teste Gir</button>
   </div>
 </div>
 
@@ -1275,7 +354,7 @@ footer span{color:var(--cyan)}
 <div id="quiz-overlay" role="dialog" aria-modal="true">
   <div class="qov-hd">
     <span class="qov-brand">Na'vi · Test Ekranı</span>
-    <button class="qov-close" onclick="closeQuiz()">✕ Ana Sayfaya Dön</button>
+    <button class="qov-close" onclick="closeQuiz()">✕ Geri Dön</button>
   </div>
   <div id="qov-body">
 
@@ -1304,12 +383,10 @@ footer span{color:var(--cyan)}
       <div class="rscore-lbl" id="rtot"></div>
       <div class="rtitle" id="rtitle"></div>
       <div class="rsub" id="rsub"></div>
-      <div class="rsum">
-        <div id="rlist"></div>
-      </div>
+      <div class="rsum"><div id="rlist"></div></div>
       <div class="rbtns">
         <button class="btn btn-p" onclick="retryQ()">Tekrar Dene</button>
-        <button class="btn btn-o" onclick="closeQuiz()">Ana Sayfaya Dön</button>
+        <button class="btn btn-o" onclick="closeQuiz()">Geri Dön</button>
       </div>
     </div>
 
@@ -1337,73 +414,6 @@ footer span{color:var(--cyan)}
   }
   addEventListener('resize',resize);init();draw();
 })();
-
-/* ── SCROLL REVEAL ── */
-const ro=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')});
-},{threshold:.15});
-document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>ro.observe(el));
-
-/* ── JAKE GUIDE ── */
-const jakeData={
-  hero:{title:"Pandora'ya Hoş Geldin!",msg:"Merhaba! Ben Jake Sully. Pandora'ya ilk geldiğimde sıfırdan başladım. Sen de öğrenebilirsin — söz veriyorum."},
-  background:{title:"Dilin Hikayesi",msg:"Paul Frommer bu dili benim için yarattı. 3 ayda Neytiri'yle rahat konuşur hale geldim. Asıl sır: dinlemeyi önce öğrenmek."},
-  grammar:{title:"Gramer Tüyosu!",msg:"SOV yapısı Türkçeyle aynı sıra — bunu öğrenince rahadım bir. Ama infix sistemi... kelimeyi içten değiştiriyorsun. Alışınca zevkli geliyor."},
-  vocabulary:{title:"İlk Kelimen Olsun",msg:"'Kaltxì' ile başla. Neytiri bana bunu öğrettiğinde gözleri parladı. Bir Pandoralı'ya ilk merhaba demek — küçük ama büyülü."},
-  pronunciation:{title:"Ejektif Sesler...",msg:"Tx sesini ilk söylediğimde Neytiri kahkaha attı. Lütfen alıştırma yap — o anı tekrar yaşamak istemiyorum."},
-  favorites:{title:"Favorilerim",msg:"'Oel ngati kameie' — bu cümleyi Neytiri'ye söylediğim an filmim değişti. Na'vi'de kelimeler düşünceden derin, ruhtan geliyor."},
-  'quiz-section':{title:"Test Zamanı!",msg:"Hazır mısın? Omatikaya'ya kabul olmak için bir test gerekiyordu. Senin vaktin geldi. Iyu teri nì'Na'vi!"}
-};
-let bubbleOpen=false,lastSection='',typeTimer=null;
-
-function typeBubble(text){
-  const el=document.getElementById('jake-msg');
-  el.textContent='';let i=0;
-  if(typeTimer)clearInterval(typeTimer);
-  typeTimer=setInterval(()=>{
-    if(i<text.length){el.textContent+=text[i++]}
-    else{clearInterval(typeTimer);typeTimer=null}
-  },22);
-}
-
-function updateJake(sectionId){
-  const d=jakeData[sectionId];
-  if(!d||sectionId===lastSection)return;
-  lastSection=sectionId;
-  document.getElementById('jake-bubble-hd').textContent=d.title;
-  if(bubbleOpen){typeBubble(d.msg)}
-  else{
-    document.getElementById('jake-msg').textContent=d.msg;
-    const dot=document.getElementById('jake-dot');
-    dot.style.display='block';
-    setTimeout(()=>{dot.style.display='none'},3000);
-  }
-}
-
-function toggleBubble(){
-  const b=document.getElementById('jake-bubble');
-  bubbleOpen=!bubbleOpen;
-  if(bubbleOpen){
-    b.classList.add('show');
-    const d=jakeData[lastSection||'hero'];
-    if(d)typeBubble(d.msg);
-    document.getElementById('jake-dot').style.display='none';
-  } else {
-    b.classList.remove('show');
-  }
-}
-function closeBubble(){
-  document.getElementById('jake-bubble').classList.remove('show');
-  bubbleOpen=false;
-}
-
-/* Section observer for Jake */
-const sections=['hero','background','grammar','vocabulary','pronunciation','favorites','quiz-section'];
-const sro=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>=.3)updateJake(e.target.id)});
-},{threshold:.3});
-sections.forEach(id=>{const el=document.getElementById(id);if(el)sro.observe(el)});
-setTimeout(()=>{document.getElementById('jake-bubble').classList.add('show');bubbleOpen=true;},2200);
 
 /* ── QUIZ ── */
 const Qs=[
@@ -1474,28 +484,26 @@ function pick(idx){
   const fb=document.getElementById('qfb');
   if(ok){score++;opts[idx].classList.add('correct');fb.textContent='✓ Doğru! Eywa seninle!';fb.className='qfb ok'}
   else{opts[idx].classList.add('wrong');fb.textContent=`✗ Yanlış — doğrusu: "${q.opts[q.ans]}"`;fb.className='qfb bad'}
-  answers.push({cat:q.cat,q:q.q,ok,correct:q.opts[q.ans],chosen:q.opts[idx]});
+  answers.push({q:q.q,ok,correct:q.opts[q.ans]});
   document.getElementById('nxtbtn').style.display='inline-block';
 }
 function nextQ(){cur++;if(cur<Qs.length)renderQ();else showRes()}
 function showRes(){
   document.getElementById('qcard').style.display='none';
   const rc=document.getElementById('rcard');
-  rc.style.display='block';
-  rc.style.animation='qSlideIn .4s ease';
+  rc.style.display='block';rc.style.animation='qSlideIn .4s ease';
   const total=Qs.length,pct=Math.round(score/total*100);
   document.getElementById('rscore').textContent=score;
   document.getElementById('rtot').textContent=`/ ${total} doğru`;
   const msgs=[
-    [100,"Toruk Makto!","Mükemmel puan — tüm soruları doğru yanıtladın. Sen gerçek bir Na'vi'sin!"],
-    [80, "Omatikaya Savaşçısı","Pandora'yı ve Na'vi dilini çok iyi biliyorsun. Neredeyse tam klan üyesisin."],
-    [60, "Yetenekli Çırak","İyi bir başlangıç! Dil ve film bölümlerini bir kez daha okuyunca fark yaratırsın."],
-    [0,  "Pandora'ya İlk Adım","Merak etme — her Na'vi bir zamanlar hiç bilmiyordu. Başa dön ve tekrar dene!"]
+    [100,"Toruk Makto!","Mükemmel — tüm soruları doğru yanıtladın. Sen gerçek bir Na'vi'sin!"],
+    [80, "Omatikaya Savaşçısı","Pandora'yı ve Na'vi dilini çok iyi biliyorsun."],
+    [60, "Yetenekli Çırak","İyi başlangıç! Birkaç soruya daha bak."],
+    [0,  "Pandora'ya İlk Adım","Merak etme — tekrar dene, ilk Na'vi herkes öğrenir!"]
   ];
   const [,t,s]=msgs.find(([p])=>pct>=p);
   document.getElementById('rtitle').textContent=t;
   document.getElementById('rsub').textContent=s;
-  /* mini analiz */
   const list=document.getElementById('rlist');list.innerHTML='';
   answers.forEach((a,i)=>{
     const d=document.createElement('div');
