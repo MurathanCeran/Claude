@@ -23,10 +23,12 @@
 }
 
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;font-weight:400;overflow-x:hidden}
+body{background:#020810;color:var(--text);font-family:'Raleway',sans-serif;font-weight:400;overflow-x:hidden}
+#pandora-bg{position:fixed;inset:0;z-index:-2;overflow:hidden}
+#pandora-bg svg{width:100%;height:100%;display:block}
 
 /* ── CANVAS ── */
-#pc{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.45}
+#pc{position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.45}
 
 /* ── NAV ── */
 nav{
@@ -70,11 +72,10 @@ h2 em{color:var(--teal);font-style:normal}
   min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
   padding:6rem 1.5rem 4rem;
   background:
-    radial-gradient(ellipse 90% 60% at 50% 30%,rgba(0,120,200,.22) 0%,transparent 65%),
-    radial-gradient(ellipse 50% 45% at 85% 70%,rgba(155,110,255,.14) 0%,transparent 55%),
-    url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+    radial-gradient(ellipse 90% 60% at 50% 30%,rgba(0,80,180,.28) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 45% at 85% 70%,rgba(120,60,255,.15) 0%,transparent 55%);
 }
-#hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,18,36,.48) 0%,rgba(5,18,36,.88) 100%)}
+#hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(3,10,22,.3) 0%,rgba(3,10,22,.7) 100%)}
 .hero-inner{position:relative;z-index:2;max-width:800px}
 .hero-badge{
   display:inline-flex;align-items:center;gap:.5rem;
@@ -91,12 +92,11 @@ h1 span{color:var(--teal)}
 .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 
 /* ═══════ BG SECTION ═══════ */
-#background{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%)}
+#background{background:rgba(4,12,28,.82)}
 .bg-scene{
   border-radius:20px;overflow:hidden;margin-bottom:2.8rem;
   box-shadow:0 0 50px rgba(0,212,255,.2);position:relative;height:300px;
-  background:
-    url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+  background:rgba(2,8,20,.5);
 }
 .bg-scene::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,100,180,.35) 0%,rgba(100,0,200,.2) 100%);mix-blend-mode:multiply}
 .bg-scene-label{position:absolute;bottom:1rem;left:1.4rem;z-index:2;font-family:'Cinzel',serif;font-size:.78rem;color:var(--teal);letter-spacing:.14em;text-shadow:var(--glow)}
@@ -121,11 +121,7 @@ h1 span{color:var(--teal)}
 .jake-note p{font-family:'Caveat',cursive;font-size:1.05rem;color:#aaeac0;line-height:1.65}
 
 /* ═══════ GRAMMAR ═══════ */
-#grammar{
-  background:
-    radial-gradient(ellipse 60% 50% at 15% 50%,rgba(155,110,255,.1) 0%,transparent 55%),
-    var(--bg2);
-}
+#grammar{background:rgba(6,14,34,.84)}
 .gr-row{display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:start}
 @media(max-width:680px){.gr-row{grid-template-columns:1fr}}
 .gr-img{
@@ -156,7 +152,7 @@ h1 span{color:var(--teal)}
 }
 
 /* ═══════ VOCAB ═══════ */
-#vocabulary{background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)}
+#vocabulary{background:rgba(4,12,28,.82)}
 .vc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:3rem}
 @media(max-width:580px){.vc-grid{grid-template-columns:1fr 1fr}}
 .vc{border-radius:14px;overflow:hidden;position:relative}
@@ -189,11 +185,7 @@ tr:hover td{background:rgba(0,212,255,.05)}
 .tp{background:rgba(240,168,0,.14);color:#ffd080}
 
 /* ═══════ PRONUNCIATION ═══════ */
-#pronunciation{
-  background:
-    radial-gradient(ellipse 55% 50% at 85% 25%,rgba(0,212,255,.08) 0%,transparent 50%),
-    var(--bg2);
-}
+#pronunciation{background:rgba(6,14,34,.84)}
 .pron-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1.4rem;margin-bottom:2.5rem}
 .pcard{
   background:var(--card);border:1px solid rgba(0,212,255,.16);
@@ -212,11 +204,7 @@ tr:hover td{background:rgba(0,212,255,.05)}
 .ptip p{color:#96d0e8;font-size:.92rem;line-height:1.7}
 
 /* ═══════ JAKE FAVORITES ═══════ */
-#favorites{
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 50%,rgba(240,168,0,.07) 0%,transparent 60%),
-    var(--bg);
-}
+#favorites{background:rgba(4,12,28,.82)}
 .fav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.6rem}
 .fcard{
   background:var(--card);border:1px solid rgba(240,168,0,.2);
@@ -236,12 +224,7 @@ tr:hover td{background:rgba(0,212,255,.05)}
 .fcard-context{font-family:'Caveat',cursive;font-size:.98rem;color:#88a8c0;line-height:1.6;border-top:1px solid rgba(240,168,0,.1);padding-top:.6rem;margin-top:.6rem}
 
 /* ═══════ QUIZ CTA ═══════ */
-#quiz-section{
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 50%,rgba(0,100,180,.16) 0%,transparent 65%),
-    var(--bg2);
-  text-align:center;
-}
+#quiz-section{background:rgba(4,12,28,.82);text-align:center}
 #quiz-section .lead{margin:0 auto 2.4rem}
 
 /* ═══════ FOOTER ═══════ */
@@ -383,6 +366,274 @@ footer span{color:var(--cyan)}
   </style>
 </head>
 <body>
+
+<!-- ═══ PANDORA FOREST BACKGROUND ═══ -->
+<div id="pandora-bg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="pbg-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020810"/>
+      <stop offset="45%" stop-color="#04051a"/>
+      <stop offset="100%" stop-color="#060220"/>
+    </linearGradient>
+    <radialGradient id="pbg-mist1" cx="22%" cy="52%" r="48%">
+      <stop offset="0%" stop-color="#1a0858" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#020810" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pbg-mist2" cx="75%" cy="40%" r="52%">
+      <stop offset="0%" stop-color="#0a0845" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#020810" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pbg-mist3" cx="50%" cy="28%" r="55%">
+      <stop offset="0%" stop-color="#080635" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#020810" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pbg-mist4" cx="50%" cy="70%" r="45%">
+      <stop offset="0%" stop-color="#100428" stop-opacity=".4"/>
+      <stop offset="100%" stop-color="#020810" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pbg-ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#040918"/>
+      <stop offset="100%" stop-color="#020610"/>
+    </linearGradient>
+    <filter id="pbg-glow-sm" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pbg-glow-md" x="-120%" y="-80%" width="340%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pbg-glow-lg" x="-200%" y="-150%" width="500%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Sky base -->
+  <rect width="1440" height="900" fill="url(#pbg-sky)"/>
+  <!-- Atmospheric mist layers -->
+  <rect width="1440" height="900" fill="url(#pbg-mist1)"/>
+  <rect width="1440" height="900" fill="url(#pbg-mist2)"/>
+  <rect width="1440" height="900" fill="url(#pbg-mist3)"/>
+  <rect width="1440" height="900" fill="url(#pbg-mist4)"/>
+
+  <!-- ── BACKGROUND TREE TRUNKS (dark silhouettes) ── -->
+  <rect x="18"   y="0" width="22" height="750" rx="5" fill="#030a1a"/>
+  <rect x="52"   y="20" width="14" height="730" rx="4" fill="#040c1e"/>
+  <rect x="84"   y="0" width="26" height="760" rx="5" fill="#030a1a"/>
+  <rect x="130"  y="30" width="16" height="720" rx="4" fill="#050d20"/>
+  <rect x="270"  y="0" width="18" height="700" rx="4" fill="#030a1a"/>
+  <rect x="315"  y="15" width="22" height="720" rx="4" fill="#040b1c"/>
+  <rect x="370"  y="0" width="14" height="740" rx="4" fill="#030a1a"/>
+  <rect x="480"  y="10" width="20" height="710" rx="4" fill="#040c1e"/>
+  <rect x="540"  y="0" width="16" height="730" rx="4" fill="#030a1a"/>
+  <rect x="640"  y="20" width="18" height="680" rx="4" fill="#040b1c"/>
+  <rect x="710"  y="0" width="14" height="700" rx="4" fill="#030a1a"/>
+  <rect x="770"  y="15" width="20" height="720" rx="4" fill="#040c1e"/>
+  <rect x="880"  y="0" width="18" height="710" rx="4" fill="#030a1a"/>
+  <rect x="940"  y="10" width="16" height="690" rx="4" fill="#040b1c"/>
+  <rect x="1020" y="0" width="22" height="740" rx="4" fill="#030a1a"/>
+  <rect x="1090" y="20" width="14" height="700" rx="4" fill="#040c1e"/>
+  <rect x="1160" y="0" width="20" height="730" rx="4" fill="#030a1a"/>
+  <rect x="1240" y="10" width="16" height="720" rx="4" fill="#040b1c"/>
+  <rect x="1310" y="0" width="24" height="760" rx="5" fill="#030a1a"/>
+  <rect x="1360" y="30" width="14" height="720" rx="4" fill="#050d20"/>
+  <rect x="1400" y="0" width="22" height="740" rx="5" fill="#030a1a"/>
+
+  <!-- Dark canopy ceiling -->
+  <path d="M0 0 L1440 0 L1440 130 Q1360 90 1260 110 Q1160 135 1060 95 Q960 60 860 108 Q760 150 660 95 Q560 48 460 118 Q360 165 260 105 Q160 55 60 125 Q30 138 0 130Z" fill="#020710"/>
+
+  <!-- ── HANGING TENDRILS — the iconic Pandora glowing wisps ── -->
+  <g filter="url(#pbg-glow-sm)">
+    <!-- Left cluster -->
+    <line x1="175" y1="100" x2="173" y2="490" stroke="#68ccf0" stroke-width="1.8"/>
+    <line x1="196" y1="85"  x2="194" y2="430" stroke="#88dcff" stroke-width="1.2"/>
+    <line x1="214" y1="95"  x2="216" y2="510" stroke="#58bfe0" stroke-width="2.2"/>
+    <line x1="232" y1="78"  x2="230" y2="400" stroke="#78d4ff" stroke-width="1.5"/>
+    <line x1="252" y1="90"  x2="254" y2="460" stroke="#98e4ff" stroke-width="1.1"/>
+    <!-- Center-left cluster -->
+    <line x1="438" y1="88"  x2="436" y2="440" stroke="#78d6ff" stroke-width="1.8"/>
+    <line x1="458" y1="75"  x2="460" y2="500" stroke="#58c0e8" stroke-width="2.2"/>
+    <line x1="478" y1="90"  x2="476" y2="420" stroke="#98e8ff" stroke-width="1.2"/>
+    <line x1="498" y1="82"  x2="500" y2="470" stroke="#68d0f0" stroke-width="1.6"/>
+    <!-- Center cluster -->
+    <line x1="672" y1="92"  x2="670" y2="460" stroke="#78d6ff" stroke-width="2.2"/>
+    <line x1="694" y1="78"  x2="696" y2="520" stroke="#58bfe8" stroke-width="1.6"/>
+    <line x1="716" y1="88"  x2="714" y2="445" stroke="#88e0ff" stroke-width="1.2"/>
+    <line x1="736" y1="74"  x2="738" y2="490" stroke="#68ccf0" stroke-width="2"/>
+    <line x1="758" y1="92"  x2="756" y2="420" stroke="#98eaff" stroke-width="1.1"/>
+    <!-- Right-center cluster -->
+    <line x1="898" y1="85"  x2="896" y2="510" stroke="#78d0f8" stroke-width="1.8"/>
+    <line x1="918" y1="72"  x2="920" y2="440" stroke="#58c0e8" stroke-width="2.2"/>
+    <line x1="940" y1="88"  x2="938" y2="480" stroke="#88dcff" stroke-width="1.3"/>
+    <!-- Right cluster -->
+    <line x1="1142" y1="90" x2="1140" y2="460" stroke="#68ccf0" stroke-width="1.8"/>
+    <line x1="1162" y1="76" x2="1164" y2="500" stroke="#78d4ff" stroke-width="2.2"/>
+    <line x1="1182" y1="88" x2="1180" y2="430" stroke="#98e4ff" stroke-width="1.2"/>
+    <line x1="1202" y1="80" x2="1204" y2="470" stroke="#58bfe0" stroke-width="1.6"/>
+  </g>
+  <!-- Extra bright core of main tendrils -->
+  <g filter="url(#pbg-glow-md)" opacity=".65">
+    <line x1="214"  y1="95"  x2="216" y2="510" stroke="#c8f4ff" stroke-width=".8"/>
+    <line x1="458"  y1="75"  x2="460" y2="500" stroke="#c8f4ff" stroke-width=".8"/>
+    <line x1="694"  y1="78"  x2="696" y2="520" stroke="#c8f4ff" stroke-width=".8"/>
+    <line x1="736"  y1="74"  x2="738" y2="490" stroke="#c8f4ff" stroke-width=".8"/>
+    <line x1="918"  y1="72"  x2="920" y2="440" stroke="#c8f4ff" stroke-width=".8"/>
+    <line x1="1162" y1="76"  x2="1164" y2="500" stroke="#c8f4ff" stroke-width=".8"/>
+  </g>
+
+  <!-- ── GROUND TERRAIN ── -->
+  <path d="M0 760 Q90 730 190 748 Q310 770 430 740 Q560 712 690 730 Q820 750 950 718 Q1080 692 1200 710 Q1320 728 1440 695 L1440 900 L0 900Z" fill="url(#pbg-ground)"/>
+  <path d="M0 818 Q110 800 230 815 Q370 832 510 808 Q650 786 790 804 Q930 822 1070 800 Q1210 780 1340 800 Q1400 810 1440 806 L1440 900 L0 900Z" fill="#020610"/>
+
+  <!-- Rocky terrain bumps -->
+  <ellipse cx="110"  cy="775" rx="88"  ry="24" fill="#030812"/>
+  <ellipse cx="360"  cy="798" rx="65"  ry="18" fill="#030912"/>
+  <ellipse cx="610"  cy="768" rx="95"  ry="22" fill="#030812"/>
+  <ellipse cx="870"  cy="785" rx="75"  ry="20" fill="#030812"/>
+  <ellipse cx="1120" cy="772" rx="88"  ry="23" fill="#030912"/>
+  <ellipse cx="1360" cy="788" rx="68"  ry="18" fill="#030812"/>
+
+  <!-- Ground foliage (low dark bushes) -->
+  <ellipse cx="160"  cy="808" rx="58" ry="14" fill="#040a1c"/>
+  <ellipse cx="420"  cy="824" rx="48" ry="12" fill="#040a1c"/>
+  <ellipse cx="680"  cy="814" rx="62" ry="14" fill="#040a1c"/>
+  <ellipse cx="940"  cy="820" rx="52" ry="13" fill="#040a1c"/>
+  <ellipse cx="1190" cy="808" rx="58" ry="14" fill="#040a1c"/>
+
+  <!-- ── CYAN BIOLUMINESCENT FLOWERS ── -->
+  <g filter="url(#pbg-glow-md)" opacity=".96">
+    <!-- Flower helper: 6 petals as rotated ellipses around center -->
+    <!-- Cyan 1 — far left (x=168,y=798) -->
+    <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(-30 168 798)"/>
+    <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(30 168 798)"/>
+    <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00c0ec"/>
+    <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(60 168 798)"/>
+    <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(-60 168 798)"/>
+    <ellipse cx="168" cy="798" rx="19" ry="8" fill="#00b0dc" transform="rotate(90 168 798)"/>
+    <circle cx="168" cy="798" r="7" fill="#90f0ff"/>
+    <!-- Cyan 2 — (x=478,y=778) -->
+    <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(18 478 778)"/>
+    <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(-22 478 778)"/>
+    <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00c8f2"/>
+    <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(52 478 778)"/>
+    <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(-52 478 778)"/>
+    <ellipse cx="478" cy="778" rx="22" ry="9" fill="#00b8e4" transform="rotate(82 478 778)"/>
+    <circle cx="478" cy="778" r="8" fill="#a0f8ff"/>
+    <!-- Cyan 3 — center (x=752,y=768) -->
+    <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(-8 752 768)"/>
+    <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(32 752 768)"/>
+    <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00bae8"/>
+    <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(62 752 768)"/>
+    <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(-62 752 768)"/>
+    <ellipse cx="752" cy="768" rx="20" ry="8" fill="#00aad8" transform="rotate(92 752 768)"/>
+    <circle cx="752" cy="768" r="7" fill="#80f0ff"/>
+    <!-- Cyan 4 — right-center (x=1042,y=776) -->
+    <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(14 1042 776)"/>
+    <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(-24 1042 776)"/>
+    <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00c0ea"/>
+    <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(56 1042 776)"/>
+    <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(-56 1042 776)"/>
+    <ellipse cx="1042" cy="776" rx="18" ry="7" fill="#00b0dc" transform="rotate(86 1042 776)"/>
+    <circle cx="1042" cy="776" r="7" fill="#82f2ff"/>
+    <!-- Cyan 5 — far right (x=1338,y=783) -->
+    <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(-5 1338 783)"/>
+    <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(38 1338 783)"/>
+    <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00b8e2"/>
+    <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(68 1338 783)"/>
+    <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(-52 1338 783)"/>
+    <ellipse cx="1338" cy="783" rx="16" ry="7" fill="#00a8d5" transform="rotate(95 1338 783)"/>
+    <circle cx="1338" cy="783" r="6" fill="#88f2ff"/>
+  </g>
+
+  <!-- ── MAGENTA FLOWERS ── -->
+  <g filter="url(#pbg-glow-lg)" opacity=".90">
+    <!-- Magenta 1 (x=318,y=788) -->
+    <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(18 318 788)"/>
+    <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(-22 318 788)"/>
+    <ellipse cx="318" cy="788" rx="17" ry="7" fill="#d200b0"/>
+    <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(58 318 788)"/>
+    <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(-58 318 788)"/>
+    <ellipse cx="318" cy="788" rx="17" ry="7" fill="#c000a0" transform="rotate(88 318 788)"/>
+    <circle cx="318" cy="788" r="6" fill="#ff84e0"/>
+    <!-- Magenta 2 (x=618,y=773) -->
+    <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(-15 618 773)"/>
+    <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(25 618 773)"/>
+    <ellipse cx="618" cy="773" rx="19" ry="7" fill="#cc00b8"/>
+    <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(55 618 773)"/>
+    <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(-55 618 773)"/>
+    <ellipse cx="618" cy="773" rx="19" ry="7" fill="#b000a0" transform="rotate(85 618 773)"/>
+    <circle cx="618" cy="773" r="6" fill="#ff72d8"/>
+    <!-- Magenta 3 (x=918,y=780) -->
+    <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(10 918 780)"/>
+    <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(-28 918 780)"/>
+    <ellipse cx="918" cy="780" rx="15" ry="6" fill="#d800b8"/>
+    <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(60 918 780)"/>
+    <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(-60 918 780)"/>
+    <ellipse cx="918" cy="780" rx="15" ry="6" fill="#c200a8" transform="rotate(90 918 780)"/>
+    <circle cx="918" cy="780" r="5" fill="#ff80e2"/>
+    <!-- Magenta 4 (x=1218,y=786) -->
+    <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(5 1218 786)"/>
+    <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(45 1218 786)"/>
+    <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ce00b2"/>
+    <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(72 1218 786)"/>
+    <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(-48 1218 786)"/>
+    <ellipse cx="1218" cy="786" rx="16" ry="6" fill="#ba00a2" transform="rotate(-78 1218 786)"/>
+    <circle cx="1218" cy="786" r="5" fill="#ff82e0"/>
+  </g>
+
+  <!-- ── PURPLE FLOWERS ── -->
+  <g filter="url(#pbg-glow-md)" opacity=".86">
+    <!-- Purple 1 (x=98,y=818) -->
+    <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(16 98 818)"/>
+    <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(-24 98 818)"/>
+    <ellipse cx="98" cy="818" rx="14" ry="6" fill="#6e30cc"/>
+    <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(58 98 818)"/>
+    <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(-58 98 818)"/>
+    <ellipse cx="98" cy="818" rx="14" ry="6" fill="#5c20bc" transform="rotate(88 98 818)"/>
+    <circle cx="98" cy="818" r="5" fill="#b280ff"/>
+    <!-- Purple 2 (x=558,y=793) -->
+    <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(-10 558 793)"/>
+    <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(32 558 793)"/>
+    <ellipse cx="558" cy="793" rx="16" ry="6" fill="#6428c4"/>
+    <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(62 558 793)"/>
+    <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(-62 558 793)"/>
+    <ellipse cx="558" cy="793" rx="16" ry="6" fill="#5018b0" transform="rotate(92 558 793)"/>
+    <circle cx="558" cy="793" r="6" fill="#a060ff"/>
+    <!-- Purple 3 (x=1148,y=790) -->
+    <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(20 1148 790)"/>
+    <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(-20 1148 790)"/>
+    <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#6632c8"/>
+    <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(55 1148 790)"/>
+    <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(-55 1148 790)"/>
+    <ellipse cx="1148" cy="790" rx="15" ry="6" fill="#5620b8" transform="rotate(85 1148 790)"/>
+    <circle cx="1148" cy="790" r="5" fill="#a262ff"/>
+  </g>
+
+  <!-- Scattered small bioluminescent glow dots -->
+  <g filter="url(#pbg-glow-sm)" opacity=".72">
+    <circle cx="248"  cy="803" r="3.5" fill="#40d0ff"/>
+    <circle cx="408"  cy="814" r="4"   fill="#00b8e0"/>
+    <circle cx="528"  cy="806" r="3"   fill="#40d0ff"/>
+    <circle cx="698"  cy="798" r="4"   fill="#40d0ff"/>
+    <circle cx="838"  cy="808" r="3.5" fill="#00c8f0"/>
+    <circle cx="978"  cy="801" r="4"   fill="#40d0ff"/>
+    <circle cx="1080" cy="810" r="3"   fill="#00b8e0"/>
+    <circle cx="1278" cy="803" r="3.5" fill="#40d0ff"/>
+    <circle cx="1440" cy="800" r="3"   fill="#40d0ff"/>
+    <circle cx="368"  cy="798" r="3.5" fill="#ff60d0"/>
+    <circle cx="648"  cy="795" r="3"   fill="#ff60d0"/>
+    <circle cx="1188" cy="798" r="3.5" fill="#ff60d0"/>
+    <circle cx="848"  cy="796" r="3"   fill="#8042ff"/>
+    <circle cx="128"  cy="808" r="3.5" fill="#8042ff"/>
+    <circle cx="1400" cy="806" r="3"   fill="#40d0ff"/>
+  </g>
+
+  <!-- Top dark overlay -->
+  <rect width="1440" height="55" fill="url(#pbg-sky)" opacity=".9"/>
+</svg>
+</div>
 
 <canvas id="pc"></canvas>
 
