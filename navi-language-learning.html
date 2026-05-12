@@ -329,26 +329,9 @@ footer span{color:var(--cyan)}
 #qov-body{position:relative;z-index:2;width:100%;max-width:660px;padding:2.5rem 1.5rem 4rem}
 
 /* Name gate */
-#name-gate{text-align:center}
-.gate-ring{
-  width:100px;height:100px;border-radius:50%;margin:0 auto 1.4rem;
-  border:2px solid rgba(0,212,255,.45);
-  box-shadow:0 0 36px rgba(0,212,255,.32);overflow:hidden;
-}
-.gate-ring svg{width:100%;height:100%}
+#name-gate{text-align:center;padding:1rem 0}
 .gate-title{font-family:'Cinzel',serif;font-size:1.7rem;color:#eef8ff;margin-bottom:.55rem}
 .gate-sub{color:#7ab8d8;margin-bottom:1.8rem;font-size:.95rem;line-height:1.65}
-.name-wrap{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap}
-#pname{
-  padding:.82rem 1.4rem;border-radius:50px;
-  border:1.5px solid rgba(0,212,255,.38);
-  background:rgba(0,28,58,.7);color:#e0f4ff;
-  font-size:1rem;font-family:'Raleway',sans-serif;outline:none;width:250px;
-  transition:border-color .25s,box-shadow .25s;
-}
-#pname:focus{border-color:var(--teal);box-shadow:0 0 14px rgba(0,212,255,.32)}
-#pname::placeholder{color:#3a6080}
-#nerr{color:#ff6680;margin-top:.7rem;font-size:.83rem;min-height:1.2rem}
 
 /* Quiz card */
 #qcard{display:none}
@@ -363,6 +346,7 @@ footer span{color:var(--cyan)}
   background:rgba(0,28,58,.65);border:1.5px solid rgba(0,212,255,.2);
   border-radius:12px;padding:.95rem 1.3rem;color:#9cd0e8;font-size:.93rem;
   cursor:pointer;text-align:left;font-family:'Raleway',sans-serif;transition:all .2s;
+  animation:qSlideIn .35s ease both;
 }
 .qopt:hover:not(:disabled){border-color:var(--teal);background:rgba(0,212,255,.1);color:#e0f6ff;transform:translateX(4px)}
 .qopt.correct{border-color:var(--green);background:rgba(61,255,122,.1);color:#b0f0c0}
@@ -384,17 +368,18 @@ footer span{color:var(--cyan)}
 }
 .snum{font-family:'Cinzel',serif;font-size:2.5rem;color:var(--teal);text-shadow:var(--glow);line-height:1}
 .stot{font-size:.83rem;color:#5090b0}
-.rtitle{font-family:'Cinzel',serif;font-size:1.45rem;color:#eef8ff;margin-bottom:.7rem}
-.rsub{color:#7ab8d8;font-size:.96rem;margin:0 auto 1.8rem;line-height:1.7;max-width:480px}
-.rbar{background:rgba(0,212,255,.1);border-radius:50px;height:10px;max-width:340px;margin:0 auto 2.2rem;overflow:hidden}
-.rbarfill{height:100%;background:linear-gradient(90deg,#006898,var(--teal),var(--green));border-radius:50px;transition:width 1.2s ease}
-.rsum{text-align:left;max-width:540px;margin:0 auto 1.8rem}
-.rsum h4{font-family:'Cinzel',serif;font-size:.8rem;color:var(--cyan);letter-spacing:.1em;margin-bottom:.9rem;text-align:center}
-.rans{display:flex;gap:.7rem;align-items:flex-start;padding:.6rem .85rem;border-radius:10px;margin-bottom:.45rem;font-size:.86rem;line-height:1.5}
+.rscore-big{font-family:'Cinzel',serif;font-size:3.5rem;color:var(--teal);text-shadow:var(--glow);line-height:1;margin-bottom:.4rem;animation:scorePop .6s cubic-bezier(.2,1.4,.5,1) both}
+@keyframes scorePop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.rscore-lbl{font-size:.85rem;color:#5090b0;margin-bottom:1.2rem}
+.rtitle{font-family:'Cinzel',serif;font-size:1.35rem;color:#eef8ff;margin-bottom:.5rem}
+.rsub{color:#7ab8d8;font-size:.9rem;margin:0 auto 1.4rem;line-height:1.6;max-width:400px}
+.rsum{text-align:left;max-width:500px;margin:0 auto 1rem}
+.rans{display:flex;gap:.7rem;align-items:flex-start;padding:.55rem .85rem;border-radius:10px;margin-bottom:.38rem;font-size:.84rem;line-height:1.5;animation:qSlideIn .35s ease both}
 .rans.ok{background:rgba(61,255,122,.07);color:#a8f0a0}
 .rans.bad{background:rgba(255,77,106,.07);color:#ffb0bc}
-.rans-ic{font-size:.95rem;flex-shrink:0;margin-top:.05rem}
+.rans-ic{font-size:.92rem;flex-shrink:0;margin-top:.08rem}
 .rbtns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.4rem}
+@keyframes qSlideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
   </style>
 </head>
 <body>
@@ -1044,86 +1029,9 @@ footer span{color:var(--cyan)}
   <div id="qov-body">
 
     <div id="name-gate">
-      <div class="gate-ring">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 130">
-          <defs>
-            <radialGradient id="gk-bg" cx="50%" cy="30%" r="80%">
-              <stop offset="0%" stop-color="#062030"/>
-              <stop offset="100%" stop-color="#010810"/>
-            </radialGradient>
-            <radialGradient id="gk-face" cx="50%" cy="42%" r="65%">
-              <stop offset="0%" stop-color="#238a9a"/>
-              <stop offset="55%" stop-color="#1a7888"/>
-              <stop offset="100%" stop-color="#0e5868"/>
-            </radialGradient>
-          </defs>
-          <rect width="120" height="130" fill="url(#gk-bg)"/>
-          <ellipse cx="60" cy="70" rx="50" ry="56" fill="rgba(0,150,190,.06)"/>
-          <path d="M0 130 L0 114 Q18 102 34 100 Q46 97 60 99 Q74 97 86 100 Q102 102 120 114 L120 130Z" fill="#0c5868"/>
-          <path d="M44 90 Q52 98 60 100 Q68 98 76 90 L78 108 Q70 116 60 118 Q50 116 42 108Z" fill="#1a7888"/>
-          <!-- Auburn hair -->
-          <path d="M24 52 Q18 30 24 12 Q34 0 60 0 Q86 0 96 12 Q102 30 96 52 Q90 36 82 26 Q74 18 60 16 Q46 18 38 26 Q30 36 24 52Z" fill="#5c2a06"/>
-          <path d="M26 50 Q24 36 28 22 Q36 10 60 8 Q84 10 92 22 Q96 36 94 50 Q90 38 82 30 Q74 22 60 20 Q46 22 38 30 Q30 38 26 50Z" fill="#6e3208"/>
-          <path d="M40 10 Q60 6 80 10" stroke="#8a4510" stroke-width="2.5" fill="none" opacity=".7" stroke-linecap="round"/>
-          <!-- Queue braid -->
-          <path d="M54 7 Q49 -3 52 -11" stroke="#3a1800" stroke-width="8" fill="none" stroke-linecap="round"/>
-          <path d="M66 7 Q71 -3 68 -11" stroke="#4a2200" stroke-width="7" fill="none" stroke-linecap="round"/>
-          <path d="M60 5 Q60 -5 60 -13" stroke="#5a3000" stroke-width="5" fill="none" stroke-linecap="round" opacity=".5"/>
-          <!-- Head -->
-          <path d="M24 54 Q22 38 26 26 Q34 10 60 8 Q86 10 94 26 Q98 38 96 54 Q96 72 90 85 Q80 99 60 101 Q40 99 30 85 Q24 72 24 54Z" fill="url(#gk-face)"/>
-          <!-- Brow ridge -->
-          <path d="M28 46 Q37 38 52 39 Q58 40 60 44" fill="#126878"/>
-          <path d="M92 46 Q83 38 68 39 Q62 40 60 44" fill="#126878"/>
-          <!-- Ears -->
-          <path d="M24 54 L6 35 L14 21 L28 46Z" fill="#1a7888"/>
-          <path d="M96 54 L114 35 L106 21 L92 46Z" fill="#1a7888"/>
-          <path d="M24 51 L10 37 L16 25 L26 46Z" fill="#116070"/>
-          <path d="M96 51 L110 37 L104 25 L94 46Z" fill="#116070"/>
-          <!-- Eye sockets -->
-          <ellipse cx="43" cy="55" rx="15" ry="14" fill="#0b4858"/>
-          <ellipse cx="77" cy="55" rx="15" ry="14" fill="#0b4858"/>
-          <!-- Yellow-green iris -->
-          <ellipse cx="43" cy="55" rx="13" ry="13" fill="#9ab800"/>
-          <ellipse cx="77" cy="55" rx="13" ry="13" fill="#9ab800"/>
-          <ellipse cx="43" cy="55" rx="10" ry="11" fill="#7a9400"/>
-          <ellipse cx="77" cy="55" rx="10" ry="11" fill="#7a9400"/>
-          <ellipse cx="43" cy="55" rx="7" ry="8" fill="#6a8000"/>
-          <ellipse cx="77" cy="55" rx="7" ry="8" fill="#6a8000"/>
-          <!-- Vertical cat pupils -->
-          <ellipse cx="43" cy="55" rx="3.5" ry="12" fill="#040300"/>
-          <ellipse cx="77" cy="55" rx="3.5" ry="12" fill="#040300"/>
-          <!-- Highlights -->
-          <circle cx="38" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
-          <circle cx="72" cy="49" r="4" fill="rgba(255,255,255,.82)"/>
-          <!-- Nose -->
-          <path d="M50 71 Q56 76 60 77 Q64 76 70 71 Q68 81 60 84 Q52 81 50 71Z" fill="#157080"/>
-          <ellipse cx="52" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
-          <ellipse cx="68" cy="79" rx="5.5" ry="3.8" fill="#0c5060"/>
-          <ellipse cx="52" cy="79" rx="3" ry="2" fill="#0a3a48"/>
-          <ellipse cx="68" cy="79" rx="3" ry="2" fill="#0a3a48"/>
-          <!-- Mouth -->
-          <path d="M47 89 Q60 97 73 89" stroke="#0a5060" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <!-- Bioluminescent dots -->
-          <circle cx="28" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
-          <circle cx="92" cy="50" r="3.2" fill="#c8ffff" opacity=".96"/>
-          <circle cx="30" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
-          <circle cx="90" cy="62" r="2.2" fill="#a0f8ff" opacity=".85"/>
-          <circle cx="60" cy="28" r="2.8" fill="#b8ffff" opacity=".9"/>
-          <circle cx="47" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
-          <circle cx="73" cy="24" r="1.8" fill="#c0ffff" opacity=".75"/>
-          <circle cx="60" cy="92" r="1.6" fill="#80eeff" opacity=".65"/>
-          <!-- Stripe markings -->
-          <path d="M26 46 Q31 52 28 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
-          <path d="M94 46 Q89 52 92 60" stroke="#008090" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="gate-title">Omatikaya'ya Hoş Geldin</div>
-      <p class="gate-sub">10 soru seni bekliyor.<br/>Başlamadan önce adını gir — sonuçlar sana özel olacak.</p>
-      <div class="name-wrap">
-        <input id="pname" type="text" placeholder="Adını gir…" maxlength="32" autocomplete="off"/>
-        <button class="btn btn-p" onclick="startQuiz()">Başla</button>
-      </div>
-      <p id="nerr"></p>
+      <div class="gate-title">Na'vi · Mini Test</div>
+      <p class="gate-sub">10 soru — Na'vi dili ve Avatar dünyası hakkında.<br/>Bakalım ne kadar biliyorsun!</p>
+      <button class="btn btn-p" onclick="startQuiz()">Başla</button>
     </div>
 
     <div id="qcard">
@@ -1141,15 +1049,11 @@ footer span{color:var(--cyan)}
     </div>
 
     <div id="rcard">
-      <div class="scircle">
-        <span class="snum" id="rscore"></span>
-        <span class="stot" id="rtot"></span>
-      </div>
+      <div class="rscore-big" id="rscore"></div>
+      <div class="rscore-lbl" id="rtot"></div>
       <div class="rtitle" id="rtitle"></div>
       <div class="rsub" id="rsub"></div>
-      <div class="rbar"><div class="rbarfill" id="rbar" style="width:0%"></div></div>
       <div class="rsum">
-        <h4>Cevaplarının Özeti</h4>
         <div id="rlist"></div>
       </div>
       <div class="rbtns">
@@ -1252,19 +1156,19 @@ setTimeout(()=>{document.getElementById('jake-bubble').classList.add('show');bub
 
 /* ── QUIZ ── */
 const Qs=[
-  {cat:"Na'vi Dili",q:"Na'vi dilinde 'Merhaba' ne demektir?",opts:["Irayo","Kaltxì","Eyawr","Oel"],ans:1},
-  {cat:"Na'vi Dili",q:"Na'vi dilinin temel kelime sırası hangisidir?",opts:["SVO","OVS","SOV","VSO"],ans:2},
-  {cat:"Na'vi Dili",q:"Na'vi'de fiil çekimi nasıl yapılır?",opts:["Sona ek","Kelime ortasına infix","Yardımcı fiille","Başa ön-ek"],ans:1},
-  {cat:"Na'vi Dili",q:"'Oel ngati kameie' ne anlama gelir?",opts:["Seninle aynı fikirdeyim","Seni seviyorum","Seni görüyorum — ruhunu","Seninle savaşacağım"],ans:2},
+  {cat:"Na'vi Dili",q:"Na'vi dilinde 'Merhaba' nasıl denir?",opts:["Irayo","Kaltxì","Srane","Kehe"],ans:1},
+  {cat:"Na'vi Dili",q:"Na'vi cümle yapısının temel kelime sırası nedir?",opts:["SVO","VSO","SOV","OVS"],ans:2},
+  {cat:"Na'vi Dili",q:"'Oel ngati kameie' ne anlama gelir?",opts:["Seni seviyorum","Seni görüyorum — ruhunu","Teşekkür ederim","Hoş geldin"],ans:1},
   {cat:"Na'vi Dili",q:"Na'vi'de 'Teşekkür ederim' nasıl söylenir?",opts:["Kaltxì","Nìprrte'","Irayo","Eyawr"],ans:2},
-  {cat:"Na'vi Dili",q:"Na'vi dilini kim yarattı?",opts:["James Cameron","Paul Frommer","Peter Jackson","Zoe Saldana"],ans:1},
-  {cat:"Avatar Filmi",q:"Na'vi'lerin yaşadığı gezegenin adı nedir?",opts:["Proxima","Pandora","Eywa Prime","Helios"],ans:1},
-  {cat:"Avatar Filmi",q:"Jake Sully hangi efsanevi unvanı alır?",opts:["Olo'eyktan","Tsahìk","Toruk Makto","Tsamsiyu"],ans:2},
+  {cat:"Na'vi Dili",q:"Na'vi'de fiil çekimi nasıl yapılır?",opts:["Sona ek getirilir","Kelime ortasına infix eklenir","Yardımcı fiil kullanılır","Başa ön-ek getirilir"],ans:1},
+  {cat:"Na'vi Dili",q:"Na'vi dilini gerçek hayatta kim yarattı?",opts:["James Cameron","Paul Frommer","Peter Jackson","Zoe Saldana"],ans:1},
+  {cat:"Avatar Filmi",q:"Na'vi'lerin yaşadığı ay'ın adı nedir?",opts:["Proxima","Pandora","Eywa Prime","Helios"],ans:1},
+  {cat:"Avatar Filmi",q:"Jake Sully filmde hangi efsanevi unvanı kazanır?",opts:["Olo'eyktan","Tsahìk","Toruk Makto","Tsamsiyu"],ans:2},
   {cat:"Avatar Filmi",q:"Na'vi'lerin nöral bağlantı organına ne denir?",opts:["Ikran","Tswin","Syaw","Tsyal"],ans:1},
   {cat:"Avatar Filmi",q:"Avatar 2'nin alt başlığı nedir?",opts:["The Spirit Tree","The Way of Water","Fire and Sky","Return to Pandora"],ans:1}
 ];
 
-let pname='',cur=0,score=0,answers=[],answrd=false;
+let cur=0,score=0,answrd=false,answers=[];
 
 function openQuiz(){
   const ov=document.getElementById('quiz-overlay');
@@ -1279,17 +1183,12 @@ function closeQuiz(){
   setTimeout(()=>{ov.style.display='none';document.body.style.overflow=''},420);
 }
 function reset(){
+  cur=0;score=0;answrd=false;answers=[];
   document.getElementById('name-gate').style.display='block';
   document.getElementById('qcard').style.display='none';
   document.getElementById('rcard').style.display='none';
-  document.getElementById('pname').value='';
-  document.getElementById('nerr').textContent='';
 }
 function startQuiz(){
-  const v=document.getElementById('pname').value.trim();
-  if(!v){document.getElementById('nerr').textContent='Lütfen adını gir!';return}
-  pname=v;cur=0;score=0;answers=[];
-  document.getElementById('nerr').textContent='';
   document.getElementById('name-gate').style.display='none';
   document.getElementById('qcard').style.display='block';
   renderQ();
@@ -1297,6 +1196,9 @@ function startQuiz(){
 function renderQ(){
   answrd=false;
   const q=Qs[cur];
+  const card=document.getElementById('qcard');
+  card.style.animation='none';
+  requestAnimationFrame(()=>{card.style.animation='qSlideIn .35s ease'});
   document.getElementById('qnum').textContent=`Soru ${cur+1} / ${Qs.length}`;
   document.getElementById('qcat').textContent=q.cat;
   document.getElementById('qtxt').textContent=q.q;
@@ -1307,6 +1209,7 @@ function renderQ(){
   const c=document.getElementById('qopts');c.innerHTML='';
   q.opts.forEach((o,i)=>{
     const b=document.createElement('button');b.className='qopt';b.textContent=o;
+    b.style.animationDelay=(i*.07)+'s';
     b.onclick=()=>pick(i);c.appendChild(b);
   });
 }
@@ -1319,38 +1222,40 @@ function pick(idx){
   const ok=idx===q.ans;
   const fb=document.getElementById('qfb');
   if(ok){score++;opts[idx].classList.add('correct');fb.textContent='✓ Doğru! Eywa seninle!';fb.className='qfb ok'}
-  else{opts[idx].classList.add('wrong');fb.textContent=`✗ Yanlış. Doğrusu: "${q.opts[q.ans]}"`;fb.className='qfb bad'}
-  answers.push({q:q.q,chosen:q.opts[idx],correct:q.opts[q.ans],ok});
+  else{opts[idx].classList.add('wrong');fb.textContent=`✗ Yanlış — doğrusu: "${q.opts[q.ans]}"`;fb.className='qfb bad'}
+  answers.push({cat:q.cat,q:q.q,ok,correct:q.opts[q.ans],chosen:q.opts[idx]});
   document.getElementById('nxtbtn').style.display='inline-block';
 }
 function nextQ(){cur++;if(cur<Qs.length)renderQ();else showRes()}
 function showRes(){
   document.getElementById('qcard').style.display='none';
-  document.getElementById('rcard').style.display='block';
+  const rc=document.getElementById('rcard');
+  rc.style.display='block';
+  rc.style.animation='qSlideIn .4s ease';
   const total=Qs.length,pct=Math.round(score/total*100);
   document.getElementById('rscore').textContent=score;
-  document.getElementById('rtot').textContent=`/ ${total}`;
-  const titles=[
-    [100,`Efsanevi Na'vi, ${pname}!`,'Tüm soruları doğru yanıtladın. Toruk Makto bile seni kıskanır. Eywa\'nın gücü seninle!'],
-    [80, `Omatikaya Savaşçısı, ${pname}!`,'Pandora\'nın dilini çok iyi öğrendin. Neredeyse tam bir Na\'vi sayılırsın.'],
-    [60, `Yetenekli Çırak, ${pname}`,'Güzel bir başlangıç! Biraz daha pratikle Eywa\'nın ağına tam bağlanabilirsin.'],
-    [40, `Pandora\'ya Yeni Gelen, ${pname}`,'Henüz başın. Dil bölümlerini tekrar gözden geçirmeye ne dersin?'],
-    [0,  `İlk Adım, ${pname}`,'Merak etme — her Na\'vi bir zamanlar hiç bilmiyordu. Başa dön ve tekrar dene!']
+  document.getElementById('rtot').textContent=`/ ${total} doğru`;
+  const msgs=[
+    [100,"Toruk Makto!","Mükemmel puan — tüm soruları doğru yanıtladın. Sen gerçek bir Na'vi'sin!"],
+    [80, "Omatikaya Savaşçısı","Pandora'yı ve Na'vi dilini çok iyi biliyorsun. Neredeyse tam klan üyesisin."],
+    [60, "Yetenekli Çırak","İyi bir başlangıç! Dil ve film bölümlerini bir kez daha okuyunca fark yaratırsın."],
+    [0,  "Pandora'ya İlk Adım","Merak etme — her Na'vi bir zamanlar hiç bilmiyordu. Başa dön ve tekrar dene!"]
   ];
-  const [,t,s]=titles.find(([p])=>pct>=p);
+  const [,t,s]=msgs.find(([p])=>pct>=p);
   document.getElementById('rtitle').textContent=t;
   document.getElementById('rsub').textContent=s;
-  setTimeout(()=>{document.getElementById('rbar').style.width=pct+'%'},150);
+  /* mini analiz */
   const list=document.getElementById('rlist');list.innerHTML='';
   answers.forEach((a,i)=>{
-    const d=document.createElement('div');d.className='rans '+(a.ok?'ok':'bad');
-    d.innerHTML=`<span class="rans-ic">${a.ok?'✓':'✗'}</span><div><strong>S${i+1}:</strong> ${a.q}<br/><small>Cevabın: <em>${a.chosen}</em>${!a.ok?` · Doğrusu: <em>${a.correct}</em>`:''}</small></div>`;
+    const d=document.createElement('div');
+    d.className='rans '+(a.ok?'ok':'bad');
+    d.style.animationDelay=(i*.06)+'s';
+    d.innerHTML=`<span class="rans-ic">${a.ok?'✓':'✗'}</span><div><strong>${i+1}.</strong> ${a.q}${!a.ok?`<br/><small>Doğrusu: <em>${a.correct}</em></small>`:''}</div>`;
     list.appendChild(d);
   });
 }
-function retryQ(){document.getElementById('rcard').style.display='none';reset()}
+function retryQ(){reset();startQuiz()}
 
-document.getElementById('pname').addEventListener('keydown',e=>{if(e.key==='Enter')startQuiz()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('quiz-overlay').classList.contains('visible'))closeQuiz()});
 </script>
 </body>
