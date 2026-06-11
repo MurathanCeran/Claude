@@ -399,7 +399,7 @@ const HEDGES = [
 
 // Structural AI patterns (regex-based) [NEW in v3]
 const STRUCTS = [
-  {re:/(?<=^|[.!?]\s)From\s+[^.,;:!?]{3,50}\s+to\s+[^.,;:!?]{3,50},/gmu, label:"From X to Y, … kalıbı"},
+  {re:/\bFrom\s+[^.,;:!?]{3,40}\s+to\s+[^.,;:!?]{3,40},/g, label:"From X to Y, … kalıbı"},
   {re:/\bis not (?:just|merely|simply)\b/gi, label:"is not merely/just kalıbı"},
   {re:/\bnot (?:just|only|merely) [^.,;!?]{2,40}[,;] (?:but|it)\b/gi, label:"not just X, but Y kalıbı"},
   {re:/\bwhether (?:it's|you're|it is|you are)\b/gi, label:"whether it's/you're kalıbı"},
@@ -415,7 +415,9 @@ function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 const TERMS = [];
 function addTerms(list,cat){
   for(const t of list){
-    TERMS.push({t,cat,len:t.length,re:new RegExp(`(?<![\\p{L}\\p{M}])${esc(t)}(?![\\p{L}\\p{M}])`,'giu')});
+    // NOTE: no look-behind — eski mobil Safari onu desteklemiyor ve tum script'i cokertiyor.
+    // Bunun yerine basa optional non-letter yakalanir (m[1]); gercek baslangic m.index+m[1].length.
+    TERMS.push({t,cat,len:t.length,re:new RegExp(`(^|[^\\p{L}\\p{M}])${esc(t)}(?![\\p{L}\\p{M}])`,'giu')});
   }
 }
 addTerms(AI_PHRASES,'cliche'); addTerms(HYPE,'hype'); addTerms(TRANSITIONS,'trans'); addTerms(HEDGES,'hedge');
@@ -444,8 +446,9 @@ function scanTerms(text){
   for(const term of TERMS){
     term.re.lastIndex=0; let m;
     while((m=term.re.exec(text))!==null){
-      claim(m.index, m.index+m[0].length, term.cat, term.t);
-      if(m.index===term.re.lastIndex) term.re.lastIndex++;
+      const lead = m[1] ? m[1].length : 0;
+      claim(m.index+lead, m.index+m[0].length, term.cat, term.t);
+      if(term.re.lastIndex<=m.index) term.re.lastIndex = m.index+1;
     }
   }
   TR_FORMAL.lastIndex=0; let mf;
@@ -465,7 +468,7 @@ function lerpColor(t){
   else{const k=(t-0.5)/0.5; r=c(242,245,k); g=c(193,100,k); b=c(78,122,k);}
   return `rgb(${r},${g},${b})`;
 }
-const getSentences = t => t.split(/(?<=[.!?…])[\s"')\]]*\s+|\n+/).map(s=>s.trim()).filter(Boolean);
+const getSentences = t => t.split(/\n+/).flatMap(line => line.match(/[^.!?…]+[.!?…]*/g) || []).map(s=>s.trim()).filter(Boolean);
 const getWords = t => (t.toLowerCase().match(/[\p{L}\p{M}']+/gu) || []);
 function htmlEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -884,15 +887,21 @@ const SAMPLE_AI_TR = `Günümüz dünyasında yapay zeka, hayatımızın vazgeç
 
 const SAMPLE_HUMAN = `Okay so I finally tried that ramen place everyone keeps raving about. Honestly? Mixed feelings. The broth was unreal — rich, deep, the kind that sticks to your lips. But twenty bucks for a bowl I finished in eight minutes? Come on. I went with my brother, who somehow ordered the spiciest thing on the menu and then pretended he wasn't dying. He was. Tears, the whole show. We'll probably go back, though. The chashu alone is worth it.`;
 
-$("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; render(); };
-$("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; render(); };
-$("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; render(); };
-$("clear").onclick = ()=>{ input.value=""; render(); input.focus(); };
+$("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; safeRender(); };
+$("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; safeRender(); };
+$("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; safeRender(); };
+$("clear").onclick = ()=>{ input.value=""; safeRender(); input.focus(); };
 
+// Canli analiz: yapistirinca ANINDA, yazarken hafif debounce. Hata olsa bile asla durmaz.
 let deb=null;
-input.addEventListener("input", ()=>{ clearTimeout(deb); deb=setTimeout(render, 200); });
+function safeRender(){ try{ render(); }catch(e){ console.error("render error:", e); } }
+function scheduleRender(delay){ clearTimeout(deb); deb=setTimeout(safeRender, delay); }
+input.addEventListener("input", ()=>scheduleRender(120));
+input.addEventListener("paste", ()=>scheduleRender(0));   // yapistir -> aninda olc
+input.addEventListener("change", ()=>scheduleRender(0));
+input.addEventListener("keyup", ()=>scheduleRender(120));  // bazi mobil klavyeler input yerine keyup tetikler
 
-render();
+safeRender();
 </script>
 </body>
 </html>
