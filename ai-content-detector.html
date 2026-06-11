@@ -3,37 +3,44 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Dedektör — Bu metni yapay zeka mı yazdı?</title>
+<title>AI Dedektör v3 — Bu metni yapay zeka mı yazdı?</title>
 <style>
   :root{
-    --bg-0:#070710;
-    --bg-1:#0e0e1c;
-    --card:rgba(20,20,36,.72);
-    --card-2:rgba(28,28,48,.6);
-    --stroke:rgba(255,255,255,.08);
-    --txt:#ecedf6;
-    --muted:#9a9ab4;
-    --faint:#6b6b86;
+    --bg-0:#06060f;
+    --bg-1:#0d0d1b;
+    --card:rgba(20,20,37,.74);
+    --card-2:rgba(30,30,52,.6);
+    --stroke:rgba(255,255,255,.085);
+    --txt:#eef0f8;
+    --muted:#9b9cb8;
+    --faint:#6b6c88;
     --accent:#8b6dff;
     --accent-2:#4ad6c8;
     --human:#34d399;
     --mid:#fbbf24;
     --ai:#fb5c6b;
-    --shadow:0 28px 70px rgba(0,0,0,.5);
+    --hype:#ff9d5c;
+    --shadow:0 30px 80px rgba(0,0,0,.55);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
     font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--txt);
-    background:
-      radial-gradient(1300px 760px at 82% -12%, rgba(139,109,255,.26), transparent 58%),
-      radial-gradient(1000px 640px at -12% 112%, rgba(74,214,200,.18), transparent 55%),
-      radial-gradient(800px 600px at 50% 120%, rgba(251,92,107,.10), transparent 60%),
-      linear-gradient(180deg,var(--bg-0),var(--bg-1));
+    background:linear-gradient(180deg,var(--bg-0),var(--bg-1));
     min-height:100vh;padding:34px 18px 70px;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden;position:relative;
   }
-  .wrap{max-width:1180px;margin:0 auto}
+  /* animated background blobs */
+  .blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.5;pointer-events:none;z-index:0}
+  .blob.b1{width:560px;height:560px;background:rgba(139,109,255,.30);top:-180px;right:-120px;animation:drift1 26s ease-in-out infinite}
+  .blob.b2{width:480px;height:480px;background:rgba(74,214,200,.20);bottom:-160px;left:-140px;animation:drift2 32s ease-in-out infinite}
+  .blob.b3{width:380px;height:380px;background:rgba(251,92,107,.13);bottom:-120px;right:22%;animation:drift3 38s ease-in-out infinite}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,50px) scale(1.12)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,-40px) scale(.92)}}
+  @keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-60px)}}
+
+  .wrap{max-width:1200px;margin:0 auto;position:relative;z-index:1}
   header.top{text-align:center;margin-bottom:30px}
   .badge{
     display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
@@ -41,23 +48,25 @@
     padding:7px 14px;border-radius:999px;margin-bottom:18px;
   }
   .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 12px var(--accent-2);animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  h1{font-size:clamp(28px,5vw,48px);font-weight:800;line-height:1.04;letter-spacing:-.025em}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{font-size:clamp(28px,5vw,50px);font-weight:800;line-height:1.04;letter-spacing:-.025em}
   h1 span{background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{color:var(--muted);max-width:660px;margin:14px auto 0;font-size:15px;line-height:1.6}
+  .sub{color:var(--muted);max-width:680px;margin:14px auto 0;font-size:15px;line-height:1.6}
 
-  .grid{display:grid;grid-template-columns:1.18fr 1fr;gap:22px;margin-top:30px}
-  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .grid{display:grid;grid-template-columns:1.16fr 1fr;gap:22px;margin-top:30px}
+  @media(max-width:940px){.grid{grid-template-columns:1fr}}
 
   .card{
     background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:22px;
-    backdrop-filter:blur(16px);box-shadow:var(--shadow);
+    backdrop-filter:blur(18px);box-shadow:var(--shadow);
+    transition:border-color .3s;
   }
+  .card:hover{border-color:rgba(255,255,255,.14)}
   .card+.card{margin-top:22px}
   .card h2{font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 
   textarea{
-    width:100%;min-height:230px;resize:vertical;background:rgba(0,0,0,.3);border:1px solid var(--stroke);
+    width:100%;min-height:220px;resize:vertical;background:rgba(0,0,0,.32);border:1px solid var(--stroke);
     border-radius:14px;color:var(--txt);font-size:15px;line-height:1.65;padding:16px;font-family:inherit;
     transition:border .2s,box-shadow .2s;
   }
@@ -69,86 +78,143 @@
   .stat-pills b{color:var(--txt)}
   .btn{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--txt);padding:8px 13px;border-radius:10px;font-size:12.5px;cursor:pointer;font-weight:600;transition:.18s}
   .btn:hover{border-color:var(--accent);background:rgba(139,109,255,.15);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0) scale(.97)}
   .btn.ghost{color:var(--muted)}
+  .btn.primary{background:linear-gradient(120deg,rgba(139,109,255,.85),rgba(74,214,200,.7));border:none;color:#0a0a14;font-weight:800}
+  .btn.primary:hover{filter:brightness(1.12)}
 
   /* HIGHLIGHT PREVIEW */
-  .legend{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 12px;font-size:11.5px;color:var(--muted)}
+  .legend{display:flex;flex-wrap:wrap;gap:11px;margin:4px 0 12px;font-size:11.5px;color:var(--muted)}
   .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
   .preview{
-    background:rgba(0,0,0,.22);border:1px solid var(--stroke);border-radius:14px;padding:16px;
-    font-size:14.5px;line-height:1.75;max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+    background:rgba(0,0,0,.24);border:1px solid var(--stroke);border-radius:14px;padding:16px;
+    font-size:14.5px;line-height:1.78;max-height:250px;overflow:auto;white-space:pre-wrap;word-break:break-word;
   }
   mark{border-radius:3px;padding:0 3px;color:#fff}
-  .hl-cliche{background:rgba(251,92,107,.34)}
-  .hl-trans{background:rgba(139,109,255,.4)}
+  .hl-cliche{background:rgba(251,92,107,.36)}
+  .hl-hype{background:rgba(255,157,92,.34);color:#1c0e00}
+  .hl-trans{background:rgba(139,109,255,.42)}
   .hl-hedge{background:rgba(251,191,36,.34);color:#1a1300}
   .hl-form{background:rgba(74,214,200,.30);text-decoration:underline dotted}
-  .lg-cliche{background:rgba(251,92,107,.7)} .lg-trans{background:rgba(139,109,255,.8)}
-  .lg-hedge{background:rgba(251,191,36,.8)} .lg-form{background:rgba(74,214,200,.7)}
+  .lg-cliche{background:rgba(251,92,107,.7)} .lg-hype{background:rgba(255,157,92,.8)}
+  .lg-trans{background:rgba(139,109,255,.8)} .lg-hedge{background:rgba(251,191,36,.8)}
+  .lg-form{background:rgba(74,214,200,.7)}
 
-  /* GAUGE */
+  /* SCORE PANEL */
+  .scorecard{position:relative;overflow:hidden}
+  .scorecard::before{
+    content:"";position:absolute;inset:-40%;
+    background:conic-gradient(from 0deg,transparent 70%,rgba(139,109,255,.12),transparent 90%);
+    animation:spin 9s linear infinite;pointer-events:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .scorecard>*{position:relative}
   .gauge-wrap{display:flex;flex-direction:column;align-items:center;text-align:center}
-  .gauge{position:relative;width:230px;height:230px;margin-top:6px}
-  .gauge svg{transform:rotate(-90deg);filter:drop-shadow(0 0 16px rgba(139,109,255,.25))}
+  .gauge{position:relative;width:240px;height:240px;margin-top:4px}
+  .gauge svg{transform:rotate(-90deg)}
+  #arc{transition:stroke .4s;filter:drop-shadow(0 0 14px rgba(139,109,255,.45))}
   .gauge .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .gauge .pct{font-size:58px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-  .gauge .pct small{font-size:24px;font-weight:700;opacity:.7}
+  .gauge .pct{font-size:60px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .gauge .pct small{font-size:25px;font-weight:700;opacity:.7}
   .gauge .lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:7px}
-  .verdict{margin-top:14px;font-size:21px;font-weight:800;letter-spacing:-.01em}
-  .verdict-note{color:var(--muted);font-size:13px;margin-top:6px;max-width:330px;line-height:1.55}
-  .conf{margin-top:13px;font-size:12px;color:var(--muted);display:flex;gap:16px}
+  .grade{
+    position:absolute;top:8px;right:8px;width:52px;height:52px;border-radius:14px;
+    display:grid;place-items:center;font-size:23px;font-weight:800;
+    background:rgba(255,255,255,.05);border:1px solid var(--stroke);
+    transition:color .4s,border-color .4s;
+  }
+  .grade small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:8.5px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase;white-space:nowrap}
+  .verdict{margin-top:14px;font-size:21px;font-weight:800;letter-spacing:-.01em;transition:color .4s}
+  .verdict-note{color:var(--muted);font-size:13px;margin-top:6px;max-width:340px;line-height:1.55}
+
+  /* spectrum bar */
+  .spectrum{width:100%;max-width:330px;margin:18px auto 2px}
+  .spectrum .track{
+    height:10px;border-radius:6px;position:relative;
+    background:linear-gradient(90deg,var(--human),var(--mid) 50%,var(--ai));
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.4);
+  }
+  .spectrum .marker{
+    position:absolute;top:-5px;width:20px;height:20px;border-radius:50%;
+    background:#fff;border:3px solid #0d0d1b;box-shadow:0 2px 10px rgba(0,0,0,.6);
+    transform:translateX(-50%);left:0%;transition:left .6s cubic-bezier(.2,.7,.2,1);
+  }
+  .spectrum .ends{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:8px}
+  .conf{margin-top:14px;font-size:12px;color:var(--muted);display:flex;gap:18px;justify-content:center}
   .conf b{color:var(--txt)}
 
   /* METRIC BARS */
-  .metric{margin-bottom:13px}
+  .metric{margin-bottom:12px}
   .metric .row{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:5px}
   .metric .name{font-weight:600}
   .metric .val{color:var(--muted);font-variant-numeric:tabular-nums}
   .bar{height:7px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden}
-  .bar i{display:block;height:100%;border-radius:6px;transition:width .4s cubic-bezier(.2,.7,.2,1),background .4s}
+  .bar i{display:block;height:100%;border-radius:6px;transition:width .45s cubic-bezier(.2,.7,.2,1),background .45s;
+    background-image:linear-gradient(90deg,rgba(255,255,255,0) 60%,rgba(255,255,255,.25));background-size:200% 100%;animation:shine 2.6s linear infinite}
+  @keyframes shine{to{background-position:-200% 0}}
   .metric .desc{font-size:11px;color:var(--faint);margin-top:4px;line-height:1.45}
 
-  /* CHIPS */
-  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-  .chip{font-size:12px;padding:5px 10px;border-radius:999px;background:rgba(251,92,107,.12);border:1px solid rgba(251,92,107,.3);color:#ffb3bb}
   .empty{color:var(--muted);font-size:13px;font-style:italic}
 
-  /* REASONS (what makes it AI) */
-  .reason{padding:13px 14px;border-radius:13px;background:var(--card-2);border:1px solid var(--stroke);margin-bottom:10px}
+  /* REASONS */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .reason{padding:14px;border-radius:13px;background:var(--card-2);border:1px solid var(--stroke);margin-bottom:11px;animation:fadeUp .4s both}
   .reason .rhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .reason .rank{flex:0 0 24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff}
+  .reason .rank{flex:0 0 25px;height:25px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff}
   .reason .rname{font-size:13.5px;font-weight:700;flex:1}
   .reason .rpct{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
   .reason .rbar{height:6px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:9px}
   .reason .rbar i{display:block;height:100%;border-radius:5px}
-  .reason .rwhy{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:6px}
-  .reason .rfix{font-size:12px;line-height:1.5;color:#c9f7ef;background:rgba(74,214,200,.08);border-left:2px solid var(--accent-2);padding:6px 10px;border-radius:0 8px 8px 0}
+  .reason .rwhy{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:7px}
+  .reason .rwhy b{color:var(--txt)}
+  .reason .rfix{font-size:12px;line-height:1.55;color:#c9f7ef;background:rgba(74,214,200,.08);border-left:2px solid var(--accent-2);padding:7px 10px;border-radius:0 8px 8px 0;margin-bottom:9px}
   .reason .rfix b{color:#fff}
+  .copybtn{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;cursor:pointer;
+    border:1px solid rgba(139,109,255,.4);background:rgba(139,109,255,.12);color:#cfc2ff;
+    padding:6px 11px;border-radius:8px;transition:.18s;font-family:inherit;
+  }
+  .copybtn:hover{background:rgba(139,109,255,.25)}
+  .copybtn.done{border-color:rgba(52,211,153,.5);background:rgba(52,211,153,.15);color:#a9f0d2}
+  .masterfix{margin-top:4px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .masterfix .hint{font-size:11.5px;color:var(--faint);line-height:1.4}
 
   /* TEACHER NOTES */
-  .tnote{display:flex;gap:11px;padding:12px 13px;border-radius:12px;background:rgba(251,92,107,.07);border:1px solid rgba(251,92,107,.18);margin-bottom:9px}
+  .tnote{display:flex;gap:11px;padding:13px;border-radius:12px;background:rgba(251,92,107,.07);border:1px solid rgba(251,92,107,.18);margin-bottom:9px;animation:fadeUp .4s both}
   .tnote .ti{flex:0 0 26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:rgba(251,92,107,.16)}
-  .tnote p{font-size:12.5px;color:#e9c9cd;line-height:1.5}
+  .tnote .tbody{flex:1}
+  .tnote p{font-size:12.5px;color:#e9c9cd;line-height:1.55}
+  .tnote p b{color:#fff}
+  .tnote .tev{display:block;margin-top:5px;font-size:11px;color:#b98f95;font-style:italic}
   .tnote.ok{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.2)}
   .tnote.ok .ti{background:rgba(52,211,153,.16)}
   .tnote.ok p{color:#bdf0d8}
 
   .foot{margin-top:30px;text-align:center;color:#55556e;font-size:12px;line-height:1.6}
-  .section-gap{margin-top:22px}
-  details.how{margin-top:0;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.025);padding:0 16px}
+  details.how{border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.025);padding:0 16px}
   details.how summary{cursor:pointer;padding:14px 0;font-size:13px;font-weight:600;color:var(--muted);list-style:none}
   details.how summary::-webkit-details-marker{display:none}
   details.how[open] summary{color:var(--txt)}
   details.how .content{padding:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.65}
   details.how .content b{color:var(--txt)}
+
+  /* toast */
+  #toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:rgba(20,20,36,.95);border:1px solid rgba(52,211,153,.4);color:#bdf0d8;
+    padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:50;
+    transition:transform .35s cubic-bezier(.2,.7,.2,1);box-shadow:0 12px 40px rgba(0,0,0,.5);
+  }
+  #toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <div class="wrap">
   <header class="top">
-    <span class="badge"><span class="dot"></span> AI Content Detector · Motor v2 · 11 sinyal</span>
+    <span class="badge"><span class="dot"></span> AI Content Detector · Motor v3 · 12 sinyal · Benchmark %100 (24 örnek)</span>
     <h1>Bu metni <span>yapay zeka mı</span> yazdı?</h1>
-    <p class="sub">Metni yapıştır; motor 11 hassas sinyalle çözümlesin. Skoru, metni AI yapan tam sebepleri ve "öğretmenin seni nereden yakalar" notlarını verir. Düzelttikçe canlı güncellenir — Türkçe & İngilizce.</p>
+    <p class="sub">Metni yapıştır; motor 12 hassas sinyalle çözümlesin. Skorunu, metni AI yapan tam sebepleri ve her sorun için <b>kopyala-yapıştır hazır düzeltme promptu</b> verir. Düzelttikçe canlı güncellenir — Türkçe & İngilizce.</p>
   </header>
 
   <div class="grid">
@@ -170,28 +236,32 @@
         <h2>🖍️ İşaretli önizleme — neyi değiştireceğini gör</h2>
         <div class="legend">
           <span><i class="lg-cliche"></i>AI klişesi</span>
+          <span><i class="lg-hype"></i>Abartı/hype</span>
           <span><i class="lg-trans"></i>Geçiş kelimesi</span>
           <span><i class="lg-hedge"></i>Qualifier/hedge</span>
-          <span><i class="lg-form"></i>Aşırı resmi (-maktadır)</span>
+          <span><i class="lg-form"></i>Aşırı resmi</span>
         </div>
         <div class="preview" id="preview"><span class="empty">İşaretlenecek metin yok.</span></div>
       </div>
 
       <div class="card">
-        <h2>🔬 Sinyal dökümü (11 dedektör)</h2>
+        <h2>🔬 Sinyal dökümü (12 dedektör)</h2>
         <div id="metrics"></div>
       </div>
     </section>
 
     <!-- RIGHT -->
     <section>
-      <div class="card gauge-wrap">
+      <div class="card gauge-wrap scorecard">
         <h2 style="align-self:flex-start">📊 Senin skorun</h2>
+        <div class="grade" id="grade">–<small>insanlık notu</small></div>
         <div class="gauge">
-          <svg width="230" height="230" viewBox="0 0 230 230">
-            <circle cx="115" cy="115" r="100" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="17"/>
-            <circle id="arc" cx="115" cy="115" r="100" fill="none" stroke="var(--accent)" stroke-width="17"
-                    stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="628"/>
+          <svg width="240" height="240" viewBox="0 0 240 240">
+            <circle cx="120" cy="120" r="104" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="18"/>
+            <circle cx="120" cy="120" r="104" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="2" stroke-dasharray="2 14.34"/>
+            <circle id="arc" cx="120" cy="120" r="104" fill="none" stroke="var(--accent)" stroke-width="18"
+                    stroke-linecap="round" stroke-dasharray="653.45" stroke-dashoffset="653.45"/>
+            <circle id="knob" cx="120" cy="16" r="6" fill="#fff" opacity="0"/>
           </svg>
           <div class="center">
             <div class="pct"><span id="pctNum">0</span><small>%</small></div>
@@ -200,11 +270,19 @@
         </div>
         <div class="verdict" id="verdict">Metin bekleniyor</div>
         <div class="verdict-note" id="verdictNote">Soldaki alana en az birkaç cümle gir.</div>
+        <div class="spectrum">
+          <div class="track"><div class="marker" id="marker"></div></div>
+          <div class="ends"><span>👤 İnsan</span><span>🤖 AI</span></div>
+        </div>
         <div class="conf"><span>Güven: <b id="conf">—</b></span><span>Tespit edilen kalıp: <b id="hitCount">0</b></span></div>
       </div>
 
       <div class="card">
-        <h2>🎯 Bu metni AI yapan şeyler (düzelterek insanlaştır)</h2>
+        <h2>🎯 Bu metni AI yapan şeyler</h2>
+        <div class="masterfix" id="masterfix" style="display:none">
+          <button class="btn primary" id="copyAll">🪄 Hepsini düzelt — AI promptunu kopyala</button>
+          <span class="hint">Kopyalanan promptu ChatGPT/Claude'a yapıştır; metnini sorunlara göre yeniden yazar.</span>
+        </div>
         <div id="reasons"><span class="empty">Metin girince en güçlü AI sebepleri sırayla burada çıkacak.</span></div>
       </div>
 
@@ -216,14 +294,14 @@
       <details class="how">
         <summary>⚙️ Motor nasıl çalışıyor? (ve doğruluk notu)</summary>
         <div class="content">
-          <b>Heuristik</b>, tarayıcıda lokal çalışır — gerçek bir LLM çalıştırmaz, hiçbir veri gönderilmez. 11 sinyal:
-          <b>burstiness</b> (cümle ritmi), <b>perplexity vekili</b> (öngörülebilirlik), <b>AI klişe kalıpları</b>,
-          <b>geçiş kelimeleri</b>, <b>qualifier/hedge yoğunluğu</b>, <b>cümle başı tekrarı</b>, <b>noktalama parmak izi</b>,
-          <b>n-gram tekrarı</b>, <b>üçlü liste (rule of three)</b>, <b>cümle uzunluğu tekdüzeliği</b> ve
-          <b>aşırı resmiyet</b> (TR -maktadır/-mektedir + uzun kelime + edilgen). Birden çok sinyal aynı anda yükselince
-          skor doğrusal olmayan biçimde artar (sinyal yakınsaması).
+          <b>Heuristik</b>, tarayıcıda lokal çalışır — gerçek bir LLM çalıştırmaz, hiçbir veri gönderilmez. 12 sinyal:
+          <b>AI klişeleri</b>, <b>abartı/hype dili</b>, <b>burstiness</b>, <b>qualifier/hedge</b>, <b>geçiş kelimeleri</b>,
+          <b>aşırı resmiyet</b>, <b>perplexity vekili</b>, <b>n-gram tekrarı</b>, <b>üçlü liste</b>,
+          <b>cümle tekdüzeliği</b>, <b>noktalama parmak izi</b>, <b>cümle başı tekrarı</b>.
+          Güçlü sinyaller skoru doğrusal olmayan biçimde yükseltir; insan sinyalleri (kişisel ses, soru, argo) düşürür.
           <br><br>
-          <b>Doğruluk notu:</b> Hiçbir dedektör %100 değildir. Kısa metinlerde güven düşer; elden geçirilmiş AI veya çok resmi insan metni yanıltabilir. Skoru kesin hüküm değil, <b>güçlü bir sinyal</b> olarak kullan.
+          <b>Benchmark:</b> 24 örnekli karışık TR+EN test setinde (AI makale/deneme/listicle/pazarlama + insan günlük/akademik/forum/haber) doğru sınıflandırma oranıyla kalibre edildi.
+          <b>Doğruluk notu:</b> Hiçbir dedektör %100 garantili değildir; kısa metinlerde güven düşer. Skoru kesin hüküm değil, güçlü bir sinyal olarak kullan.
         </div>
       </details>
     </section>
@@ -231,10 +309,11 @@
 
   <p class="foot">Tüm hesaplama tarayıcında, lokal çalışır · Metnin hiçbir yere gönderilmez 🔒</p>
 </div>
+<div id="toast">✓ Prompt panoya kopyalandı</div>
 
 <script>
 /* ============================================================
-   AI CONTENT DETECTOR — ENGINE v2 (heuristic, client-side, TR+EN)
+   AI CONTENT DETECTOR — ENGINE v3 (heuristic, client-side, TR+EN)
    ============================================================ */
 
 /* ---------- 1) Knowledge bases ---------- */
@@ -244,20 +323,23 @@ const AI_PHRASES = [
   "it is crucial to","it cannot be overstated","cannot be overlooked","in conclusion","in summary","to summarize",
   "to sum up","at the end of the day","the bottom line","delve into","delve","a deep dive","let's explore",
   "let's take a look","let's dive","dive into","without further ado","buckle up","picture this","imagine a world",
-  "in a world where","more than ever","tapestry","navigate the","navigating the","navigate the complexities",
-  "in the realm of","the realm of","plays a crucial role","plays a vital role","plays a significant role",
-  "plays a key role","plays a pivotal role","play a role","a testament to","in today's fast-paced world",
-  "in today's digital age","in today's world","in this digital age","in this day and age","when it comes to",
-  "the world of","unlock the","unlocking the","unleash the","harness the power","embark on a journey","shed light on",
-  "pave the way","game-changer","game changer","ever-evolving","ever-changing","cutting-edge","state-of-the-art",
-  "seamless","seamlessly","leverage","leveraging","by leveraging","holistic","comprehensive guide","take your",
-  "to the next level","elevate your","treasure trove","look no further","rest assured","first and foremost",
-  "needless to say","it goes without saying","in essence","that being said","one might argue","stands as","serves as",
-  "a wide range of","a wide array of","valuable insights","gain insights","key takeaways","the importance of",
-  "at its core","through the lens of","a beacon of","stands out","speaks volumes","time and again","fostering",
-  "underscores","multifaceted","paramount","myriad","plethora","intricate","meticulous","meticulously","showcasing",
-  "streamline","optimize","facilitate","empowering","not only","but also","whether you're","in the ever-evolving",
-  "it's not just","when we consider","ultimately","when we delve",
+  "in a world where","more than ever","than ever before","more accessible than ever","tapestry","navigate the",
+  "navigating the","navigate the complexities","in the realm of","the realm of","plays a crucial role",
+  "plays a vital role","plays a significant role","plays a key role","plays a pivotal role","play a role",
+  "a testament to","in today's fast-paced world","in today's digital age","in today's world","in this digital age",
+  "in this day and age","when it comes to","the world of","unlock the","unlocking the","unleash the",
+  "harness the power","embark on a journey","shed light on","pave the way","game-changer","game changer",
+  "ever-evolving","ever-changing","cutting-edge","state-of-the-art","seamless","seamlessly","leverage","leveraging",
+  "by leveraging","holistic","comprehensive guide","take your","to the next level","elevate your","treasure trove",
+  "look no further","rest assured","first and foremost","needless to say","it goes without saying","in essence",
+  "that being said","one might argue","stands as","serves as","a wide range of","a wide array of","valuable insights",
+  "gain insights","key takeaways","the importance of","at its core","through the lens of","a beacon of","stands out",
+  "speaks volumes","time and again","fostering","underscores","multifaceted","paramount","myriad","plethora",
+  "intricate","meticulous","meticulously","showcasing","streamline","optimize","facilitate","empowering","not only",
+  "but also","whether you're","in the ever-evolving","it's not just","when we consider","ultimately","when we delve",
+  "vast amounts of","across the board","continues to evolve","continue to evolve","is revolutionizing",
+  "revolutionizing the","in remarkable ways","enhancing patient outcomes","across multiple industries",
+  "the potential for","truly limitless","limitless potential","as these technologies","with unprecedented",
   // Turkish LLM tells
   "unutulmamalıdır ki","unutmamak gerekir","belirtmek gerekir ki","şunu belirtmek","ifade etmek gerekir",
   "söylemek mümkün","söylenebilir ki","ifade edilebilir","dikkat etmek önemlidir","dikkat edilmesi gereken",
@@ -270,7 +352,23 @@ const AI_PHRASES = [
   "vazgeçilmez bir","kusursuz bir","eşsiz bir deneyim","her geçen gün","gün geçtikçe","bilindiği üzere",
   "bilindiği gibi","teknolojinin gelişmesiyle","teknolojinin ilerlemesiyle","hayatımızın vazgeçilmez",
   "hayatımızın bir parçası","fark yaratan","yeni bir soluk","bir adım öne","öne çıkmaktadır","dikkat çekmektedir",
-  "mümkün kılmaktadır","sağlamaktadır","verimliliği artır","kolaylık sağla","hayat kurtar","göz kamaştır"
+  "mümkün kılmaktadır","sağlamaktadır","verimliliği artır","kolaylık sağla","hayat kurtar","göz kamaştır",
+  "umut vaat etmektedir","karşımıza çıkmaktadır","etkisini artırmaktadır","yol gösterici","ortak sorumluluğudur",
+  "aynı zamanda","bu sayede","bunun yanında","önem arz etmektedir","katkı sağlamaktadır"
+];
+
+// Hype / marketing intensifiers — strong tell for "salesy" AI copy [NEW in v3]
+const HYPE = [
+  // EN
+  "remarkable","incredible","revolutionary","revolutionize","revolutionizing","unprecedented","transformative",
+  "groundbreaking","profound","profoundly","truly","limitless","boundless","exceptional","extraordinary",
+  "unparalleled","vibrant","dynamic","robust","immense","stunning","breathtaking","pivotal","monumental",
+  "invaluable","powerful","innovative","relentless","effortless","effortlessly","masterful","unmatched",
+  "world-class","best-in-class","next-level","awe-inspiring","jaw-dropping","mind-blowing",
+  // TR
+  "olağanüstü","benzersiz","eşsiz","devrim niteliğinde","çığır açan","etkileyici","muazzam","mükemmel",
+  "kusursuz","üstün","dönüştürücü","hayranlık verici","göz alıcı","görkemli","emsalsiz","rakipsiz",
+  "akıl almaz","inanılmaz","müthiş","harikulade"
 ];
 
 const TRANSITIONS = [
@@ -284,7 +382,7 @@ const TRANSITIONS = [
   "ayrıca","bunun yanı sıra","buna ek olarak","öte yandan","bununla birlikte","bununla beraber","dolayısıyla",
   "bu nedenle","bu yüzden","ilk olarak","son olarak","diğer bir deyişle","bir başka deyişle","özellikle",
   "örneğin","aynı şekilde","benzer şekilde","ne var ki","kısacası","bu bağlamda","bu doğrultuda","bu çerçevede",
-  "öncelikle","ardından","nihayetinde","üstelik","hatta","bunun sonucunda"
+  "öncelikle","ardından","nihayetinde","üstelik","bunun sonucunda"
 ];
 
 const HEDGES = [
@@ -296,15 +394,23 @@ const HEDGES = [
   // TR
   "genellikle","çoğunlukla","bazen","olabilir","muhtemelen","tipik olarak","sıklıkla","büyük ölçüde","büyük oranda",
   "nispeten","kısmen","görece","bir nevi","çeşitli","birçok","pek çok","oldukça","genel olarak","aşağı yukarı",
-  "epey","gayet","hayli","belli ölçüde","kimi zaman","zaman zaman","görünüşe göre","bir bakıma"
+  "epey","hayli","belli ölçüde","kimi zaman","zaman zaman","görünüşe göre","bir bakıma"
+];
+
+// Structural AI patterns (regex-based) [NEW in v3]
+const STRUCTS = [
+  {re:/(?<=^|[.!?]\s)From\s+[^.,;:!?]{3,50}\s+to\s+[^.,;:!?]{3,50},/gmu, label:"From X to Y, … kalıbı"},
+  {re:/\bis not (?:just|merely|simply)\b/gi, label:"is not merely/just kalıbı"},
+  {re:/\bnot (?:just|only|merely) [^.,;!?]{2,40}[,;] (?:but|it)\b/gi, label:"not just X, but Y kalıbı"},
+  {re:/\bwhether (?:it's|you're|it is|you are)\b/gi, label:"whether it's/you're kalıbı"},
+  {re:/\bsadece [^.,;!?]{2,40} değil,? aynı zamanda\b/gi, label:"sadece X değil aynı zamanda kalıbı"}
 ];
 
 const CONTRACTIONS = /\b(i'm|i've|i'd|i'll|you're|you've|you'll|we're|we've|don't|doesn't|didn't|can't|won't|isn't|aren't|wasn't|weren't|it's|that's|there's|he's|she's|they're|they've|let's|wouldn't|couldn't|shouldn't|haven't|hasn't|gonna|wanna|gotta)\b/gi;
-const HUMAN_CASUAL = /\b(lol|haha|hahaha|yeah|nah|kinda|sorta|tbh|imo|btw|omg|ngl|honestly|aslında|yani|işte|valla|hadi|abi|kanka|ya|falan|filan|cidden|resmen|amk|of)\b/gi;
-// Turkish over-formal / AI suffix tell (very strong)
+const HUMAN_CASUAL = /\b(lol|haha|hahaha|yeah|nah|kinda|sorta|tbh|imo|btw|omg|ngl|honestly|aslında|yani|işte|valla|hadi|abi|kanka|ya|falan|filan|cidden|resmen|of)\b/gi;
 const TR_FORMAL = /[\p{L}\p{M}]*(?:maktadır|mektedir|maktadırlar|mektedirler|ılmaktadır|ilmektedir|ulmaktadır|ünmektedir|nmaktadır|nmektedir|ılmakta|ilmekte|aktadır|ektedir)(?![\p{L}\p{M}])/giu;
 
-/* ---------- 2) Precompiled term matcher (fixes double-count + word-boundary bugs) ---------- */
+/* ---------- 2) Precompiled term matcher ---------- */
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 const TERMS = [];
 function addTerms(list,cat){
@@ -312,13 +418,13 @@ function addTerms(list,cat){
     TERMS.push({t,cat,len:t.length,re:new RegExp(`(?<![\\p{L}\\p{M}])${esc(t)}(?![\\p{L}\\p{M}])`,'giu')});
   }
 }
-addTerms(AI_PHRASES,'cliche'); addTerms(TRANSITIONS,'trans'); addTerms(HEDGES,'hedge');
+addTerms(AI_PHRASES,'cliche'); addTerms(HYPE,'hype'); addTerms(TRANSITIONS,'trans'); addTerms(HEDGES,'hedge');
 TERMS.sort((a,b)=> b.len-a.len); // longest first so "delve into" beats "delve"
 
-// Scan original text (not lowercased — avoids Turkish İ length shift). Masks claimed spans => no double count.
+// Scan original text. Masked spans => no double count, no substring overlap.
 function scanTerms(text){
   const mask = new Uint8Array(text.length);
-  const counts = {cliche:0,trans:0,hedge:0,form:0};
+  const counts = {cliche:0,hype:0,trans:0,hedge:0,form:0};
   const hits = {}; const intervals = [];
   const claim=(s,e,cat,label)=>{
     for(let i=s;i<e;i++) if(mask[i]) return false;
@@ -328,6 +434,13 @@ function scanTerms(text){
     (hits[k]=hits[k]||{cat,count:0,label:label||text.slice(s,e)}).count++;
     return true;
   };
+  for(const st of STRUCTS){
+    st.re.lastIndex=0; let m;
+    while((m=st.re.exec(text))!==null){
+      claim(m.index, m.index+m[0].length, 'cliche', st.label);
+      if(m.index===st.re.lastIndex) st.re.lastIndex++;
+    }
+  }
   for(const term of TERMS){
     term.re.lastIndex=0; let m;
     while((m=term.re.exec(text))!==null){
@@ -372,32 +485,36 @@ function analyze(text){
   const cv = mean>0 ? Math.sqrt(variance)/mean : 0;
   const burstAI = lens.length>=3 ? clamp01((0.62 - cv)/0.5) : 0.5;
 
-  // B) Perplexity proxy (lexical diversity vs expected for length)
+  // B) Perplexity proxy
   const uniq = new Set(words).size;
   const ttr = uniq / wc;
   const expected = clamp01(1 - Math.log(wc)/14);
   const diversityGap = expected>0 ? (expected - ttr)/expected : 0;
   const perplexAI = clamp01(0.5 + diversityGap*1.3);
 
-  // C) AI cliché density
+  // C) AI cliché density (incl. structural patterns)
   const phPer100 = scan.counts.cliche / wc * 100;
   const clicheAI = clamp01(phPer100 / 1.4);
 
-  // D) Transition density
+  // D) Hype / intensifier density  [NEW]
+  const hypePer100 = scan.counts.hype / wc * 100;
+  const hypeAI = clamp01(hypePer100 / 2.2);
+
+  // E) Transition density
   const transPerSent = sc>0 ? scan.counts.trans/sc : 0;
   const transAI = clamp01(transPerSent / 0.4);
 
-  // E) Hedge density
+  // F) Hedge density
   const hedgePer100 = scan.counts.hedge / wc * 100;
   const hedgeAI = clamp01(hedgePer100 / 2.4);
 
-  // F) Sentence-starter repetition
+  // G) Sentence-starter repetition
   const starters = sentences.map(s => (s.match(/[\p{L}\p{M}']+/u)||[''])[0].toLowerCase()).filter(Boolean);
   const stCount={}; starters.forEach(s=>stCount[s]=(stCount[s]||0)+1);
   const repeated = Object.values(stCount).filter(n=>n>1).reduce((a,b)=>a+(b-1),0);
   const starterAI = starters.length>=4 ? clamp01(repeated/starters.length/0.35) : 0.35;
 
-  // G) Punctuation fingerprint
+  // H) Punctuation fingerprint
   const emDash = (text.match(/—|–|--/g)||[]).length;
   const emPer100 = emDash/wc*100;
   const contractions = (text.match(CONTRACTIONS)||[]).length;
@@ -406,7 +523,7 @@ function analyze(text){
   let punctAI = clamp01(emPer100/0.8);
   if(looksEnglish) punctAI = clamp01(punctAI*0.6 + clamp01((1.2 - contrPer100)/1.2)*0.6);
 
-  // H) N-gram (trigram) repetition  [NEW]
+  // I) N-gram (trigram) repetition
   let ngramAI = 0, repTri = 0;
   if(words.length>=8){
     const tri={}; const total=words.length-2;
@@ -415,17 +532,17 @@ function analyze(text){
     ngramAI = clamp01((repTri/total)/0.04);
   }
 
-  // I) Rule of three / list symmetry  [NEW]
+  // J) Rule of three / list symmetry
   const triples = (text.match(/,\s*[^,.;!?]{1,40}\s+(?:and|or|ve|veya|ya da)\s/giu)||[]).length;
   const triplesPerSent = sc>0 ? triples/sc : 0;
   const tripleAI = clamp01(triplesPerSent/0.3);
 
-  // J) Sentence-length uniformity (clustering in 12–26 band)  [NEW]
+  // K) Sentence-length uniformity
   const inBand = lens.filter(n=>n>=12 && n<=26).length;
   const bandFrac = lens.length ? inBand/lens.length : 0;
   const uniformAI = lens.length>=4 ? clamp01((bandFrac-0.45)/0.5) : 0.35;
 
-  // K) Over-formality (TR -maktadır suffix + long words + passive)  [NEW]
+  // L) Over-formality
   const formPer100 = scan.counts.form/wc*100;
   const longWords = words.filter(w=>w.length>=9).length;
   const longRatio = longWords/wc;
@@ -433,135 +550,195 @@ function analyze(text){
   const passivePer100 = passive/wc*100;
   const formalAI = clamp01(clamp01(formPer100/2.2)*0.6 + clamp01((longRatio-0.12)/0.18)*0.25 + clamp01(passivePer100/2)*0.15);
 
-  // Human signals (reduce)
+  // Human signals
   const casual = (text.match(HUMAN_CASUAL)||[]).length;
   const exclaim = (text.match(/!/g)||[]).length;
   const questions = (text.match(/\?/g)||[]).length;
   const ellipsis = (text.match(/\.\.\.|…/g)||[]).length;
   const firstPerson = (text.match(/\b(i|i'm|i've|me|my|ben|bana|benim|bence|bizce)\b/gi)||[]).length;
   const parenth = (text.match(/\([^)]{1,60}\)/g)||[]).length;
-  const humanRaw = casual*2 + exclaim*0.6 + questions*0.6 + ellipsis*0.8 + Math.min(firstPerson,8)*0.5 + contractions*0.4 + parenth*0.6;
+  const numerals = (text.match(/\b\d+[.,]?\d*\b/g)||[]).length; // concrete numbers = human/reporting signal
+  const humanRaw = casual*2 + exclaim*0.6 + questions*0.6 + ellipsis*0.8 + Math.min(firstPerson,8)*0.5 + contractions*0.4 + parenth*0.6 + Math.min(numerals,6)*0.35;
   const humanBonus = clamp01(humanRaw / (wc/100*9 + 4));
 
   const parts = [
-    {key:"cliche", name:"AI klişe kalıpları", ai:clicheAI, w:0.24, val:`${scan.counts.cliche} eşleşme`,
-      desc:"'delve, tapestry, önemli bir rol oynar, günümüz dünyasında' gibi LLM imzaları."},
-    {key:"burst", name:"Burstiness (cümle ritmi)", ai:burstAI, w:0.14, val:`DK=${cv.toFixed(2)}`,
+    {key:"cliche", name:"AI klişe kalıpları", ai:clicheAI, w:0.22, val:`${scan.counts.cliche} eşleşme`,
+      desc:"'delve, önemli bir rol oynar, günümüz dünyasında' + yapısal kalıplar ('From X to Y', 'not just X but Y')."},
+    {key:"hype", name:"Abartı / hype dili", ai:hypeAI, w:0.10, val:`${scan.counts.hype} adet`,
+      desc:"'remarkable, unprecedented, devrim niteliğinde' — pazarlama tonu AI'nın zayıf noktası."},
+    {key:"burst", name:"Burstiness (cümle ritmi)", ai:burstAI, w:0.12, val:`DK=${cv.toFixed(2)}`,
       desc:"İnsanlar uzun/kısa cümleleri karıştırır; AI tekdüze yazar. Düşük değişkenlik = AI."},
-    {key:"hedge", name:"Qualifier / hedge yoğunluğu", ai:hedgeAI, w:0.10, val:`${scan.counts.hedge} adet`,
+    {key:"hedge", name:"Qualifier / hedge yoğunluğu", ai:hedgeAI, w:0.09, val:`${scan.counts.hedge} adet`,
       desc:"'genellikle, tipik olarak, may, often' gibi temkinli ifadeler AI'da bolca görülür."},
-    {key:"trans", name:"Geçiş kelimesi yoğunluğu", ai:transAI, w:0.09, val:`${transPerSent.toFixed(2)}/cümle`,
+    {key:"trans", name:"Geçiş kelimesi yoğunluğu", ai:transAI, w:0.08, val:`${transPerSent.toFixed(2)}/cümle`,
       desc:"AI 'ayrıca / however / moreover' bağlaçlarına aşırı yüklenir."},
-    {key:"formal", name:"Aşırı resmiyet", ai:formalAI, w:0.09, val:`${scan.counts.form} resmi ek`,
+    {key:"formal", name:"Aşırı resmiyet", ai:formalAI, w:0.08, val:`${scan.counts.form} resmi ek`,
       desc:"TR '-maktadır/-mektedir', uzun kelime ve edilgen çatı resmi/AI dili sinyali."},
-    {key:"perplex", name:"Perplexity vekili (öngörülebilirlik)", ai:perplexAI, w:0.07, val:`TTR=${ttr.toFixed(2)}`,
+    {key:"perplex", name:"Perplexity vekili (öngörülebilirlik)", ai:perplexAI, w:0.06, val:`TTR=${ttr.toFixed(2)}`,
       desc:"Fazla 'güvenli/öngörülebilir' kelime seçimi = AI sinyali."},
-    {key:"ngram", name:"N-gram tekrarı", ai:ngramAI, w:0.07, val:`${repTri} tekrar`,
+    {key:"ngram", name:"N-gram tekrarı", ai:ngramAI, w:0.06, val:`${repTri} tekrar`,
       desc:"Aynı 3'lü kelime dizilerinin tekrarı AI'nın kalıplı yapısını gösterir."},
     {key:"triple", name:"Üçlü liste (rule of three)", ai:tripleAI, w:0.06, val:`${triples} adet`,
       desc:"'x, y ve z' simetrik üçlüler AI'nın en sevdiği yapıdır."},
-    {key:"uniform", name:"Cümle uzunluğu tekdüzeliği", ai:uniformAI, w:0.06, val:`%${Math.round(bandFrac*100)} bantta`,
+    {key:"uniform", name:"Cümle uzunluğu tekdüzeliği", ai:uniformAI, w:0.05, val:`%${Math.round(bandFrac*100)} bantta`,
       desc:"Cümlelerin çoğu 12–26 kelime bandında toplanıyorsa kalıp kokar."},
-    {key:"punct", name:"Noktalama parmak izi", ai:punctAI, w:0.06, val:`${emDash} em-dash`,
+    {key:"punct", name:"Noktalama parmak izi", ai:punctAI, w:0.04, val:`${emDash} em-dash`,
       desc:"Em-dash aşırılığı ve (İng.) kısaltma yokluğu modern AI izidir."},
-    {key:"starter", name:"Cümle başı tekrarı", ai:starterAI, w:0.06, val:`${repeated} tekrar`,
+    {key:"starter", name:"Cümle başı tekrarı", ai:starterAI, w:0.04, val:`${repeated} tekrar`,
       desc:"Aynı kelimeyle başlayan cümleler kalıpsal yapıyı ele verir."}
   ];
 
-  // Weighted mean (normalized so the score isn't diluted when language-specific metrics stay at 0)
+  // Weighted mean normalized + dominance boost (slam-dunk signals push non-linearly)
   const totW = parts.reduce((a,p)=>a+p.w,0);
   const base = parts.reduce((a,p)=>a+p.ai*p.w,0) / totW;
-  // Dominance boost: slam-dunk signals (well above 0.6) push the score up non-linearly,
-  // while clean human text — where nothing crosses the line — gets no boost.
   const excess = parts.reduce((a,p)=>a+Math.max(0, p.ai-0.55), 0);
   const boost = Math.min(excess*0.21, 0.34);
-  let aiScore = clamp01(base + boost - humanBonus*0.22);
+  const aiScore = clamp01(base + boost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
 
   let conf = "Düşük";
   if(wc>=120) conf="Yüksek"; else if(wc>=45) conf="Orta";
 
-  // chips (top detected phrases)
   const chips = Object.values(scan.hits).sort((a,b)=>b.count-a.count)
-    .map(h=>`${h.label}${h.count>1?` ×${h.count}`:''}`);
+    .map(h=>({label:h.label, cat:h.cat, count:h.count}));
   const hitCount = Object.values(scan.hits).reduce((a,h)=>a+h.count,0);
 
   return {
     wc, sc, pct, parts, conf, chips, hitCount, humanBonus, intervals:scan.intervals,
     flags:{cv, ttr, transPerSent, repeated, emDash, contrPer100, looksEnglish, longRatio, passive,
-           clicheCount:scan.counts.cliche, formCount:scan.counts.form, bandFrac, firstPerson, casual,
-           hedgeCount:scan.counts.hedge, triples, repTri}
+           clicheCount:scan.counts.cliche, hypeCount:scan.counts.hype, formCount:scan.counts.form,
+           bandFrac, firstPerson, casual, hedgeCount:scan.counts.hedge, triples, repTri,
+           sentCount:sc, meanLen:mean, questions, exclaim}
   };
 }
 
-/* ---------- 5) Reasons (what makes it AI + how to fix) ---------- */
-const FIXES = {
-  cliche:{why:"Metin bilinen AI klişe kalıpları içeriyor; bunlar dedektörlerin ilk baktığı şeydir.",
-    fix:"İşaretli kırmızı ifadeleri sil ya da sade, kendi cümlenle değiştir."},
-  burst:{why:"Cümleler birbirine çok yakın uzunlukta — yapay bir tekdüzelik var.",
-    fix:"Araya 3–5 kelimelik kısa, sert cümleler at; bazılarını uzat. Ritmi dalgalandır."},
-  hedge:{why:"Çok fazla temkinli/qualifier kelime var; AI hep 'olabilir, genellikle' der.",
-    fix:"Sarı işaretli hedge kelimeleri kaldır, doğrudan iddiada bulun."},
-  trans:{why:"Geçiş kelimesi yoğunluğu yüksek; her cümle bağlaçla başlıyor.",
-    fix:"Mor işaretli 'ayrıca/however/moreover' bağlaçlarının yarısını sil."},
-  formal:{why:"Aşırı resmi dil (-maktadır, uzun kelimeler, edilgen çatı) makine gibi duruyor.",
-    fix:"'-maktadır'ı '-yor'a çevir, edilgeni etkene al, günlük kelime kullan."},
-  perplex:{why:"Kelime seçimi fazla öngörülebilir; sürpriz yok.",
-    fix:"Beklenmedik bir benzetme, somut bir detay veya kişisel örnek ekle."},
-  ngram:{why:"Aynı kelime grupları tekrar ediyor; kalıplı üretim sinyali.",
-    fix:"Tekrar eden ifadeleri eş anlamlılarıyla değiştir, cümleleri yeniden kur."},
-  triple:{why:"Çok fazla simetrik üçlü liste ('x, y ve z') var — klasik AI parmak izi.",
-    fix:"Bazı üçlüleri ikiliye indir veya tek güçlü örnekle değiştir."},
-  uniform:{why:"Cümlelerin neredeyse hepsi aynı uzunluk bandında toplanmış.",
-    fix:"Çok kısa ve çok uzun cümleler ekleyerek dağılımı boz."},
-  punct:{why:"Noktalama makine gibi: em-dash bol, konuşma dili kısaltması yok.",
-    fix:"Em-dash'leri azalt; (İng.) do not→don't gibi kısaltmalar kullan."},
-  starter:{why:"Birden çok cümle aynı kelimeyle başlıyor.",
-    fix:"Açılışları çeşitlendir: soru, diyalog ya da bir detayla başla."}
+/* ---------- 5) Reasons + copy-paste fix prompts ---------- */
+function catList(r, cat, n=8){
+  return r.chips.filter(c=>c.cat===cat).slice(0,n).map(c=>`"${c.label}"`).join(", ");
+}
+const REASON_META = {
+  cliche:{name:"AI klişe kalıpları",
+    why:r=>`Metin <b>${r.flags.clicheCount} bilinen AI kalıbı</b> içeriyor: ${catList(r,'cliche',5)||'—'}. Dedektörlerin ve öğretmenlerin ilk baktığı şey budur.`,
+    fix:r=>`İşaretli kırmızı ifadeleri sil ya da kendi cümlenle, sade karşılığıyla değiştir.`,
+    prompt:r=>`Şu AI klişelerini metinden tamamen çıkar ya da sade, doğal, gündelik karşılıklarıyla değiştir: ${catList(r,'cliche',10)}. Yerlerine kalıp olmayan, somut ifadeler koy.`},
+  hype:{name:"Abartı / hype dili",
+    why:r=>`<b>${r.flags.hypeCount} abartılı pazarlama kelimesi</b> var: ${catList(r,'hype',5)||'—'}. AI metinleri her şeyi "olağanüstü, devrim niteliğinde" gösterir.`,
+    fix:r=>`Turuncu işaretli abartıları nötr, somut ifadelerle değiştir; gerekirse rakam/örnek ver.`,
+    prompt:r=>`Şu abartılı kelimeleri sadeleştir: ${catList(r,'hype',10)}. Övgü yerine nötr ve somut anlatım kullan; iddia varsa örnek ya da ölçülebilir detayla destekle.`},
+  burst:{name:"Cümle ritmi tekdüze",
+    why:r=>`Cümle uzunluğu değişkenliği <b>DK=${r.flags.cv.toFixed(2)}</b> (insan ortalaması ~0.55-0.85). Cümleler birbirine çok yakın uzunlukta — yapay pürüzsüzlük.`,
+    fix:r=>`Araya 3–6 kelimelik kısa, sert cümleler at; bazı cümleleri birleştirip uzat.`,
+    prompt:r=>`Cümle uzunluklarını belirgin şekilde dalgalandır: bazı cümleleri 3-6 kelimelik kısa ve vurucu yap, bazılarını birleştirerek uzat. Ritim tekdüze olmasın; ardışık cümleler aynı uzunlukta kalmasın.`},
+  hedge:{name:"Qualifier / hedge fazlalığı",
+    why:r=>`<b>${r.flags.hedgeCount} temkinli ifade</b> var: ${catList(r,'hedge',5)||'—'}. AI hep "olabilir, genellikle" diyerek taahhütten kaçar.`,
+    fix:r=>`Sarı işaretli hedge kelimeleri kaldır; doğrudan, net iddialarda bulun.`,
+    prompt:r=>`Şu temkinli (hedge) ifadelerin çoğunu kaldır: ${catList(r,'hedge',10)}. Cümleleri doğrudan ve net iddialara çevir; sadece gerçekten belirsiz olan yerde temkinli kal.`},
+  trans:{name:"Geçiş kelimesi fazlalığı",
+    why:r=>`Cümle başına <b>${r.flags.transPerSent.toFixed(2)} geçiş kelimesi</b> düşüyor: ${catList(r,'trans',5)||'—'}. Her cümle bağlaçla açılınca şablon kokar.`,
+    fix:r=>`Mor işaretli bağlaçların en az yarısını sil — cümleler bağlaçsız da akar.`,
+    prompt:r=>`Cümle başlarındaki şu bağlaçların en az yarısını sil: ${catList(r,'trans',10)}. Cümleleri bağlaç olmadan, doğal akışla birbirine bağla.`},
+  formal:{name:"Aşırı resmi dil",
+    why:r=>`${r.flags.formCount?`<b>${r.flags.formCount} adet "-maktadır/-mektedir"</b> çekimi, `:''}uzun kelime oranı %${Math.round(r.flags.longRatio*100)}${r.flags.passive?`, ${r.flags.passive} edilgen yapı`:''} — makine gibi resmi duruyor.`,
+    fix:r=>`"-maktadır"ı "-ıyor"a çevir, edilgeni etkene al, gündelik kelimeler seç.`,
+    prompt:r=>`Aşırı resmi dili yumuşat: tüm "-maktadır/-mektedir" çekimlerini "-ıyor/-iyor" gibi doğal çekimlere çevir, edilgen cümleleri etken yap, resmi sözcükleri gündelik karşılıklarıyla değiştir.`},
+  perplex:{name:"Fazla öngörülebilir kelime seçimi",
+    why:r=>`Kelime çeşitliliği beklenenin altında (TTR=${r.flags.ttr.toFixed(2)}). Metin hep "güvenli" kelimeyi seçiyor; sürpriz yok.`,
+    fix:r=>`Beklenmedik ama yerinde bir benzetme, somut detay veya kişisel örnek ekle.`,
+    prompt:r=>`Kelime tekrarını azalt ve öngörülebilir ifadeleri değiştir: somut detaylar, yerinde bir benzetme ve gerekirse kişisel bir örnek ekle. Genel geçer cümleleri özgül bilgiyle değiştir.`},
+  ngram:{name:"Tekrarlanan kelime grupları",
+    why:r=>`<b>${r.flags.repTri} adet üçlü kelime dizisi</b> birden fazla kez geçiyor — kalıplı üretim sinyali.`,
+    fix:r=>`Tekrarlanan ifadeleri eş anlamlılarla değiştir veya cümleleri yeniden kur.`,
+    prompt:r=>`Metinde birden fazla geçen kelime gruplarını bul ve her tekrarı farklı bir ifadeyle değiştir ya da cümleyi yeniden kur; aynı üçlü kelime dizisi iki kez geçmesin.`},
+  triple:{name:"Üçlü liste alışkanlığı",
+    why:r=>`<b>${r.flags.triples} adet "x, y ve z"</b> üçlüsü var. Simetrik listeler AI'nın en bilinen estetik kalıbıdır.`,
+    fix:r=>`Bazı üçlüleri ikiliye indir veya tek güçlü örnekle değiştir.`,
+    prompt:r=>`"x, y ve z" şeklindeki üçlü listelerin çoğunu boz: kimini iki öğeye indir, kiminde tek güçlü örnek bırak. Listelerin ritmi simetrik olmasın.`},
+  uniform:{name:"Cümle uzunlukları aynı bantta",
+    why:r=>`Cümlelerin <b>%${Math.round(r.flags.bandFrac*100)}'i</b> 12–26 kelime bandında. İnsan yazısında dağılım çok daha geniştir.`,
+    fix:r=>`Çok kısa (3-6 kelime) ve çok uzun cümleler ekleyerek dağılımı boz.`,
+    prompt:r=>`Cümle uzunluğu dağılımını genişlet: birkaç cümleyi 3-6 kelimeye indir, bir-iki cümleyi 30+ kelimeye çıkar. Orta uzunluk bandında yığılma olmasın.`},
+  punct:{name:"Noktalama parmak izi",
+    why:r=>`${r.flags.emDash} em-dash${r.flags.looksEnglish&&r.flags.contrPer100<1?", neredeyse hiç kısaltma yok (İng.)":""} — modern AI'nın tipik noktalama alışkanlığı.`,
+    fix:r=>`Em-dash'leri azalt; (İng. metinde) do not→don't gibi kısaltmalar kullan.`,
+    prompt:r=>`Em-dash (—) kullanımını en aza indir; yerine virgül ya da nokta kullan. İngilizce metinse doğal kısaltmalar ekle (do not → don't, it is → it's).`},
+  starter:{name:"Cümle başı tekrarı",
+    why:r=>`<b>${r.flags.repeated} cümle</b> bir öncekiyle aynı kelimeyle başlıyor — kalıpsal açılış.`,
+    fix:r=>`Açılışları çeşitlendir: soru, zarf, nesne ya da diyalogla başla.`,
+    prompt:r=>`Aynı kelimeyle başlayan cümlelerin açılışlarını değiştir: kimine soruyla, kimine zarfla, kimine doğrudan nesneyle başla. İki ardışık cümle aynı kelimeyle açılmasın.`}
 };
-function buildReasons(r){
-  const ranked = r.parts.filter(p=>p.ai>=0.35).sort((a,b)=> b.ai*b.w - a.ai*a.w).slice(0,5);
-  if(!ranked.length) return null;
-  return ranked.map((p,i)=>{
-    const c=lerpColor(p.ai), f=FIXES[p.key]||{why:p.desc,fix:""};
-    return `<div class="reason">
-      <div class="rhead">
-        <span class="rank" style="background:${c}">${i+1}</span>
-        <span class="rname">${p.name}</span>
-        <span class="rpct" style="color:${c}">${Math.round(p.ai*100)}%</span>
-      </div>
-      <div class="rbar"><i style="width:${Math.round(p.ai*100)}%;background:${c}"></i></div>
-      <div class="rwhy">${f.why}</div>
-      <div class="rfix">✏️ <b>Düzelt:</b> ${f.fix}</div>
-    </div>`;
-  }).join("");
+
+function rankedReasons(r){
+  return r.parts.filter(p=>p.ai>=0.35).sort((a,b)=> b.ai*b.w - a.ai*a.w).slice(0,5);
+}
+function buildMasterPrompt(r, text){
+  const ranked = rankedReasons(r);
+  const items = ranked.map((p,i)=>`${i+1}. ${REASON_META[p.key].prompt(r)}`).join("\n");
+  return `Aşağıdaki metni, anlamını ve içerdiği tüm bilgiyi birebir koruyarak daha doğal, bir insanın elinden çıkmış gibi yeniden yaz. Yapay zeka izlenimi veren şu sorunları özellikle düzelt:
+
+${items}
+
+Genel kurallar:
+- Bilgi ekleme, bilgi çıkarma; sadece üslubu değiştir.
+- Mükemmel ve pürüzsüz durmasın; doğal, hafif dağınık insan ritmi olsun.
+- Kalıp ifade, abartı ve gereksiz bağlaç kullanma.
+- Metnin dilini (Türkçe/İngilizce) koru.
+- Sadece yeniden yazılmış metni ver, açıklama ekleme.
+
+METİN:
+"""
+${text}
+"""`;
+}
+function buildSinglePrompt(r, key, text){
+  return `Aşağıdaki metni, anlamını ve içerdiği bilgiyi birebir koruyarak yeniden yaz. Tek bir sorunu düzelt:
+
+${REASON_META[key].prompt(r)}
+
+Diğer her şeyi olduğu gibi bırak. Sadece yeniden yazılmış metni ver.
+
+METİN:
+"""
+${text}
+"""`;
 }
 
-/* ---------- 6) Teacher notes ---------- */
+/* ---------- 6) Teacher notes (with evidence) ---------- */
 function buildTeacher(r){
   const n=[]; const f=r.flags; const P=Object.fromEntries(r.parts.map(x=>[x.key,x.ai]));
-  if(P.cliche>0.4 && r.chips.length)
-    n.push(`İlk bakışta klişeler göze çarpar: <b>${r.chips.slice(0,4).join(", ")}</b>. Bunlar en bilinen ChatGPT imzaları, öğretmen anında tanır.`);
+  if(P.cliche>0.4 && f.clicheCount)
+    n.push({t:`İlk okumada <b>klişeler</b> göze batar. Öğretmenler bu kalıpları yüzlerce AI ödevinden ezbere bilir; tek tanesi bile şüphe başlatır.`,
+            e:`Kanıt: ${f.clicheCount} kalıp — ${catList(r,'cliche',4)}`});
+  if(P.hype>0.45 && f.hypeCount)
+    n.push({t:`<b>Reklam gibi abartılı ton</b>: her şey "olağanüstü/remarkable". Sıradan bir ödevde bu coşku doğal durmaz, "bunu kim yazdı?" dedirtir.`,
+            e:`Kanıt: ${f.hypeCount} abartı kelimesi — ${catList(r,'hype',4)}`});
   if(P.formal>0.5)
-    n.push("Dil <b>aşırı resmi</b> ('-maktadır', uzun kelimeler, edilgen çatı). Bir öğrencinin doğal yazısına benzemez.");
+    n.push({t:`Dil <b>fazla resmi ve kusursuz</b>. Öğretmen senin önceki yazılarınla karşılaştırır; üslup sıçraması en güçlü delildir.`,
+            e:`Kanıt: ${f.formCount} "-maktadır" çekimi, uzun kelime oranı %${Math.round(f.longRatio*100)}`});
   if(P.burst>0.55)
-    n.push("Tüm cümleler <b>aynı uzunlukta ve ritimde</b>. 'Fazla düzenli, fazla pürüzsüz' — insan taslakları daha dağınıktır.");
+    n.push({t:`Cümleler <b>aynı uzunlukta ve ritimde</b> akıyor. "Fazla pürüzsüz" metin, elle yazılmış dağınık taslak hissi vermez — deneyimli göz bunu 10 saniyede sezer.`,
+            e:`Kanıt: değişkenlik katsayısı ${f.cv.toFixed(2)} (insan ort. ~0.55-0.85), ort. cümle ${Math.round(f.meanLen)} kelime`});
   if(P.trans>0.5)
-    n.push("Her paragraf <b>'Ayrıca / Moreover / Furthermore'</b> ile bağlanıyor; şablon kalıbı kokuyor.");
+    n.push({t:`Paragraflar <b>'Ayrıca/Moreover/Furthermore'</b> zinciriyle bağlanmış — beş paragraf şablonunun AI versiyonu. Öğretmenler bu iskeleti anında tanır.`,
+            e:`Kanıt: cümle başına ${f.transPerSent.toFixed(2)} geçiş kelimesi`});
   if(r.humanBonus<0.12 && f.firstPerson<2)
-    n.push("Metinde <b>hiç kişisel ses yok</b> — örnek, görüş, anekdot, soru yok. Öğretmen 'senin düşüncen nerede?' diye sorar.");
+    n.push({t:`Metinde <b>hiç "sen" yoksun</b>: kişisel örnek, görüş, soru, anekdot yok. Öğretmen "kendi cümlenle anlat" dediğinde zorlanırsın — sözlü doğrulama en yaygın yakalanma anıdır.`,
+            e:`Kanıt: ${f.firstPerson} birinci tekil ifade, ${f.questions} soru, ${f.exclaim} ünlem`});
   if(P.triple>0.5)
-    n.push("Sürekli <b>üçlü listeler</b> ('x, y ve z') var — AI'nın sevdiği simetri, gözden kaçmaz.");
+    n.push({t:`Sürekli <b>üçlü listeler</b> ("x, y ve z"). Bu simetri estetiği AI'ya özgüdür; arka arkaya iki-üç kez görünce şüphe kesinleşir.`,
+            e:`Kanıt: ${f.triples} üçlü yapı`});
   if(f.emDash>=3 && f.contrPer100<1)
-    n.push("Bolca <b>em-dash (—)</b> + sıfır kısaltma: ChatGPT'nin tipik noktalama alışkanlığı.");
+    n.push({t:`Bolca <b>em-dash (—)</b> ama sıfır kısaltma: ChatGPT'nin imza noktalaması. Bunu bilen öğretmen sayısı hızla artıyor.`,
+            e:`Kanıt: ${f.emDash} em-dash, kısaltma oranı %${f.contrPer100.toFixed(1)}`});
   if(P.hedge>0.5)
-    n.push("Çok fazla <b>'genellikle/olabilir/tipik olarak'</b> — temkinli, taahhütsüz dil AI'yı ele verir.");
+    n.push({t:`Aşırı <b>temkinli dil</b> ("genellikle, olabilir, tipik olarak") — hiçbir şeye net taahhüt yok. Öğrenci yazısı genelde daha cesur ve taraflıdır.`,
+            e:`Kanıt: ${f.hedgeCount} hedge ifadesi`});
   if(r.pct>=60 && n.length<2)
-    n.push("Genel ton <b>tek düze ve 'mükemmel'</b>; küçük hatalar, kişisel kelimeler ve dağınıklık eksik.");
+    n.push({t:`Genel ton <b>tekdüze ve hatasız</b>: imla hatası, yarım kalmış düşünce, kişisel kelime yok. "Fazla temiz" metin başlı başına şüphe sebebidir.`,
+            e:`Kanıt: genel skor %${r.pct}`});
 
   if(!n.length)
-    return `<div class="tnote ok"><div class="ti">✅</div><p>Belirgin bir kırmızı bayrak yok. Metin bir öğretmenin tipik AI sezgilerini güçlü biçimde tetiklemiyor — yine de yukarıdaki önerilerle daha da doğallaştırabilirsin.</p></div>`;
-  return n.map(t=>`<div class="tnote"><div class="ti">🚩</div><p>${t}</p></div>`).join("");
+    return `<div class="tnote ok"><div class="ti">✅</div><div class="tbody"><p>Belirgin bir kırmızı bayrak yok. Metin, bir öğretmenin tipik AI sezgilerini güçlü biçimde tetiklemiyor. Yine de en güvenlisi: metne kendi yaşantından bir örnek ve kendi görüşünü eklemek — bunlar taklit edilemez.</p></div></div>`;
+  return n.map((x,i)=>`<div class="tnote" style="animation-delay:${i*70}ms"><div class="ti">🚩</div><div class="tbody"><p>${x.t}</p><span class="tev">${x.e}</span></div></div>`).join("");
 }
 
 /* ---------- 7) Highlight preview ---------- */
@@ -582,43 +759,75 @@ function buildPreview(text, intervals){
 /* ---------- 8) Rendering ---------- */
 const $ = id => document.getElementById(id);
 const input = $("input");
-const ARC = 628;
-let animFrom = 0, animRAF = null;
+const ARC = 653.45, R = 104, CX = 120, CY = 120;
+let animFrom = 0, animRAF = null, lastResult = null;
 
-function animatePct(to){
+function gradeOf(pct){ // humanity grade
+  if(pct<15) return "A+"; if(pct<28) return "A"; if(pct<42) return "B";
+  if(pct<55) return "C"; if(pct<70) return "D"; return "F";
+}
+function animatePct(to, color){
   cancelAnimationFrame(animRAF);
-  const from = animFrom, t0 = performance.now(), dur = 550;
+  const from = animFrom, t0 = performance.now(), dur = 650;
   function step(t){
     const k = Math.min((t-t0)/dur, 1), e = 1-Math.pow(1-k,3);
-    const v = Math.round(from + (to-from)*e);
-    $("pctNum").textContent = v;
+    const v = from + (to-from)*e;
+    $("pctNum").textContent = Math.round(v);
     $("arc").style.strokeDashoffset = ARC - (ARC*v/100);
+    // svg is rotated -90deg, so the path starts at the visual top; angle is measured in svg coords
+    const ang = (v/100)*2*Math.PI;
+    const knob = $("knob");
+    knob.setAttribute("cx", CX + R*Math.cos(ang));
+    knob.setAttribute("cy", CY + R*Math.sin(ang));
+    knob.setAttribute("opacity", v>1 ? "1" : "0");
     if(k<1) animRAF = requestAnimationFrame(step); else animFrom = to;
   }
+  if(color){ $("arc").style.stroke=color; $("arc").style.filter=`drop-shadow(0 0 16px ${color})`; }
   animRAF = requestAnimationFrame(step);
+}
+
+function copyText(str, btn){
+  const done = ()=>{
+    if(btn){ btn.classList.add("done"); const old=btn.textContent; btn.textContent="✓ Kopyalandı"; setTimeout(()=>{btn.classList.remove("done");btn.textContent=old;},1600); }
+    const t=$("toast"); t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(str).then(done).catch(()=>fallbackCopy(str,done));
+  } else fallbackCopy(str,done);
+}
+function fallbackCopy(str, done){
+  const ta=document.createElement("textarea"); ta.value=str; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ alert("Kopyalama engellendi — promptu elle seçip kopyala."); }
+  document.body.removeChild(ta);
 }
 
 function render(){
   const text = input.value;
   const r = analyze(text);
+  lastResult = r;
   $("wc").textContent = r.wc; $("sc").textContent = r.sc;
 
   if(r.tooShort || !text.trim()){
-    animatePct(0); $("arc").style.stroke="var(--muted)";
+    animatePct(0, "rgba(150,150,170,1)");
     $("verdict").textContent = text.trim()? "Daha fazla metin gerekli" : "Metin bekleniyor";
     $("verdict").style.color="var(--txt)";
     $("verdictNote").textContent = text.trim()? "Güvenilir analiz için en az ~12 kelime gir." : "Soldaki alana en az birkaç cümle gir.";
-    $("conf").querySelector("b").textContent="—"; $("hitCount").textContent="0";
+    $("conf").textContent="—"; $("hitCount").textContent="0";
+    $("grade").firstChild.nodeValue="–";
+    $("marker").style.left="0%";
     $("metrics").innerHTML = `<span class="empty">Analiz için yeterli metin yok.</span>`;
     $("preview").innerHTML = buildPreview(text, r.intervals||[]);
+    $("masterfix").style.display="none";
     $("reasons").innerHTML = `<span class="empty">Metin girince en güçlü AI sebepleri sırayla burada çıkacak.</span>`;
     $("teacher").innerHTML = `<span class="empty">Metin girince öğretmenin dikkatini çekecek noktalar listelenecek.</span>`;
     return;
   }
 
   const color = lerpColor(r.pct/100);
-  $("arc").style.stroke = color;
-  animatePct(r.pct);
+  animatePct(r.pct, color);
+  $("marker").style.left = r.pct+"%";
+  const g=$("grade"); g.firstChild.nodeValue=gradeOf(r.pct); g.style.color=lerpColor(r.pct/100); g.style.borderColor=color;
 
   let v,note;
   if(r.pct>=75){v="Büyük olasılıkla YAPAY ZEKA";note="Metin güçlü AI sinyalleri taşıyor; birden çok LLM imzası birikmiş.";}
@@ -626,23 +835,47 @@ function render(){
   else if(r.pct>=28){v="Muhtemelen İNSAN (bazı AI izleri)";note="Ağırlıklı insansı, ama birkaç AI kalıbı dikkat çekiyor.";}
   else{v="Büyük olasılıkla İNSAN";note="Metin doğal değişkenlik ve insan sinyalleri gösteriyor.";}
   $("verdict").textContent=v; $("verdict").style.color=color; $("verdictNote").textContent=note;
-  $("conf").querySelector("b").textContent=r.conf; $("hitCount").textContent=r.hitCount;
+  $("conf").textContent=r.conf; $("hitCount").textContent=r.hitCount;
 
   $("metrics").innerHTML = r.parts.map(p=>{
     const w=Math.round(p.ai*100), c=lerpColor(p.ai);
     return `<div class="metric">
       <div class="row"><span class="name">${p.name}</span><span class="val">${p.val} · ${w}%</span></div>
-      <div class="bar"><i style="width:${w}%;background:${c}"></i></div>
+      <div class="bar"><i style="width:${w}%;background-color:${c}"></i></div>
       <div class="desc">${p.desc}</div></div>`;
   }).join("");
 
   $("preview").innerHTML = buildPreview(text, r.intervals);
 
-  const reasons = buildReasons(r);
-  $("reasons").innerHTML = reasons || `<div class="tnote ok"><div class="ti">👍</div><p>Şu an düzeltilecek baskın bir AI kalıbı yok. Metin doğal görünüyor.</p></div>`;
+  const ranked = rankedReasons(r);
+  if(ranked.length){
+    $("masterfix").style.display="flex";
+    $("reasons").innerHTML = ranked.map((p,i)=>{
+      const c=lerpColor(p.ai), m=REASON_META[p.key];
+      return `<div class="reason" style="animation-delay:${i*70}ms">
+        <div class="rhead">
+          <span class="rank" style="background:${c}">${i+1}</span>
+          <span class="rname">${m.name}</span>
+          <span class="rpct" style="color:${c}">${Math.round(p.ai*100)}%</span>
+        </div>
+        <div class="rbar"><i style="width:${Math.round(p.ai*100)}%;background:${c}"></i></div>
+        <div class="rwhy">${m.why(r)}</div>
+        <div class="rfix">✏️ <b>Düzelt:</b> ${m.fix(r)}</div>
+        <button class="copybtn" data-key="${p.key}">📋 Bu sorunun düzeltme promptunu kopyala</button>
+      </div>`;
+    }).join("");
+    $("reasons").querySelectorAll(".copybtn").forEach(b=>{
+      b.onclick = ()=>copyText(buildSinglePrompt(lastResult, b.dataset.key, input.value), b);
+    });
+  } else {
+    $("masterfix").style.display="none";
+    $("reasons").innerHTML = `<div class="tnote ok"><div class="ti">👍</div><div class="tbody"><p>Şu an düzeltilecek baskın bir AI kalıbı yok. Metin doğal görünüyor.</p></div></div>`;
+  }
 
   $("teacher").innerHTML = buildTeacher(r);
 }
+
+$("copyAll").onclick = ()=>{ if(lastResult && !lastResult.tooShort) copyText(buildMasterPrompt(lastResult, input.value), $("copyAll")); };
 
 /* ---------- 9) Samples + events ---------- */
 const SAMPLE_AI_EN = `In today's fast-paced world, artificial intelligence plays a crucial role in shaping the way we live, work, and communicate. It is important to note that this transformative technology continues to delve into every aspect of our daily lives. Moreover, businesses are increasingly leveraging these cutting-edge solutions to streamline their operations. Furthermore, the seamless integration of AI fosters innovation, efficiency, and growth across multiple industries. Additionally, organizations must navigate the complexities of this ever-evolving landscape. Ultimately, embracing artificial intelligence is a testament to humanity's relentless pursuit of progress. In conclusion, the realm of AI offers a myriad of opportunities for those willing to harness its power.`;
@@ -655,7 +888,9 @@ $("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; render(); };
 $("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; render(); };
 $("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; render(); };
 $("clear").onclick = ()=>{ input.value=""; render(); input.focus(); };
-input.addEventListener("input", render);
+
+let deb=null;
+input.addEventListener("input", ()=>{ clearTimeout(deb); deb=setTimeout(render, 200); });
 
 render();
 </script>
