@@ -82,6 +82,8 @@
   .btn.ghost{color:var(--muted)}
   .btn.primary{background:linear-gradient(120deg,rgba(139,109,255,.85),rgba(74,214,200,.7));border:none;color:#0a0a14;font-weight:800}
   .btn.primary:hover{filter:brightness(1.12)}
+  .analyze-btn{width:100%;margin-top:13px;padding:15px;font-size:16px;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 10px 28px rgba(139,109,255,.30)}
+  .analyze-btn:active{transform:scale(.99)}
 
   /* HIGHLIGHT PREVIEW */
   .legend{display:flex;flex-wrap:wrap;gap:11px;margin:4px 0 12px;font-size:11.5px;color:var(--muted)}
@@ -222,7 +224,8 @@
     <section>
       <div class="card">
         <h2>📝 Metin</h2>
-        <textarea id="input" placeholder="Analiz etmek istediğin metni buraya yapıştır...&#10;&#10;Yazdıkça her şey canlı güncellenir."></textarea>
+        <textarea id="input" placeholder="Analiz etmek istediğin metni buraya yapıştır, sonra Analiz Et'e bas."></textarea>
+        <button class="btn primary analyze-btn" id="analyzeBtn">🔍 Analiz Et</button>
         <div class="toolbar">
           <button class="btn" id="sampleAIen">AI (EN)</button>
           <button class="btn" id="sampleAItr">AI (TR)</button>
@@ -468,7 +471,14 @@ function lerpColor(t){
   else{const k=(t-0.5)/0.5; r=c(242,245,k); g=c(193,100,k); b=c(78,122,k);}
   return `rgb(${r},${g},${b})`;
 }
-const getSentences = t => t.split(/\n+/).flatMap(line => line.match(/[^.!?…]+[.!?…]*/g) || []).map(s=>s.trim()).filter(Boolean);
+function getSentences(t){
+  const out=[];
+  t.split(/\n+/).forEach(line=>{
+    const m = line.match(/[^.!?…]+[.!?…]*/g);
+    if(m) for(const s of m){ const v=s.trim(); if(v) out.push(v); }
+  });
+  return out;
+}
 const getWords = t => (t.toLowerCase().match(/[\p{L}\p{M}']+/gu) || []);
 function htmlEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -707,7 +717,7 @@ ${text}
 
 /* ---------- 6) Teacher notes (with evidence) ---------- */
 function buildTeacher(r){
-  const n=[]; const f=r.flags; const P=Object.fromEntries(r.parts.map(x=>[x.key,x.ai]));
+  const n=[]; const f=r.flags; const P={}; r.parts.forEach(x=>{P[x.key]=x.ai;});
   if(P.cliche>0.4 && f.clicheCount)
     n.push({t:`İlk okumada <b>klişeler</b> göze batar. Öğretmenler bu kalıpları yüzlerce AI ödevinden ezbere bilir; tek tanesi bile şüphe başlatır.`,
             e:`Kanıt: ${f.clicheCount} kalıp — ${catList(r,'cliche',4)}`});
@@ -887,21 +897,28 @@ const SAMPLE_AI_TR = `Günümüz dünyasında yapay zeka, hayatımızın vazgeç
 
 const SAMPLE_HUMAN = `Okay so I finally tried that ramen place everyone keeps raving about. Honestly? Mixed feelings. The broth was unreal — rich, deep, the kind that sticks to your lips. But twenty bucks for a bowl I finished in eight minutes? Come on. I went with my brother, who somehow ordered the spiciest thing on the menu and then pretended he wasn't dying. He was. Tears, the whole show. We'll probably go back, though. The chashu alone is worth it.`;
 
-$("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; safeRender(); };
-$("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; safeRender(); };
-$("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; safeRender(); };
-$("clear").onclick = ()=>{ input.value=""; safeRender(); input.focus(); };
-
-// Canli analiz: yapistirinca ANINDA, yazarken hafif debounce. Hata olsa bile asla durmaz.
-let deb=null;
 function safeRender(){ try{ render(); }catch(e){ console.error("render error:", e); } }
-function scheduleRender(delay){ clearTimeout(deb); deb=setTimeout(safeRender, delay); }
-input.addEventListener("input", ()=>scheduleRender(120));
-input.addEventListener("paste", ()=>scheduleRender(0));   // yapistir -> aninda olc
-input.addEventListener("change", ()=>scheduleRender(0));
-input.addEventListener("keyup", ()=>scheduleRender(120));  // bazi mobil klavyeler input yerine keyup tetikler
 
-safeRender();
+let deb=null, analyzed=false;
+// START: tek dokunusla tum zincir calisir (skor + tarama + sinyaller + sebepler + notlar)
+function runAnalysis(scroll){
+  analyzed = true;
+  safeRender();
+  if(scroll){ const sc=document.querySelector(".scorecard"); if(sc) sc.scrollIntoView({behavior:"smooth", block:"start"}); }
+}
+// Ilk analizden SONRA, duzelttikce canli guncelleme (basta otomatik yok)
+function liveUpdate(delay){ if(!analyzed) return; clearTimeout(deb); deb=setTimeout(safeRender, delay); }
+
+$("analyzeBtn").onclick = ()=>runAnalysis(true);
+$("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; runAnalysis(false); };
+$("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; runAnalysis(false); };
+$("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; runAnalysis(false); };
+$("clear").onclick = ()=>{ input.value=""; analyzed=false; safeRender(); input.focus(); };
+
+input.addEventListener("input", ()=>liveUpdate(150));
+input.addEventListener("keyup", ()=>liveUpdate(150));
+
+safeRender(); // bos baslangic durumu
 </script>
 </body>
 </html>
