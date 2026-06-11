@@ -84,6 +84,16 @@
   .btn.primary:hover{filter:brightness(1.12)}
   .analyze-btn{width:100%;margin-top:13px;padding:15px;font-size:16px;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 10px 28px rgba(139,109,255,.30)}
   .analyze-btn:active{transform:scale(.99)}
+  .status{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:11px;font-size:13px;font-weight:600;color:var(--faint);min-height:18px;transition:color .3s;text-align:center}
+  .status .ld{width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 9px currentColor;flex:0 0 auto}
+  .status.ready{color:#7fe3c0}
+  .status.busy{color:#cbb8ff}
+  .status.busy .ld{width:12px;height:12px;background:transparent;border:2px solid currentColor;border-top-color:transparent;box-shadow:none;animation:spin360 .6s linear infinite}
+  .status.done{color:#7fe3c0}
+  .status.done .ld{animation:pop .4s ease}
+  .status.err{color:#ffb3bb;background:rgba(245,100,122,.13);border:1px solid rgba(245,100,122,.3);border-radius:9px;padding:8px 11px}
+  @keyframes spin360{to{transform:rotate(360deg)}}
+  @keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.4)}100%{transform:scale(1)}}
 
   /* HIGHLIGHT PREVIEW */
   .legend{display:flex;flex-wrap:wrap;gap:11px;margin:4px 0 12px;font-size:11.5px;color:var(--muted)}
@@ -209,6 +219,13 @@
   }
   #toast.show{transform:translateX(-50%) translateY(0)}
 </style>
+<script>
+  // Erken hata yakalayici: ana script parse/calisma hatasi verirse ekranda goster (sessizce olme).
+  window.addEventListener('error', function(e){
+    var s=document.getElementById('status');
+    if(s){ s.className='status err'; s.textContent='⚠️ Kod hatası: '+((e&&e.message)||(e&&e.error)||'bilinmeyen')+' — bu mesajı bana ilet.'; }
+  });
+</script>
 </head>
 <body>
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
@@ -225,7 +242,8 @@
       <div class="card">
         <h2>📝 Metin</h2>
         <textarea id="input" placeholder="Analiz etmek istediğin metni buraya yapıştır, sonra Analiz Et'e bas."></textarea>
-        <button class="btn primary analyze-btn" id="analyzeBtn">🔍 Analiz Et</button>
+        <button type="button" class="btn primary analyze-btn" id="analyzeBtn">🔍 Analiz Et</button>
+        <div id="status" class="status">JS yükleniyor…</div>
         <div class="toolbar">
           <button class="btn" id="sampleAIen">AI (EN)</button>
           <button class="btn" id="sampleAItr">AI (TR)</button>
@@ -411,16 +429,19 @@ const STRUCTS = [
 
 const CONTRACTIONS = /\b(i'm|i've|i'd|i'll|you're|you've|you'll|we're|we've|don't|doesn't|didn't|can't|won't|isn't|aren't|wasn't|weren't|it's|that's|there's|he's|she's|they're|they've|let's|wouldn't|couldn't|shouldn't|haven't|hasn't|gonna|wanna|gotta)\b/gi;
 const HUMAN_CASUAL = /\b(lol|haha|hahaha|yeah|nah|kinda|sorta|tbh|imo|btw|omg|ngl|honestly|aslında|yani|işte|valla|hadi|abi|kanka|ya|falan|filan|cidden|resmen|of)\b/gi;
-const TR_FORMAL = /[\p{L}\p{M}]*(?:maktadır|mektedir|maktadırlar|mektedirler|ılmaktadır|ilmektedir|ulmaktadır|ünmektedir|nmaktadır|nmektedir|ılmakta|ilmekte|aktadır|ektedir)(?![\p{L}\p{M}])/giu;
+const TR_FORMAL = new RegExp("[A-Za-z\\u00C0-\\u024F\\u0300-\\u036F]*(?:maktadır|mektedir|maktadırlar|mektedirler|ılmaktadır|ilmektedir|ulmaktadır|ünmektedir|nmaktadır|nmektedir|ılmakta|ilmekte|aktadır|ektedir)(?![A-Za-z\\u00C0-\\u024F\\u0300-\\u036F])","gi");
 
 /* ---------- 2) Precompiled term matcher ---------- */
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+// Harf sinifi — \p{L}/\p{M} ve 'u' bayragi YOK (eski mobil Safari bunlari parse edemiyor ve
+// tum script'i syntax hatasiyla oldururdu). Latin + Turkce + birlesik isaretler acik aralikla:
+const LET = "A-Za-z\\u00C0-\\u024F\\u0300-\\u036F";
+const WORD_RE = new RegExp("["+LET+"']+","g");
 const TERMS = [];
 function addTerms(list,cat){
   for(const t of list){
-    // NOTE: no look-behind — eski mobil Safari onu desteklemiyor ve tum script'i cokertiyor.
-    // Bunun yerine basa optional non-letter yakalanir (m[1]); gercek baslangic m.index+m[1].length.
-    TERMS.push({t,cat,len:t.length,re:new RegExp(`(^|[^\\p{L}\\p{M}])${esc(t)}(?![\\p{L}\\p{M}])`,'giu')});
+    // look-behind yok: bastaki non-letter (m[1]) yakalanir; gercek baslangic m.index+m[1].length
+    TERMS.push({t,cat,len:t.length,re:new RegExp("(^|[^"+LET+"])"+esc(t)+"(?!["+LET+"])","gi")});
   }
 }
 addTerms(AI_PHRASES,'cliche'); addTerms(HYPE,'hype'); addTerms(TRANSITIONS,'trans'); addTerms(HEDGES,'hedge');
@@ -479,7 +500,7 @@ function getSentences(t){
   });
   return out;
 }
-const getWords = t => (t.toLowerCase().match(/[\p{L}\p{M}']+/gu) || []);
+const getWords = t => { WORD_RE.lastIndex=0; return (t.toLowerCase().match(WORD_RE) || []); };
 function htmlEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 /* ---------- 4) The engine ---------- */
@@ -492,7 +513,7 @@ function analyze(text){
   const scan = scanTerms(text);
 
   // A) Burstiness
-  const lens = sentences.map(s => (s.match(/[\p{L}\p{M}']+/gu)||[]).length).filter(n=>n>0);
+  const lens = sentences.map(s => { WORD_RE.lastIndex=0; return (s.match(WORD_RE)||[]).length; }).filter(n=>n>0);
   const mean = lens.reduce((a,b)=>a+b,0)/(lens.length||1);
   const variance = lens.reduce((a,b)=>a+(b-mean)**2,0)/(lens.length||1);
   const cv = mean>0 ? Math.sqrt(variance)/mean : 0;
@@ -522,7 +543,7 @@ function analyze(text){
   const hedgeAI = clamp01(hedgePer100 / 2.4);
 
   // G) Sentence-starter repetition
-  const starters = sentences.map(s => (s.match(/[\p{L}\p{M}']+/u)||[''])[0].toLowerCase()).filter(Boolean);
+  const starters = sentences.map(s => { WORD_RE.lastIndex=0; const m=s.match(WORD_RE); return (m?m[0]:'').toLowerCase(); }).filter(Boolean);
   const stCount={}; starters.forEach(s=>stCount[s]=(stCount[s]||0)+1);
   const repeated = Object.values(stCount).filter(n=>n>1).reduce((a,b)=>a+(b-1),0);
   const starterAI = starters.length>=4 ? clamp01(repeated/starters.length/0.35) : 0.35;
@@ -546,7 +567,7 @@ function analyze(text){
   }
 
   // J) Rule of three / list symmetry
-  const triples = (text.match(/,\s*[^,.;!?]{1,40}\s+(?:and|or|ve|veya|ya da)\s/giu)||[]).length;
+  const triples = (text.match(/,\s*[^,.;!?]{1,40}\s+(?:and|or|ve|veya|ya da)\s/gi)||[]).length;
   const triplesPerSent = sc>0 ? triples/sc : 0;
   const tripleAI = clamp01(triplesPerSent/0.3);
 
@@ -897,28 +918,47 @@ const SAMPLE_AI_TR = `Günümüz dünyasında yapay zeka, hayatımızın vazgeç
 
 const SAMPLE_HUMAN = `Okay so I finally tried that ramen place everyone keeps raving about. Honestly? Mixed feelings. The broth was unreal — rich, deep, the kind that sticks to your lips. But twenty bucks for a bowl I finished in eight minutes? Come on. I went with my brother, who somehow ordered the spiciest thing on the menu and then pretended he wasn't dying. He was. Tears, the whole show. We'll probably go back, though. The chashu alone is worth it.`;
 
-function safeRender(){ try{ render(); }catch(e){ console.error("render error:", e); } }
+function setStatus(cls, text){
+  const s=$("status"); if(!s) return;
+  s.className="status "+cls;
+  s.innerHTML='<span class="ld"></span><span>'+text+'</span>';
+}
+function safeRender(){ try{ render(); return true; }catch(e){ console.error("render error:", e); setStatus("err","⚠️ Analiz hatası: "+(e&&e.message||e)); return false; } }
 
 let deb=null, analyzed=false;
 // START: tek dokunusla tum zincir calisir (skor + tarama + sinyaller + sebepler + notlar)
 function runAnalysis(scroll){
   analyzed = true;
-  safeRender();
-  if(scroll){ const sc=document.querySelector(".scorecard"); if(sc) sc.scrollIntoView({behavior:"smooth", block:"start"}); }
+  if(!input.value.trim()){ setStatus("ready","● Önce metni yapıştır"); safeRender(); return; }
+  setStatus("busy","Analiz ediliyor…");
+  setTimeout(function(){
+    const okR = safeRender();
+    if(okR){
+      const r=lastResult;
+      if(r && !r.tooShort) setStatus("done","✓ Analiz edildi · %"+r.pct+" AI · "+r.hitCount+" kalıp bulundu");
+      else setStatus("ready","● Metin çok kısa — en az ~12 kelime gir");
+    }
+    if(scroll){ const sc=document.querySelector(".scorecard"); if(sc) sc.scrollIntoView({behavior:"smooth", block:"start"}); }
+  }, 40);
 }
 // Ilk analizden SONRA, duzelttikce canli guncelleme (basta otomatik yok)
-function liveUpdate(delay){ if(!analyzed) return; clearTimeout(deb); deb=setTimeout(safeRender, delay); }
+function liveUpdate(delay){
+  if(!analyzed) return;
+  clearTimeout(deb);
+  deb=setTimeout(function(){ if(safeRender()){ const r=lastResult; if(r&&!r.tooShort) setStatus("done","✓ Güncellendi · %"+r.pct+" AI"); } }, delay);
+}
 
 $("analyzeBtn").onclick = ()=>runAnalysis(true);
-$("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; runAnalysis(false); };
-$("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; runAnalysis(false); };
-$("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; runAnalysis(false); };
-$("clear").onclick = ()=>{ input.value=""; analyzed=false; safeRender(); input.focus(); };
+$("sampleAIen").onclick = ()=>{ input.value=SAMPLE_AI_EN; runAnalysis(true); };
+$("sampleAItr").onclick = ()=>{ input.value=SAMPLE_AI_TR; runAnalysis(true); };
+$("sampleHuman").onclick = ()=>{ input.value=SAMPLE_HUMAN; runAnalysis(true); };
+$("clear").onclick = ()=>{ input.value=""; analyzed=false; safeRender(); setStatus("ready","● Hazır — metni yapıştır, Analiz Et'e bas"); input.focus(); };
 
 input.addEventListener("input", ()=>liveUpdate(150));
 input.addEventListener("keyup", ()=>liveUpdate(150));
 
 safeRender(); // bos baslangic durumu
+setStatus("ready","● Hazır — metni yapıştır, Analiz Et'e bas");  // <-- bu gorunuyorsa JS calisiyor demektir
 </script>
 </body>
 </html>
