@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Dedektör v4 — Bu metni yapay zeka mı yazdı?</title>
+<meta name="theme-color" content="#8b6dff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="AI Dedektör" />
+<meta name="description" content="Metni yapıştır, AI mı insan mı öğren — 20 sinyal, ısı haritası, Claude ile insansılaştırma." />
+<title>AI Dedektör v5 — Bu metni yapay zeka mı yazdı?</title>
+<script>
+  /* [v5] FOUC onleyici tema init — CSS'ten once class ata */
+  (function(){ try{ var s=localStorage.getItem("theme");
+    if(s==="light" || (!s && window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches))
+      document.documentElement.classList.add("light");
+  }catch(e){} })();
+</script>
 <style>
   :root{
     --bg-0:#06060f;
@@ -271,6 +284,126 @@
     #printReport table{width:100%;border-collapse:collapse;font-size:12px}
     #printReport td,#printReport th{border:1px solid #ddd;padding:5px 8px;text-align:left}
   }
+
+  /* ===== [v5] LIGHT TEMA ===== */
+  :root.light{
+    --bg-0:#f5f5fa; --bg-1:#eeeef4; --card:rgba(255,255,255,.85); --card-2:rgba(240,240,250,.8);
+    --stroke:rgba(0,0,0,.08); --txt:#1a1a2e; --muted:#6b6b8a; --faint:#9b9bb0;
+    --accent:#7c5ce0; --accent-2:#1fae9f; --human:#22b07a; --mid:#d4a83a; --ai:#e04860;
+    --shadow:0 20px 60px rgba(0,0,0,.08);
+  }
+  :root.light .blob{opacity:.18}
+  :root.light textarea{background:rgba(0,0,0,.04)}
+  :root.light .preview, :root.light .cmp .pane, :root.light .selbox, :root.light .keyrow input{background:rgba(0,0,0,.03)}
+  :root.light .bar, :root.light .qbar, :root.light .reason .rbar, :root.light .sparkbox{background:rgba(0,0,0,.06)}
+  :root.light mark{color:#1a1a2e}
+  :root.light .tnote p{color:#7a3a42} :root.light .tnote.ok p{color:#1a5a38}
+  :root.light .reason .rfix{color:#155a4f}
+  :root.light .rlabel{fill:#6b6b8a}
+  :root.light #toast{background:rgba(255,255,255,.96);color:#1a5a38;border-color:rgba(34,176,122,.5)}
+  :root.light .grade{background:rgba(0,0,0,.04)}
+  :root.light .scorecard::before{background:conic-gradient(from 0deg,transparent 70%,rgba(124,92,224,.10),transparent 90%)}
+  :root.light .wizard-card, :root.light .modal-card{background:#fff;color:#1a1a2e}
+  :root.light .genre-btn.on{background:rgba(124,92,224,.14)}
+
+  /* theme button */
+  .theme-btn{position:absolute;top:0;right:0;border:1px solid var(--stroke);background:rgba(255,255,255,.05);
+    color:var(--txt);width:38px;height:38px;border-radius:11px;font-size:17px;cursor:pointer;transition:.18s}
+  .theme-btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  header.top{position:relative}
+
+  /* genre selector */
+  .genre-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .genre-row .gl{font-size:12px;color:var(--muted);font-weight:600;margin-right:2px}
+  .genre-btn{border:1px solid var(--stroke);background:rgba(255,255,255,.04);color:var(--muted);
+    padding:6px 12px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.18s}
+  .genre-btn:hover{border-color:var(--accent)}
+  .genre-btn.on{background:rgba(139,109,255,.2);border-color:rgba(139,109,255,.5);color:#dcd2ff}
+
+  /* sparkline + benchmark */
+  .sparkbox{background:rgba(0,0,0,.18);border:1px solid var(--stroke);border-radius:12px;padding:10px;margin-top:6px}
+  .sparkbox svg{width:100%;display:block}
+  .sparkempty{font-size:12px;color:var(--faint);font-style:italic;text-align:center;padding:18px 0}
+  .bm-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;font-size:12px}
+  .bm-row .lbl{flex:0 0 110px;color:var(--muted)}
+  .bm-row .track{flex:1;height:14px;border-radius:7px;background:rgba(255,255,255,.06);overflow:hidden}
+  .bm-row .track i{display:block;height:100%;border-radius:7px;transition:width .7s cubic-bezier(.2,.7,.2,1)}
+  .bm-row .v{flex:0 0 42px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  .bm-pos{margin-top:8px;font-size:12px;color:var(--muted);text-align:center}
+  .bm-pos b{color:var(--txt)}
+
+  /* analysis history */
+  .hist-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:var(--card-2);border:1px solid var(--stroke);margin-bottom:7px}
+  .hist-item .hp{flex:0 0 46px;text-align:center;font-size:13px;font-weight:800;padding:3px 0;border-radius:7px;color:#0a0a14}
+  .hist-item .ht{flex:1;min-width:0}
+  .hist-item .ht .hpre{font-size:12px;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hist-item .ht .hmeta{font-size:10.5px;color:var(--faint)}
+
+  /* micro-interactions: ripple */
+  .btn{position:relative;overflow:hidden}
+  .btn::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.3) 10%,transparent 60%);transform:scale(0);opacity:0;transition:transform .4s,opacity .4s;pointer-events:none}
+  .btn:active::after{transform:scale(2.5);opacity:1;transition:0s}
+  .gauge{transition:transform .25s}
+  .gauge:hover{transform:scale(1.03)}
+  .scorecard.celebrate{box-shadow:0 0 0 2px rgba(52,211,153,.5), 0 0 40px rgba(52,211,153,.35)}
+  .celebrate-msg{color:var(--human);font-weight:800;font-size:14px;margin-top:8px;animation:fadeUp .5s both}
+  @keyframes cardIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .card{animation:cardIn .5s ease both}
+  .kbd-hint{font-size:11px;color:var(--faint);text-align:center;margin-top:6px}
+
+  /* wizard modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(5,5,12,.72);backdrop-filter:blur(4px);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}
+  .modal-bg.show{display:flex;animation:fadeUp .25s both}
+  .wizard-card{background:#15152a;border:1px solid var(--stroke);border-radius:20px;padding:22px;width:560px;max-width:96vw;max-height:88vh;overflow:auto;box-shadow:var(--shadow)}
+  .wz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .wz-prog{font-size:12px;color:var(--muted);font-weight:700}
+  .wz-close{border:none;background:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+  .wz-progbar{height:6px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:16px}
+  .wz-progbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:5px;transition:width .4s}
+  .wz-title{font-size:17px;font-weight:800;margin-bottom:8px}
+  .wz-why{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:12px}
+  .wz-why b{color:var(--txt)}
+  .wz-fix{font-size:12.5px;color:#c9f7ef;background:rgba(74,214,200,.08);border-left:2px solid var(--accent-2);padding:9px 12px;border-radius:0 9px 9px 0;margin-bottom:14px}
+  .wz-result{background:rgba(0,0,0,.24);border:1px solid var(--stroke);border-radius:12px;padding:13px;margin-bottom:13px;font-size:13px;line-height:1.6;max-height:200px;overflow:auto}
+  .wz-result .old{color:#c98f96;text-decoration:line-through;opacity:.7}
+  .wz-result .new{color:#bdf0d8;display:block;margin-top:7px}
+  .wz-btns{display:flex;gap:8px;flex-wrap:wrap}
+  .wz-status{font-size:12px;color:var(--muted);margin-top:10px;min-height:15px}
+  .wz-done{text-align:center;padding:14px 0}
+  .wz-done .big{font-size:40px;font-weight:800;margin:6px 0}
+
+  /* multi-rewrite options */
+  .rwopts{display:grid;grid-template-columns:1fr;gap:8px;margin-top:11px}
+  .rwopt{background:rgba(0,0,0,.22);border:1px solid var(--stroke);border-radius:11px;padding:11px}
+  .rwopt .ro-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .rwopt .ro-tag{font-size:10.5px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+  .rwopt .ro-score{font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;color:#0a0a14}
+  .rwopt .ro-text{font-size:13px;line-height:1.55;margin-bottom:8px}
+
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:90;display:none}
+
+  /* ===== [v5] MOBİL ===== */
+  @media(max-width:940px){
+    .grid{grid-template-columns:1fr}
+    .grid > section:last-child{order:-1}
+    .gauge{width:180px;height:180px}
+    .gauge .pct{font-size:44px}
+    .radarbox svg{width:280px;height:280px}
+    h1{font-size:30px}
+    .cmp{grid-template-columns:1fr}
+  }
+  @media(max-width:480px){
+    body{padding:16px 10px 50px}
+    .card{padding:15px;border-radius:16px}
+    .toolbar{gap:5px}
+    .btn{padding:7px 10px;font-size:11.5px}
+    .stat-pills{font-size:11px}
+    .sub{font-size:13.5px}
+    textarea{min-height:160px;font-size:14px}
+    .preview{font-size:13.5px;max-height:220px}
+    .sent{padding:3px 2px}
+    .wizard-card{padding:16px}
+  }
 </style>
 <script>
   // Erken hata yakalayici: ana script parse/calisma hatasi verirse ekranda goster (sessizce olme).
@@ -284,9 +417,10 @@
 <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 <div class="wrap">
   <header class="top">
-    <span class="badge"><span class="dot"></span> AI Content Detector · Motor v4 · 16 sinyal · Claude entegrasyonu</span>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="Tema değiştir">🌙</button>
+    <span class="badge"><span class="dot"></span> <span id="badgeText">AI Content Detector · Motor v5 · 20 sinyal · Tür: Akademik</span></span>
     <h1>Bu metni <span>yapay zeka mı</span> yazdı?</h1>
-    <p class="sub">Metni yapıştır; motor 16 sinyalle çözümlesin. <b>Cümle cümle ısı haritası</b>, AI skoru + yazı kalitesi skoru, radar dashboard ve <b>uygulama içi Claude ile insansılaştırma</b> — sorunlu cümleye dokun, Claude yeniden yazsın, skorun düşsün.</p>
+    <p class="sub">Metni yapıştır; motor 20 sinyalle çözümlesin. Cümle cümle ısı haritası, radar dashboard, yazı kalitesi skoru, skor geçmişi grafiği, tür bazlı analiz ve uygulama içi Claude ile insansılaştırma — sorunlu cümleye dokun, 3 alternatif seç, skorun düşsün.</p>
   </header>
 
   <div id="jsWarn">
@@ -300,10 +434,17 @@
     <section>
       <div class="card dropzone" id="dropCard">
         <h2>📝 Metin</h2>
+        <div class="genre-row">
+          <span class="gl">Tür:</span>
+          <button type="button" class="genre-btn on" data-genre="academic" aria-label="Akademik tür">🎓 Akademik</button>
+          <button type="button" class="genre-btn" data-genre="creative" aria-label="Yaratıcı tür">✍️ Yaratıcı</button>
+          <button type="button" class="genre-btn" data-genre="business" aria-label="İş türü">💼 İş</button>
+          <button type="button" class="genre-btn" data-genre="casual" aria-label="Gündelik tür">💬 Gündelik</button>
+        </div>
         <textarea id="input" placeholder="Analiz etmek istediğin metni buraya yapıştır (veya .txt dosyasını sürükleyip bırak), sonra Analiz Et'e bas."></textarea>
-        <button type="button" class="btn primary analyze-btn" id="analyzeBtn" onclick="if(window.__run)window.__run(true)">🔍 Analiz Et</button>
+        <button type="button" class="btn primary analyze-btn" id="analyzeBtn" onclick="if(window.__run)window.__run(true)" aria-label="Analiz et">🔍 Analiz Et</button>
         <div id="status" class="status">JS yükleniyor…</div>
-        <div class="drophint">💡 .txt / .md dosyasını bu kartın üstüne sürükleyip bırakabilirsin</div>
+        <div class="kbd-hint">💡 Ctrl/Cmd + Enter ile hızlı analiz · .txt/.md dosyasını karta sürükleyip bırakabilirsin</div>
         <div class="toolbar">
           <button type="button" class="btn" id="sampleAIen">AI (EN)</button>
           <button type="button" class="btn" id="sampleAItr">AI (TR)</button>
@@ -311,6 +452,11 @@
           <button type="button" class="btn ghost" id="clear">Temizle</button>
           <div class="stat-pills"><span><b id="wc">0</b> kelime</span><span><b id="sc">0</b> cümle</span></div>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>📚 Geçmiş analizler <button type="button" class="btn ghost" id="histClear" style="margin-left:auto;font-size:11px;padding:4px 9px">🗑️ Temizle</button></h2>
+        <div id="histList"><span class="empty">Henüz kayıt yok — analiz yaptıkça (metinsiz, gizliliğe saygılı) burada birikecek.</span></div>
       </div>
 
       <div class="card">
@@ -370,6 +516,20 @@
           <div class="ends"><span>👤 İnsan</span><span>🤖 AI</span></div>
         </div>
         <div class="conf"><span>Güven: <b id="conf">—</b></span><span>Tespit edilen kalıp: <b id="hitCount">0</b></span></div>
+        <div id="celebrateMsg"></div>
+      </div>
+
+      <div class="card">
+        <h2>📊 Benchmark — sen nerede duruyorsun</h2>
+        <div class="bm-row"><span class="lbl">👤 Ort. insan metni</span><div class="track"><i id="bmHuman" style="width:0%;background:var(--human)"></i></div><span class="v" id="bmHumanV">%14</span></div>
+        <div class="bm-row"><span class="lbl" style="color:var(--txt);font-weight:700">📝 Senin metnin</span><div class="track"><i id="bmYou" style="width:0%"></i></div><span class="v" id="bmYouV">—</span></div>
+        <div class="bm-row"><span class="lbl">🤖 Ort. AI metni</span><div class="track"><i id="bmAI" style="width:0%;background:var(--ai)"></i></div><span class="v" id="bmAIV">%82</span></div>
+        <div class="bm-pos" id="bmPos">Analiz et, konumun belirsin.</div>
+      </div>
+
+      <div class="card">
+        <h2>📉 Skor geçmişi <button type="button" class="btn ghost" id="sparkClear" style="margin-left:auto;font-size:11px;padding:4px 9px">🗑️ Temizle</button></h2>
+        <div class="sparkbox" id="sparkBox"><div class="sparkempty">Metni düzeltip tekrar analiz ettikçe skor değişimin burada çizilecek.</div></div>
       </div>
 
       <div class="card">
@@ -394,6 +554,7 @@
           <button type="button" class="btn" id="btnRwAll" disabled>🪄 Tüm metni insansılaştır</button>
         </div>
         <div class="rwstatus" id="rwStatus"></div>
+        <div class="rwopts" id="rwOpts" style="display:none"></div>
       </div>
 
       <div class="card" id="compareCard" style="display:none">
@@ -418,8 +579,9 @@
       <div class="card">
         <h2>🎯 Bu metni AI yapan şeyler</h2>
         <div class="masterfix" id="masterfix" style="display:none">
-          <button type="button" class="btn primary" id="copyAll">🪄 Hepsini düzelt — AI promptunu kopyala</button>
-          <span class="hint">Kopyalanan promptu ChatGPT/Claude'a yapıştır; ya da yukarıdaki entegre Claude butonunu kullan.</span>
+          <button type="button" class="btn primary" id="wizardBtn">🧙 Düzeltme sihirbazını başlat</button>
+          <button type="button" class="btn" id="copyAll">🪄 Hepsini düzelt — promptu kopyala</button>
+          <span class="hint">Sihirbaz sorunları tek tek Claude'a düzelttirir; ya da promptu kopyalayıp dışarıda kullan.</span>
         </div>
         <div id="reasons"><span class="empty">Metin girince en güçlü AI sebepleri sırayla burada çıkacak.</span></div>
       </div>
@@ -432,21 +594,32 @@
       <details class="how">
         <summary>⚙️ Motor nasıl çalışıyor? (ve doğruluk notu)</summary>
         <div class="content">
-          <b>Heuristik</b>, tarayıcıda lokal çalışır (Claude insansılaştırma hariç — o, kendi API anahtarınla doğrudan Anthropic'e gider). 16 sinyal:
-          <b>AI klişeleri</b>, <b>abartı/hype</b>, <b>burstiness</b>, <b>hedge</b>, <b>geçiş kelimeleri</b>, <b>aşırı resmiyet</b>,
-          <b>edilgen çatı</b>, <b>nominalizasyon</b>, <b>zarf yığını</b>, <b>paragraf tekdüzeliği</b>,
-          <b>perplexity vekili</b>, <b>n-gram tekrarı</b>, <b>üçlü liste</b>, <b>cümle tekdüzeliği</b>, <b>noktalama</b>, <b>cümle başı tekrarı</b>.
+          <b>Heuristik</b>, tarayıcıda lokal çalışır (Claude insansılaştırma hariç — o, kendi API anahtarınla doğrudan Anthropic'e gider). <b>20 sinyal:</b>
+          AI klişeleri, abartı/hype, burstiness, hedge, geçiş kelimeleri, aşırı resmiyet, edilgen çatı, nominalizasyon, zarf yığını, paragraf tekdüzeliği,
+          perplexity vekili, n-gram tekrarı, üçlü liste, cümle tekdüzeliği, noktalama, cümle başı tekrarı, <b>duygu tekdüzeliği</b>, <b>somutluk</b>, <b>soru kullanımı</b>, <b>bilgi yoğunluğu varyansı</b>.
           <br><br>
-          <b>Benchmark:</b> 24 örnekli TR+EN test setiyle kalibre edildi. <b>Doğruluk notu:</b> Hiçbir dedektör %100 garantili değildir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan.
+          <b>Tür bazlı analiz:</b> Akademik/Yaratıcı/İş/Gündelik türlerine göre sinyal ağırlıkları uyarlanır (ör. gündelik metinde resmiyet daha güçlü AI sinyali sayılır).
+          <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
+          Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
+          <br><br>
+          <b>Benchmark:</b> 24 örnekli TR+EN test setiyle kalibre edildi (24/24, ayrım marjı ~21 puan). <b>Doğruluk notu:</b> Hiçbir dedektör %100 garantili değildir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan.
         </div>
       </details>
     </section>
   </div>
 
-  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · Claude insansılaştırma yalnızca senin API anahtarınla, doğrudan Anthropic'e</p>
+  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 20 sinyal · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
 </div>
 <div id="toast">✓ Kopyalandı</div>
 <div id="printReport"></div>
+<canvas id="confetti"></canvas>
+<div class="modal-bg" id="wizardBg">
+  <div class="wizard-card" role="dialog" aria-modal="true" aria-label="Düzeltme sihirbazı">
+    <div class="wz-top"><span class="wz-prog" id="wzProg">Sorun 1/5</span><button type="button" class="wz-close" id="wzClose" aria-label="Kapat">×</button></div>
+    <div class="wz-progbar"><i id="wzProgBar" style="width:0%"></i></div>
+    <div id="wzBody"></div>
+  </div>
+</div>
 
 <script>
 /* ============================================================
@@ -550,6 +723,15 @@ const NOMINAL_TR = new RegExp("["+LET+"]{3,}(?:ması|mesi|maları|meleri)(?!["+L
 const ADV_EN = /\b[A-Za-z]{4,}ly\b/g;
 const ADV_STOP = {only:1,family:1,reply:1,supply:1,early:1,belly:1,silly:1,jelly:1,holy:1,italy:1,july:1,ally:1,apply:1,multiply:1,likely:1,rally:1,bully:1,daily:1,assembly:1,monopoly:1};
 const ADV_TR = /\bşekilde\b|\bbiçimde\b/gi;
+
+/* v5 yeni sinyal kaynaklari: duygu, somutluk, soru, bilgi yogunlugu */
+const POS_WORDS = ["good","great","love","loved","happy","glad","enjoy","enjoyed","wonderful","pleased","grateful","excited","proud","amazing","awesome","güzel","harika","sevdi","sevdim","mutlu","memnun","keyif","hoş","sevinç","gurur","muhteşem","bayıl"];
+const NEG_WORDS = ["bad","terrible","hate","hated","angry","sad","awful","horrible","frustrating","annoying","disappointed","worst","ugly","kötü","berbat","nefret","kızgın","üzgün","sinir","korkunç","sıkıcı","rezalet","iğrenç","hayal kırıklığı"];
+function buildStemRe(list){ return new RegExp("(^|[^"+LET+"])(?:"+list.map(esc).join("|")+")","gi"); }
+const POS_RE = buildStemRe(POS_WORDS);
+const NEG_RE = buildStemRe(NEG_WORDS);
+const TIME_REF = /\b(geçen|dün|bugün|önceki gün|geçtiğimiz|last|yesterday|today|once|remember when)\b/gi;
+const PROPER_RE = /[a-zçğıöşü"',)]\s+[A-ZÇĞİÖŞÜ][A-Za-zçğıöşüÇĞİÖŞÜ]+/g;
 
 /* ---------- 2) Precompiled term matcher ---------- */
 function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
@@ -729,6 +911,41 @@ function analyze(text){
     parauAI = clamp01((0.34 - paraCV)/0.28);
   }
 
+  // Q) [v5] Emotional flatness — duygu tonu tekduzeligi
+  const posTotal = countRe(text, POS_RE), negTotal = countRe(text, NEG_RE);
+  let emotionAI = 0.4, emoStd = null;
+  if((posTotal+negTotal)>=3 && sentences.length>=3){
+    const sents2 = sentences.map(function(s){ const p=countRe(s,POS_RE), nn=countRe(s,NEG_RE); return p>nn?1:(nn>p?-1:0); });
+    const em = sents2.reduce(function(a,b){return a+b;},0)/sents2.length;
+    const ev = sents2.reduce(function(a,b){return a+Math.pow(b-em,2);},0)/sents2.length;
+    emoStd = Math.sqrt(ev);
+    emotionAI = clamp01((0.78 - emoStd)/0.78);
+  }
+
+  // R) [v5] Concreteness — somut detay / kisisel anekdot yogunlugu
+  const numeralsCount = countRe(text, /\b\d+[.,]?\d*\b/g);
+  const timeRefs = countRe(text, TIME_REF);
+  const properNouns = countRe(text, PROPER_RE);
+  const concreteCount = numeralsCount + timeRefs + properNouns;
+  const concretePer100 = concreteCount/wc*100;
+  const concreteAI = clamp01((1.5 - concretePer100)/1.5);
+
+  // S) [v5] Question usage — soru / retorik soru (yumusatilmis: cogu prozada soru 0'dir)
+  const questionsCount = countRe(text, /\?/g);
+  const questionPer100 = questionsCount/wc*100;
+  const questionAI = clamp01((0.6 - questionPer100)/0.6) * 0.7;
+
+  // T) [v5] Info-density variance — cumle basina bilgi yogunlugu degiskenligi
+  let infoDensityAI = 0.4, ttrStd = null;
+  const sTTR = [];
+  for(const s of sentences){ WORD_RE.lastIndex=0; const ws=(s.toLowerCase().match(WORD_RE)||[]); if(ws.length>=4){ const u={}; let uc=0; for(const w of ws){ if(!u[w]){u[w]=1;uc++;} } sTTR.push(uc/ws.length); } }
+  if(sTTR.length>=3){
+    const tm = sTTR.reduce(function(a,b){return a+b;},0)/sTTR.length;
+    const tv = sTTR.reduce(function(a,b){return a+Math.pow(b-tm,2);},0)/sTTR.length;
+    ttrStd = Math.sqrt(tv);
+    infoDensityAI = clamp01((0.12 - ttrStd)/0.12);
+  }
+
   // Human signals
   const casual = countRe(text, HUMAN_CASUAL);
   const exclaim = countRe(text, /!/g);
@@ -741,44 +958,60 @@ function analyze(text){
   const humanBonus = clamp01(humanRaw / (wc/100*9 + 4));
 
   const parts = [
-    {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
+    {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.18, val:scan.counts.cliche+" eşleşme",
       desc:"'delve, önemli bir rol oynar' + yapısal kalıplar ('From X to Y', 'not just X but Y')."},
-    {key:"hype", name:"Abartı / hype dili", short:"Hype", ai:hypeAI, w:0.09, val:scan.counts.hype+" adet",
+    {key:"hype", name:"Abartı / hype dili", short:"Hype", ai:hypeAI, w:0.08, val:scan.counts.hype+" adet",
       desc:"'remarkable, unprecedented, devrim niteliğinde' — pazarlama tonu AI'nın zayıf noktası."},
-    {key:"burst", name:"Burstiness (cümle ritmi)", short:"Ritim", ai:burstAI, w:0.11, val:"DK="+cv.toFixed(2),
+    {key:"burst", name:"Burstiness (cümle ritmi)", short:"Ritim", ai:burstAI, w:0.10, val:"DK="+cv.toFixed(2),
       desc:"İnsanlar uzun/kısa cümleleri karıştırır; AI tekdüze yazar. Düşük değişkenlik = AI."},
-    {key:"hedge", name:"Qualifier / hedge yoğunluğu", short:"Hedge", ai:hedgeAI, w:0.07, val:scan.counts.hedge+" adet",
+    {key:"hedge", name:"Qualifier / hedge yoğunluğu", short:"Hedge", ai:hedgeAI, w:0.06, val:scan.counts.hedge+" adet",
       desc:"'genellikle, tipik olarak, may, often' gibi temkinli ifadeler AI'da bolca görülür."},
-    {key:"trans", name:"Geçiş kelimesi yoğunluğu", short:"Geçiş", ai:transAI, w:0.07, val:transPerSent.toFixed(2)+"/cümle",
+    {key:"trans", name:"Geçiş kelimesi yoğunluğu", short:"Geçiş", ai:transAI, w:0.06, val:transPerSent.toFixed(2)+"/cümle",
       desc:"AI 'ayrıca / however / moreover' bağlaçlarına aşırı yüklenir."},
-    {key:"formal", name:"Aşırı resmiyet", short:"Resmiyet", ai:formalAI, w:0.07, val:scan.counts.form+" resmi ek",
+    {key:"formal", name:"Aşırı resmiyet", short:"Resmiyet", ai:formalAI, w:0.06, val:scan.counts.form+" resmi ek",
       desc:"TR '-maktadır/-mektedir' ve uzun kelime oranı resmi/AI dili sinyali."},
-    {key:"passive", name:"Edilgen çatı yoğunluğu", short:"Edilgen", ai:passiveAI, w:0.05, val:passiveTotal+" adet",
+    {key:"passive", name:"Edilgen çatı yoğunluğu", short:"Edilgen", ai:passiveAI, w:0.04, val:passiveTotal+" adet",
       desc:"[v4] 'yapılmıştır / is considered' — AI özneyi gizler, edilgene kaçar."},
-    {key:"nominal", name:"Nominalizasyon (fiilden isim)", short:"Nominal", ai:nominalAI, w:0.04, val:nomCount+" adet",
+    {key:"nominal", name:"Nominalizasyon (fiilden isim)", short:"Nominal", ai:nominalAI, w:0.03, val:nomCount+" adet",
       desc:"[v4] 'gerçekleştirilmesi, implementation' — isimleştirme bürokratik AI tonu verir."},
-    {key:"advrb", name:"Zarf yığını", short:"Zarf", ai:advAI, w:0.04, val:advCount+" adet",
+    {key:"advrb", name:"Zarf yığını", short:"Zarf", ai:advAI, w:0.03, val:advCount+" adet",
       desc:"[v4] '-ly' ve 'bir şekilde' bolluğu — AI her eylemi 'etkili bir şekilde' yapar."},
-    {key:"parau", name:"Paragraf tekdüzeliği", short:"Paragraf", ai:parauAI, w:0.04, val:paraCount>=3?("DK="+(paraCV!==null?paraCV.toFixed(2):"—")):"<3 paragraf",
+    {key:"parau", name:"Paragraf tekdüzeliği", short:"Paragraf", ai:parauAI, w:0.03, val:paraCount>=3?("DK="+(paraCV!==null?paraCV.toFixed(2):"—")):"<3 paragraf",
       desc:"[v4] AI paragrafları eşit boyda keser; insan paragrafları nefes alır."},
     {key:"perplex", name:"Perplexity vekili", short:"Perplexity", ai:perplexAI, w:0.05, val:"TTR="+ttr.toFixed(2),
       desc:"Fazla 'güvenli/öngörülebilir' kelime seçimi = AI sinyali."},
     {key:"ngram", name:"N-gram tekrarı", short:"N-gram", ai:ngramAI, w:0.05, val:repTri+" tekrar",
       desc:"Aynı 3'lü kelime dizilerinin tekrarı kalıplı üretimi gösterir."},
-    {key:"triple", name:"Üçlü liste (rule of three)", short:"Üçlü", ai:tripleAI, w:0.05, val:triples+" adet",
+    {key:"triple", name:"Üçlü liste (rule of three)", short:"Üçlü", ai:tripleAI, w:0.04, val:triples+" adet",
       desc:"'x, y ve z' simetrik üçlüler AI'nın en sevdiği yapıdır."},
-    {key:"uniform", name:"Cümle uzunluğu tekdüzeliği", short:"Tekdüze", ai:uniformAI, w:0.04, val:"%"+Math.round(bandFrac*100)+" bantta",
+    {key:"uniform", name:"Cümle uzunluğu tekdüzeliği", short:"Tekdüze", ai:uniformAI, w:0.03, val:"%"+Math.round(bandFrac*100)+" bantta",
       desc:"Cümlelerin çoğu 12–26 kelime bandında toplanıyorsa kalıp kokar."},
     {key:"punct", name:"Noktalama parmak izi", short:"Noktalama", ai:punctAI, w:0.03, val:emDash+" em-dash",
       desc:"Em-dash aşırılığı ve (İng.) kısaltma yokluğu modern AI izidir."},
     {key:"starter", name:"Cümle başı tekrarı", short:"Başlangıç", ai:starterAI, w:0.03, val:repeated+" tekrar",
-      desc:"Aynı kelimeyle başlayan cümleler kalıpsal yapıyı ele verir."}
+      desc:"Aynı kelimeyle başlayan cümleler kalıpsal yapıyı ele verir."},
+    {key:"emotion", name:"Duygusal ton tekdüzeliği", short:"Duygu", ai:emotionAI, w:0.04, val:emoStd!==null?("σ="+emoStd.toFixed(2)):"yetersiz",
+      desc:"[v5] AI tek tonda kalır; insan yazısı pozitif/negatif arası dalgalanır."},
+    {key:"concrete", name:"Somutluk / kişisel detay", short:"Somutluk", ai:concreteAI, w:0.04, val:concreteCount+" somut iz",
+      desc:"[v5] İnsan rakam/isim/zaman/anı verir; AI genelleştirir. Az somutluk = AI."},
+    {key:"question", name:"Soru kullanımı", short:"Soru", ai:questionAI, w:0.03, val:questionsCount+" soru",
+      desc:"[v5] İnsan retorik soru sorar; AI açıklayıcı moda saplanır."},
+    {key:"infodensity", name:"Bilgi yoğunluğu varyansı", short:"Bilgi Yoğ.", ai:infoDensityAI, w:0.03, val:ttrStd!==null?("σ="+ttrStd.toFixed(2)):"yetersiz",
+      desc:"[v5] AI her cümleye eşit bilgi yükler; insanda yoğun/geçiş cümleler değişir."}
   ];
 
+  // [v5] Tür (genre) bazli agirliklandirma — her sinyalin ai degerini ture gore carp
+  try{
+    const gw = (typeof selectedGenre!=="undefined" && GENRE_WEIGHTS[selectedGenre]) ? GENRE_WEIGHTS[selectedGenre] : null;
+    if(gw) parts.forEach(function(p){ const m=(typeof gw[p.key]==="number")?gw[p.key]:1; p.ai = clamp01(p.ai*m); });
+  }catch(e){}
+
   // Normalize edilmis agirlikli ortalama + dominance boost
+  // [v5] yeni yumusak sinyaller (duygu/somut/soru/bilgi) boost'a girmez — sadece guclu sinyaller amplifiye edilir
+  const SOFT = {emotion:1, concrete:1, question:1, infodensity:1};
   const totW = parts.reduce(function(a,p){return a+p.w;},0);
   const base = parts.reduce(function(a,p){return a+p.ai*p.w;},0) / totW;
-  const excess = parts.reduce(function(a,p){return a+Math.max(0, p.ai-0.55);},0);
+  const excess = parts.reduce(function(a,p){return a+(SOFT[p.key]?0:Math.max(0, p.ai-0.55));},0);
   const boost = Math.min(excess*0.18, 0.34);
   const aiScore = clamp01(base + boost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
@@ -812,7 +1045,9 @@ function analyze(text){
            bandFrac:bandFrac, firstPerson:firstPerson, casual:casual, hedgeCount:scan.counts.hedge,
            triples:triples, repTri:repTri, sentCount:sc, meanLen:mean, questions:questions, exclaim:exclaim,
            passiveTotal:passiveTotal, passivePer100:passivePer100, nomCount:nomCount, advCount:advCount,
-           paraCount:paraCount, paraCV:paraCV, wps:wps, lix:lix}
+           paraCount:paraCount, paraCV:paraCV, wps:wps, lix:lix,
+           emoStd:emoStd, posTotal:posTotal, negTotal:negTotal, concreteCount:concreteCount,
+           concretePer100:concretePer100, questionsCount:questionsCount, ttrStd:ttrStd}
   };
 }
 
@@ -831,6 +1066,8 @@ function scoreSentence(stext){
   if(/[!?]/.test(stext)) sc -= 0.12;
   if(CONTR_TEST.test(stext)) sc -= 0.08;
   if(/\b(ben|bence|i|my|me)\b/i.test(stext)) sc -= 0.06;
+  // [v5] somut iz (rakam/zaman) insansilastirir
+  if(/\d/.test(stext) || /\b(geçen|dün|bugün|geçtiğimiz|last|yesterday|today)\b/i.test(stext)) sc -= 0.05;
   return clamp01(sc);
 }
 
@@ -903,7 +1140,23 @@ const REASON_META = {
   starter:{name:"Cümle başı tekrarı",
     why:function(r){return "<b>"+r.flags.repeated+" cümle</b> bir öncekiyle aynı kelimeyle başlıyor — kalıpsal açılış.";},
     fix:function(){return "Açılışları çeşitlendir: soru, zarf, nesne ya da diyalogla başla.";},
-    prompt:function(){return "Aynı kelimeyle başlayan cümlelerin açılışlarını değiştir: kimine soruyla, kimine zarfla, kimine doğrudan nesneyle başla. İki ardışık cümle aynı kelimeyle açılmasın.";}}
+    prompt:function(){return "Aynı kelimeyle başlayan cümlelerin açılışlarını değiştir: kimine soruyla, kimine zarfla, kimine doğrudan nesneyle başla. İki ardışık cümle aynı kelimeyle açılmasın.";}},
+  emotion:{name:"Duygusal ton tekdüzeliği",
+    why:function(r){return "Metin <b>tek bir duygusal tonda</b> kalıyor"+(r.flags.emoStd!==null?(" (σ="+r.flags.emoStd.toFixed(2)+")"):"")+". AI baştan sona aynı havada gider; insan yazısı pozitif/negatif arası dalgalanır.";},
+    fix:function(){return "Bir-iki yere içten bir tepki kat: hayal kırıklığı, sürpriz, sevinç — tek düz övgüden çık.";},
+    prompt:function(){return "Metnin duygusal tonunu dalgalandır: her şeyi olumlu/nötr anlatmak yerine bir-iki yere içten bir tepki (hayal kırıklığı, sürpriz, kişisel sevinç ya da rahatsızlık) ekle. Anlamı bozma, sadece tonu insanlaştır.";}},
+  concrete:{name:"Somutluk / kişisel detay eksikliği",
+    why:function(r){return "Metin <b>fazla genel</b> ("+r.flags.concreteCount+" somut iz). Rakam, özel isim, tarih, 'geçen hafta' gibi somut/kişisel ayrıntı az — AI genelleştirir.";},
+    fix:function(){return "Somut bir örnek ekle: gerçek bir rakam, yer/isim, tarih ya da kişisel bir anı.";},
+    prompt:function(){return "Genel ifadeleri somutlaştır: en az bir-iki yere gerçek bir rakam, özel isim, yer, tarih ya da kişisel bir anı ekle (uydurma değil, metnin konusuyla tutarlı). Soyut genellemeleri spesifik detayla değiştir.";}},
+  question:{name:"Soru kullanımı yok",
+    why:function(r){return "Metinde <b>"+r.flags.questionsCount+" soru</b> var. İnsan yazısı retorik soru sorar, okuyucuya seslenir; AI açıklayıcı moda saplanır.";},
+    fix:function(){return "Bir yere retorik bir soru ya da okuyucuya doğrudan hitap ekle.";},
+    prompt:function(){return "Uygun bir-iki yere retorik soru ya da okuyucuya doğrudan hitap ekleyerek metni daha diyalog gibi yap. Düz açıklamayı azaltma anlamı koru, sadece ritmi insanlaştır.";}},
+  infodensity:{name:"Bilgi yoğunluğu eşit dağılmış",
+    why:function(r){return "Her cümle <b>neredeyse eşit yoğunlukta</b>"+(r.flags.ttrStd!==null?(" (σ="+r.flags.ttrStd.toFixed(2)+")"):"")+". AI her cümleye aynı miktarda bilgi yükler; insanda bazı cümleler yoğun, bazıları geçiştir.";},
+    fix:function(){return "Bazı cümleleri kısa geçiş cümlesi yap, bazılarına daha çok bilgi yükle.";},
+    prompt:function(){return "Cümlelerin bilgi yoğunluğunu değiştir: bazı cümleleri kısa, geçiştirici/nefes aldıran cümlelere indir; bazılarına daha fazla detay yükle. Her cümle aynı yoğunlukta olmasın.";}}
 };
 
 function rankedReasons(r){
@@ -974,6 +1227,15 @@ function buildTeacher(r){
   if(P.hedge>0.5)
     n.push({t:"Aşırı <b>temkinli dil</b> (\"genellikle, olabilir\") — hiçbir şeye net taahhüt yok. Öğrenci yazısı genelde daha cesur ve taraflıdır.",
             e:"Kanıt: "+f.hedgeCount+" hedge ifadesi"});
+  if(P.emotion>0.55)
+    n.push({t:"Ton <b>baştan sona aynı</b> — hep ölçülü, hep aynı sıcaklıkta. Öğrenci yazısı duygu olarak iniş çıkışlıdır; bu düzlük makineyi ele verir.",
+            e:"Kanıt: duygu değişkenliği σ="+(f.emoStd!==null?f.emoStd.toFixed(2):"—")+" (poz "+f.posTotal+" / neg "+f.negTotal+")"});
+  if(P.concrete>0.6)
+    n.push({t:"Metin <b>somut detaydan yoksun</b>: gerçek rakam, isim, tarih ya da kişisel anı yok. Öğretmen \"örnek ver\" deyince elin boş kalır — en sık yakalanma noktası.",
+            e:"Kanıt: yalnızca "+f.concreteCount+" somut iz ("+f.concretePer100.toFixed(1)+"/100 kelime)"});
+  if(P.question>0.7 && f.questionsCount===0)
+    n.push({t:"Baştan sona <b>tek bir soru bile yok</b> — saf açıklama modu. İnsan yazısı okuyucuya seslenir, ara sıra soru sorar.",
+            e:"Kanıt: 0 soru / "+r.wc+" kelime"});
   if(r.pct>=60 && n.length<2)
     n.push({t:"Genel ton <b>tekdüze ve hatasız</b>: imla hatası, yarım kalmış düşünce, kişisel kelime yok. \"Fazla temiz\" metin başlı başına şüphe sebebidir.",
             e:"Kanıt: genel skor %"+r.pct});
@@ -1035,6 +1297,17 @@ let animFrom = 0, animRAF = null, lastResult = null;
 let previewMode = "heat", selIdx = -1, sentsCache = [];
 let origSnap = null; // {text, pct} — before/after karsilastirma
 let analyzed = false;
+let scoreHistory = []; // [v5] skor gecmisi sparkline
+
+/* [v5] Tur (genre) bazli agirliklar */
+var selectedGenre = "academic";
+const GENRE_LABELS = {academic:"Akademik", creative:"Yaratıcı", business:"İş", casual:"Gündelik"};
+const GENRE_WEIGHTS = {
+  academic: {cliche:1.0,hype:1.1,burst:1.0,hedge:0.6,trans:0.85,formal:0.5,passive:0.7,nominal:0.8,advrb:0.9,parau:1.0,perplex:1.0,ngram:1.0,triple:0.9,uniform:1.0,punct:1.0,starter:1.0,emotion:0.8,concrete:0.9,question:0.8,infodensity:1.0},
+  creative: {cliche:1.2,hype:0.85,burst:1.2,hedge:0.8,trans:0.8,formal:1.3,passive:1.0,nominal:1.0,advrb:1.0,parau:1.1,perplex:1.0,ngram:1.1,triple:1.1,uniform:1.1,punct:0.9,starter:1.1,emotion:1.2,concrete:1.1,question:0.9,infodensity:1.0},
+  business: {cliche:0.85,hype:0.75,burst:1.0,hedge:0.7,trans:0.7,formal:0.45,passive:0.6,nominal:0.7,advrb:0.9,parau:1.0,perplex:1.0,ngram:1.0,triple:0.85,uniform:1.0,punct:1.0,starter:1.0,emotion:0.9,concrete:1.0,question:0.9,infodensity:1.0},
+  casual: {cliche:1.0,hype:1.0,burst:0.7,hedge:1.0,trans:1.2,formal:1.6,passive:1.3,nominal:1.2,advrb:1.0,parau:0.9,perplex:1.0,ngram:1.0,triple:1.0,uniform:0.9,punct:1.0,starter:1.0,emotion:1.0,concrete:1.1,question:1.1,infodensity:1.0}
+};
 
 function gradeOf(pct){
   if(pct<15) return "A+"; if(pct<28) return "A"; if(pct<42) return "B";
@@ -1130,7 +1403,7 @@ function updateRadar(vals){
   }
   radarRAF=requestAnimationFrame(step);
 }
-function lastRadarZero(){ const z=[]; for(let i=0;i<16;i++)z.push(0); return z; }
+function lastRadarZero(){ const z=[]; for(let i=0;i<20;i++)z.push(0); return z; }
 
 /* ----- [v4] Claude API (kullanicinin kendi anahtariyla, dogrudan tarayicidan) ----- */
 function getKey(){ try{ return localStorage.getItem("anthropic_api_key")||""; }catch(e){ return ""; } }
@@ -1138,7 +1411,9 @@ function saveKey(v){ try{ localStorage.setItem("anthropic_api_key", v); }catch(e
 function callClaude(userPrompt, maxTokens, onOk, onErr){
   const key=getKey();
   if(!key){ onErr("API anahtarı gerekli — yukarıya Anthropic anahtarını (sk-ant-...) girip Kaydet'e bas."); return; }
-  fetch("https://api.anthropic.com/v1/messages",{
+  // [v5] 30sn timeout (AbortController destekliyorsa)
+  let ctrl=null, timer=null, done=false;
+  const opts={
     method:"POST",
     headers:{
       "content-type":"application/json",
@@ -1151,9 +1426,13 @@ function callClaude(userPrompt, maxTokens, onOk, onErr){
       max_tokens:maxTokens,
       messages:[{role:"user",content:userPrompt}]
     })
-  }).then(function(res){
+  };
+  try{ if(typeof AbortController!=="undefined"){ ctrl=new AbortController(); opts.signal=ctrl.signal; timer=setTimeout(function(){ try{ctrl.abort();}catch(e){} },30000); } }catch(e){}
+  function finish(){ if(timer) clearTimeout(timer); }
+  fetch("https://api.anthropic.com/v1/messages",opts).then(function(res){
     return res.json().then(function(data){ return {ok:res.ok, status:res.status, data:data}; });
   }).then(function(r){
+    finish(); if(done) return; done=true;
     if(!r.ok){
       const msg=(r.data && r.data.error && r.data.error.message) || ("HTTP "+r.status);
       onErr("API hatası: "+msg); return;
@@ -1164,7 +1443,9 @@ function callClaude(userPrompt, maxTokens, onOk, onErr){
     if(!txt){ onErr("Boş yanıt geldi — tekrar dene."); return; }
     onOk(txt);
   })["catch"](function(e){
-    onErr("Bağlantı hatası: "+e.message+". İnterneti ve anahtarı kontrol et.");
+    finish(); if(done) return; done=true;
+    if(e && (e.name==="AbortError")) onErr("İstek 30 saniyede tamamlanmadı (zaman aşımı) — tekrar dene ya da metni kısalt.");
+    else onErr("Bağlantı hatası: "+(e&&e.message||e)+". İnterneti ve anahtarı kontrol et.");
   });
 }
 function setRwStatus(cls, msg){ const el=$("rwStatus"); el.className="rwstatus "+(cls||""); el.textContent=msg||""; }
@@ -1177,6 +1458,7 @@ function selectSentence(i){
   $("selBox").className="selbox has";
   $("selBox").innerHTML='<span class="schip" style="background:'+lerpColor(sc)+'">%'+Math.round(sc*100)+' AI</span><br>'+htmlEsc(sn.text);
   $("btnRwSent").disabled=false;
+  try{ $("rwOpts").style.display="none"; }catch(e){}
   renderPreview();
 }
 function clearSelection(){
@@ -1184,6 +1466,7 @@ function clearSelection(){
   $("selBox").className="selbox";
   $("selBox").textContent="Isı haritasından bir cümleye dokun — burada görünsün.";
   $("btnRwSent").disabled=true;
+  try{ $("rwOpts").style.display="none"; }catch(e){}
 }
 function rewriteSentence(){
   if(selIdx<0 || !sentsCache[selIdx] || !lastResult) return;
@@ -1433,6 +1716,10 @@ function runAnalysis(scroll){
         setStatus("done","✓ Analiz edildi · %"+r.pct+" AI · "+r.hitCount+" kalıp · kalite "+r.quality.overall+"/100");
         if(origSnap===null) origSnap={text:input.value, pct:r.pct};
         renderCompare();
+        try{ addToHistory(r.pct); }catch(e){}
+        try{ renderBenchmark(r.pct); }catch(e){}
+        try{ saveAnalysis(input.value, r); renderAnalysisHistory(); }catch(e){}
+        try{ celebrate(r.pct); }catch(e){}
       }
       else setStatus("ready","● Metin çok kısa — en az ~12 kelime gir");
     }
@@ -1440,6 +1727,234 @@ function runAnalysis(scroll){
   }, 40);
 }
 window.__run = runAnalysis; // inline onclick yedegi — listener baglanamasa bile buton calisir
+
+/* ===== [v5] Tur (genre) secici ===== */
+function setGenre(g){
+  if(!GENRE_WEIGHTS[g]) return;
+  selectedGenre = g;
+  try{
+    const btns=document.querySelectorAll(".genre-btn");
+    for(let i=0;i<btns.length;i++){ btns[i].className = "genre-btn"+(btns[i].getAttribute("data-genre")===g?" on":""); }
+  }catch(e){}
+  try{ $("badgeText").textContent = "AI Content Detector · Motor v5 · 20 sinyal · Tür: "+(GENRE_LABELS[g]||g); }catch(e){}
+  if(analyzed && input.value.trim()) runAnalysis(false);
+}
+
+/* ===== [v5] Skor gecmisi sparkline ===== */
+function addToHistory(pct){
+  scoreHistory.push({pct:pct, time:Date.now()});
+  if(scoreHistory.length>30) scoreHistory.shift();
+  renderSparkline();
+}
+function renderSparkline(){
+  const box=$("sparkBox"); if(!box) return;
+  const h=scoreHistory;
+  if(h.length<1){ box.innerHTML='<div class="sparkempty">Metni düzeltip tekrar analiz ettikçe skor değişimin burada çizilecek.</div>'; return; }
+  const W=320, H=80, pad=10;
+  const n=h.length;
+  function xOf(i){ return n<=1 ? W/2 : pad + (W-2*pad)*i/(n-1); }
+  function yOf(p){ return H-pad - (H-2*pad)*p/100; }
+  const trend = h.length>1 ? (h[h.length-1].pct - h[0].pct) : 0;
+  const col = trend<0 ? "#34d399" : (trend>0 ? "#f5647a" : "#8b6dff");
+  let path=""; for(let i=0;i<n;i++){ path += (i?" L":"M")+xOf(i).toFixed(1)+" "+yOf(h[i].pct).toFixed(1); }
+  let dots=""; for(let i=0;i<n;i++){ dots += '<circle cx="'+xOf(i).toFixed(1)+'" cy="'+yOf(h[i].pct).toFixed(1)+'" r="3.4" fill="'+lerpColor(h[i].pct/100)+'" stroke="#0d0d1b" stroke-width="1.5"><title>'+(i+1)+". analiz: %"+h[i].pct+'</title></circle>'; }
+  let grid=""; [0,50,100].forEach(function(g){ grid+='<line x1="'+pad+'" y1="'+yOf(g).toFixed(1)+'" x2="'+(W-pad)+'" y2="'+yOf(g).toFixed(1)+'" stroke="rgba(255,255,255,.06)"/>'; });
+  const svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" height="80">'+grid
+    +'<path d="'+path+'" fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:1000;stroke-dashoffset:1000;animation:sparkdraw .7s ease forwards"/>'
+    +dots+'</svg>'
+    +'<div style="font-size:11px;color:var(--faint);text-align:center;margin-top:4px">'+n+' analiz · '+(trend<0?("toplam ▼ "+Math.abs(trend)+" puan 🎉"):(trend>0?("toplam ▲ "+trend+" puan"):"değişim yok"))+'</div>';
+  box.innerHTML=svg;
+  if(!document.getElementById("sparkKf")){ const st=document.createElement("style"); st.id="sparkKf"; st.textContent="@keyframes sparkdraw{to{stroke-dashoffset:0}}"; document.head.appendChild(st); }
+}
+
+/* ===== [v5] Benchmark paneli ===== */
+const BENCHMARKS = { avgHuman:{pct:14}, avgAI:{pct:82}, avgMixed:{pct:48} };
+function renderBenchmark(pct){
+  $("bmHuman").style.width=BENCHMARKS.avgHuman.pct+"%";
+  $("bmAI").style.width=BENCHMARKS.avgAI.pct+"%";
+  $("bmYou").style.width=pct+"%"; $("bmYou").style.background=lerpColor(pct/100);
+  $("bmYouV").textContent="%"+pct;
+  let pos;
+  const dh=Math.abs(pct-BENCHMARKS.avgHuman.pct), da=Math.abs(pct-BENCHMARKS.avgAI.pct);
+  if(pct<28) pos="İnsan ortalamasına yakın — doğal görünüyor 👤";
+  else if(pct>=72) pos="AI ortalamasına yakın — güçlü AI sinyali 🤖";
+  else if(dh<da) pos="İnsan tarafına daha yakın, ama AI izleri var";
+  else pos="AI tarafına daha yakın — düzeltme öneririm";
+  $("bmPos").innerHTML="<b>"+pos+"</b>";
+}
+
+/* ===== [v5] Analiz gecmisi (localStorage, metinsiz) ===== */
+function saveAnalysis(text, result){
+  let hist;
+  try{ hist=JSON.parse(localStorage.getItem("analysis_history")||"[]"); }catch(e){ hist=[]; }
+  hist.unshift({ date:new Date().toISOString(), textPreview:text.slice(0,80), pct:result.pct, grade:gradeOf(result.pct), quality:result.quality.overall, wc:result.wc });
+  if(hist.length>20) hist=hist.slice(0,20);
+  try{ localStorage.setItem("analysis_history", JSON.stringify(hist)); }catch(e){}
+}
+function renderAnalysisHistory(){
+  const el=$("histList"); if(!el) return;
+  let hist;
+  try{ hist=JSON.parse(localStorage.getItem("analysis_history")||"[]"); }catch(e){ hist=[]; }
+  if(!hist.length){ el.innerHTML='<span class="empty">Henüz kayıt yok — analiz yaptıkça (metinsiz, gizliliğe saygılı) burada birikecek.</span>'; return; }
+  el.innerHTML = hist.map(function(h){
+    const c=lerpColor(h.pct/100);
+    let d=""; try{ d=new Date(h.date).toLocaleString(); }catch(e){ d=h.date; }
+    return '<div class="hist-item"><div class="hp" style="background:'+c+'">%'+h.pct+'</div>'
+      +'<div class="ht"><div class="hpre">'+htmlEsc(h.textPreview||"")+'…</div>'
+      +'<div class="hmeta">'+d+' · '+h.wc+' kelime · kalite '+h.quality+'/100 · not '+h.grade+'</div></div></div>';
+  }).join("");
+}
+function clearAnalysisHistory(){ try{ localStorage.removeItem("analysis_history"); }catch(e){} renderAnalysisHistory(); }
+
+/* ===== [v5] Tema ===== */
+function applyThemeIcon(){ try{ $("themeBtn").textContent = document.documentElement.classList.contains("light") ? "☀️" : "🌙"; }catch(e){} }
+function toggleTheme(){
+  const isLight=document.documentElement.classList.toggle("light");
+  try{ localStorage.setItem("theme", isLight?"light":"dark"); }catch(e){}
+  applyThemeIcon();
+}
+
+/* ===== [v5] Konfeti + kutlama ===== */
+function celebrate(pct){
+  const msg=$("celebrateMsg");
+  const card=document.querySelector(".scorecard");
+  if(pct<30){
+    if(msg) msg.innerHTML='<div class="celebrate-msg">🎉 Harika iş! İnsansı bir metin.</div>';
+    if(card){ card.classList.add("celebrate"); setTimeout(function(){card.classList.remove("celebrate");},1600); }
+    if(pct<25) launchConfetti();
+  } else { if(msg) msg.innerHTML=""; }
+}
+function launchConfetti(){
+  const cv=$("confetti"); if(!cv || !cv.getContext) return;
+  const ctx=cv.getContext("2d");
+  cv.width=window.innerWidth; cv.height=window.innerHeight; cv.style.display="block";
+  const cols=["#8b6dff","#4ad6c8","#34d399","#f2c14e","#f5647a","#ef9456"];
+  const parts=[];
+  for(let i=0;i<40;i++){ parts.push({ x:Math.random()*cv.width, y:-20-Math.random()*cv.height*0.3,
+    w:6+Math.random()*8, h:8+Math.random()*10, vx:(Math.random()-0.5)*4, vy:2+Math.random()*4,
+    rot:Math.random()*6.28, vr:(Math.random()-0.5)*0.3, col:cols[(Math.random()*cols.length)|0] }); }
+  const t0=Date.now();
+  function frame(){
+    const el=Date.now()-t0;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(let i=0;i<parts.length;i++){ const p=parts[i];
+      p.vy+=0.12; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = el>1500 ? Math.max(0,1-(el-1500)/500) : 1;
+      ctx.fillStyle=p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    }
+    if(el<2000) requestAnimationFrame(frame); else { ctx.clearRect(0,0,cv.width,cv.height); cv.style.display="none"; }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ===== [v5] Coklu yeniden yazma (3 alternatif) ===== */
+function buildMultiRewritePrompt(fullText, sentence){
+  return "Aşağıdaki metindeki TEK bir cümleyi 3 FARKLI şekilde yeniden yaz. "
+    + "Her versiyon farklı bir üslup kullansın: biri daha kısa ve vurucu, biri daha detaylı, biri daha gündelik.\n\n"
+    + "Metnin tamamı (bağlam için):\n\"\"\"\n" + fullText + "\n\"\"\"\n\n"
+    + "Yeniden yazılacak cümle:\n\"\"\"\n" + sentence + "\n\"\"\"\n\n"
+    + "Kurallar:\n- Anlamı koru, AI klişesi kullanma, metnin dilinde yaz.\n"
+    + "- SADECE 3 versiyonu ver, her birini ayrı satırda, başına 1) 2) 3) koy.\n"
+    + "- Açıklama, tırnak işareti, ön söz ekleme.";
+}
+function parseThree(txt){
+  const out=[]; const re=/^\s*(\d)[\)\.\-]\s*(.+)$/;
+  const lines=txt.split(/\r?\n/);
+  for(let i=0;i<lines.length;i++){ const m=lines[i].match(re); if(m) out.push(m[2].replace(/^["'\s]+|["'\s]+$/g,"")); }
+  if(out.length<2){ // fallback: cumlelere bol
+    const parts=txt.split(/\n+/).map(function(s){return s.replace(/^["'\s]+|["'\s]+$/g,"");}).filter(Boolean);
+    return parts.slice(0,3);
+  }
+  return out.slice(0,3);
+}
+const RO_TAGS=["Kısa & vurucu","Detaylı","Gündelik"];
+function rewriteSentenceMulti(){
+  if(selIdx<0 || !sentsCache[selIdx] || !lastResult) return;
+  const sn=sentsCache[selIdx]; const full=input.value;
+  setRwStatus("","🤖 Claude 3 alternatif hazırlıyor…");
+  $("btnRwSent").disabled=true; $("rwOpts").style.display="none";
+  callClaude(buildMultiRewritePrompt(full, sn.text), 1024, function(out){
+    $("btnRwSent").disabled=false;
+    const opts=parseThree(out);
+    if(!opts.length){ setRwStatus("err","Yanıt ayrıştırılamadı — tekrar dene."); return; }
+    setRwStatus("ok","✓ 3 alternatif hazır — birini seç:");
+    const box=$("rwOpts"); box.style.display="grid";
+    box.innerHTML = opts.map(function(o,i){
+      const s=Math.round(scoreSentence(o)*100);
+      return '<div class="rwopt"><div class="ro-top"><span class="ro-tag">'+(RO_TAGS[i]||("Seçenek "+(i+1)))+'</span>'
+        +'<span class="ro-score" style="background:'+lerpColor(s/100)+'">%'+s+' AI</span></div>'
+        +'<div class="ro-text">'+htmlEsc(o)+'</div>'
+        +'<button type="button" class="btn primary" data-opt="'+i+'" style="font-size:12px;padding:6px 11px">Bu versiyonu kullan</button></div>';
+    }).join("");
+    const bs=box.querySelectorAll("button[data-opt]");
+    for(let i=0;i<bs.length;i++){ (function(b){ b.onclick=function(){
+      const o=opts[parseInt(b.getAttribute("data-opt"),10)];
+      input.value = full.slice(0,sn.s) + o + full.slice(sn.e);
+      box.style.display="none"; clearSelection();
+      setRwStatus("ok","✓ Cümle değiştirildi — skor güncelleniyor…");
+      runAnalysis(false);
+    }; })(bs[i]); }
+  }, function(err){ $("btnRwSent").disabled=false; setRwStatus("err","⚠️ "+err); });
+}
+
+/* ===== [v5] Duzeltme sihirbazi ===== */
+let wizSteps=[], wizIdx=0, wizPending=null;
+function openWizard(){
+  if(!lastResult || lastResult.tooShort){ showToast("Önce bir metni analiz et"); return; }
+  wizSteps = rankedReasons(lastResult);
+  if(!wizSteps.length){ showToast("Düzeltilecek baskın sorun yok 👍"); return; }
+  wizIdx=0; wizPending=null;
+  $("wizardBg").classList.add("show");
+  renderWizardStep();
+}
+function closeWizard(){ const bg=$("wizardBg"); if(bg) bg.classList.remove("show"); }
+function renderWizardStep(){
+  const total=wizSteps.length;
+  if(wizIdx>=total){ renderWizardDone(); return; }
+  const p=wizSteps[wizIdx], m=REASON_META[p.key], r=lastResult;
+  $("wzProg").textContent="Sorun "+(wizIdx+1)+"/"+total;
+  $("wzProgBar").style.width=Math.round(wizIdx/total*100)+"%";
+  let h='<div class="wz-title">'+(wizIdx+1)+'. '+m.name+' <span style="color:'+lerpColor(p.ai)+'">(%'+Math.round(p.ai*100)+')</span></div>';
+  h+='<div class="wz-why">'+m.why(r)+'</div>';
+  h+='<div class="wz-fix">✏️ <b>Ne yapmalı:</b> '+m.fix(r)+'</div>';
+  h+='<div id="wzResult"></div>';
+  h+='<div class="wz-btns">'
+    +'<button type="button" class="btn primary" id="wzFix">✨ Claude\'a düzelttir</button>'
+    +'<button type="button" class="btn" id="wzCopy">📋 Prompt\'u kopyala</button>'
+    +'<button type="button" class="btn ghost" id="wzSkip">⏭️ Atla</button></div>';
+  h+='<div class="wz-status" id="wzStatus"></div>';
+  $("wzBody").innerHTML=h;
+  $("wzFix").onclick=wizardRewrite;
+  $("wzCopy").onclick=function(){ copyText(buildSinglePrompt(r, p.key, input.value), $("wzCopy")); };
+  $("wzSkip").onclick=wizardNext;
+}
+function wizardRewrite(){
+  const p=wizSteps[wizIdx];
+  const before=input.value;
+  $("wzStatus").textContent="🤖 Claude düzeltiyor…"; $("wzFix").disabled=true;
+  callClaude(buildSinglePrompt(lastResult, p.key, before), 8192, function(newText){
+    wizPending={before:before, after:newText};
+    $("wzResult").innerHTML='<div class="wz-result"><b>Önizleme:</b><span class="new">'+htmlEsc(newText.slice(0,600))+(newText.length>600?"…":"")+'</span></div>';
+    $("wzStatus").innerHTML="";
+    $("wzBody").querySelector(".wz-btns").innerHTML=
+      '<button type="button" class="btn primary" id="wzAccept">✓ Kabul et</button>'
+      +'<button type="button" class="btn" id="wzUndo">↩️ Geri al</button>';
+    $("wzAccept").onclick=function(){ input.value=wizPending.after; wizPending=null; runAnalysis(false); wizardNext(); };
+    $("wzUndo").onclick=function(){ wizPending=null; renderWizardStep(); };
+  }, function(err){ $("wzFix").disabled=false; $("wzStatus").textContent="⚠️ "+err; });
+}
+function wizardNext(){ wizIdx++; renderWizardStep(); }
+function renderWizardDone(){
+  $("wzProg").textContent="Tamamlandı"; $("wzProgBar").style.width="100%";
+  const pct = (lastResult && !lastResult.tooShort) ? lastResult.pct : 0;
+  $("wzBody").innerHTML='<div class="wz-done"><div style="font-size:34px">🎉</div>'
+    +'<div class="big" style="color:'+lerpColor(pct/100)+'">%'+pct+' AI</div>'
+    +'<p style="color:var(--muted);font-size:13px">Tüm adımlar bitti. Yeni skorun bu. Karşılaştırma kartından önce/sonra farkını görebilirsin.</p>'
+    +'<div style="margin-top:14px"><button type="button" class="btn primary" id="wzFinish">Kapat</button></div></div>';
+  $("wzFinish").onclick=closeWizard;
+  if(pct<25){ closeWizard(); launchConfetti(); }
+}
 
 /* ----- Events ----- */
 let deb=null;
@@ -1478,7 +1993,7 @@ $("keySave").onclick=function(){
   if(!v){ setRwStatus("err","Anahtar boş — sk-ant-... formatında gir."); return; }
   saveKey(v); setRwStatus("ok","✓ Anahtar bu tarayıcıya kaydedildi.");
 };
-$("btnRwSent").onclick=rewriteSentence;
+$("btnRwSent").onclick=rewriteSentenceMulti;
 $("btnRwAll").onclick=rewriteAll;
 $("copyAll").onclick=function(){ if(lastResult && !lastResult.tooShort) copyText(buildMasterPrompt(lastResult, input.value), $("copyAll")); };
 
@@ -1510,9 +2025,47 @@ $("btnPdf").onclick=exportPdf;
   });
 })();
 
+/* [v5] yeni event'ler */
+(function(){
+  // tur secici
+  const gbtns=document.querySelectorAll(".genre-btn");
+  for(let i=0;i<gbtns.length;i++){ (function(b){ b.onclick=function(){ try{ setGenre(b.getAttribute("data-genre")); }catch(e){} }; })(gbtns[i]); }
+  // tema
+  const tb=$("themeBtn"); if(tb) tb.onclick=function(){ try{ toggleTheme(); }catch(e){} };
+  // sparkline temizle
+  const sc=$("sparkClear"); if(sc) sc.onclick=function(){ scoreHistory=[]; renderSparkline(); };
+  // analiz gecmisi temizle
+  const hc=$("histClear"); if(hc) hc.onclick=function(){ try{ clearAnalysisHistory(); }catch(e){} };
+  // wizard
+  const wb=$("wizardBtn"); if(wb) wb.onclick=function(){ try{ openWizard(); }catch(e){} };
+  const wc=$("wzClose"); if(wc) wc.onclick=closeWizard;
+  const wbg=$("wizardBg"); if(wbg) wbg.onclick=function(e){ if(e.target===wbg) closeWizard(); };
+  // klavye kisayollari
+  document.addEventListener("keydown", function(e){
+    if((e.ctrlKey||e.metaKey) && (e.key==="Enter"||e.keyCode===13)){ e.preventDefault(); try{ runAnalysis(true); }catch(err){} }
+    if(e.key==="Escape"||e.keyCode===27){ try{ closeWizard(); }catch(err){} }
+  });
+  // cok uzun metin uyarisi
+  input.addEventListener("input", function(){
+    try{ var w=input.value.split(/\s+/).length; var dh=$("status");
+      if(w>5000 && analyzed) {/* analiz zaten yavas olabilir; sadece bilgi */} }catch(e){}
+  });
+})();
+
 /* init */
-initRadar(["Klişe","Hype","Ritim","Hedge","Geçiş","Resmiyet","Edilgen","Nominal","Zarf","Paragraf","Perplexity","N-gram","Üçlü","Tekdüze","Noktalama","Başlangıç"]);
+initRadar(["Klişe","Hype","Ritim","Hedge","Geçiş","Resmiyet","Edilgen","Nominal","Zarf","Paragraf","Perplexity","N-gram","Üçlü","Tekdüze","Noktalama","Başlangıç","Duygu","Somutluk","Soru","Bilgi Yoğ."]);
 $("apiKey").value = getKey();
+try{ applyThemeIcon(); }catch(e){}
+try{ setGenre(selectedGenre); }catch(e){}
+try{ renderAnalysisHistory(); }catch(e){}
+/* [v5] PWA manifest (dinamik blob) */
+try{
+  var mf={ name:"AI Dedektör v5", short_name:"AI Dedektör", description:"Metni yapıştır, AI mı insan mı öğren", start_url:".", display:"standalone", background_color:"#06060f", theme_color:"#8b6dff",
+    icons:[{ src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#0d0d1b"/><text x="50" y="68" font-size="56" text-anchor="middle" fill="#8b6dff">🤖</text></svg>'), sizes:"any", type:"image/svg+xml" }] };
+  var mblob=new Blob([JSON.stringify(mf)],{type:"application/json"});
+  var mlink=document.createElement("link"); mlink.rel="manifest"; mlink.href=URL.createObjectURL(mblob);
+  document.head.appendChild(mlink);
+}catch(e){}
 safeRender();
 setStatus("ready","● Hazır — metni yapıştır, Analiz Et'e bas");  // <-- bunu goruyorsan JS calisiyor
 </script>
