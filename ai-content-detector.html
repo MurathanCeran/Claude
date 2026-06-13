@@ -151,7 +151,7 @@
   .scorecard>*{position:relative}
   .gauge-wrap{display:flex;flex-direction:column;align-items:center;text-align:center}
   .gauge{position:relative;width:240px;height:240px;margin-top:4px}
-  .gauge svg{transform:rotate(-90deg)}
+  .gauge svg{width:100%;height:100%;display:block;transform:rotate(-90deg)}
   #arc{transition:stroke .4s;filter:drop-shadow(0 0 14px rgba(139,109,255,.45))}
   .gauge .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .gauge .pct{font-size:60px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -385,8 +385,8 @@
   /* ===== [v5] MOBİL ===== */
   @media(max-width:940px){
     .grid{grid-template-columns:1fr}
-    .grid > section:last-child{order:-1}
-    .gauge{width:180px;height:180px}
+    /* Metin (giris) karti ustte kalsin; Analiz Et sonra skora otomatik kaydirir */
+    .gauge{width:200px;height:200px}
     .gauge .pct{font-size:44px}
     .radarbox svg{width:280px;height:280px}
     h1{font-size:30px}
@@ -1703,17 +1703,26 @@ function clearSelectionQuiet(){
 
 function safeRender(){ try{ render(); return true; }catch(e){ if(window.console)console.error(e); setStatus("err","⚠️ Analiz hatası: "+((e&&e.message)||e)); return false; } }
 
+function estScanMs(text){
+  // [v5.1] Tahmini tarama suresi: kelime sayisina gore, 0.4–2.4 sn arasi
+  let w=0; try{ w=(text.trim().match(/\S+/g)||[]).length; }catch(e){ w=0; }
+  return Math.min(2400, Math.max(400, Math.round(350 + w*1.4)));
+}
 function runAnalysis(scroll){
   analyzed = true;
   if(!input.value.trim()){ setStatus("ready","● Önce metni yapıştır"); safeRender(); return; }
-  setStatus("busy","Analiz ediliyor…");
+  const t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+  const estMs = estScanMs(input.value);
+  setStatus("busy","🔍 Taranıyor… tahmini ~"+(estMs/1000).toFixed(1)+" sn");
   setTimeout(function(){
     if(selIdx>=0) clearSelectionQuiet();
     const okR = safeRender();
     if(okR){
       const r=lastResult;
       if(r && !r.tooShort){
-        setStatus("done","✓ Analiz edildi · %"+r.pct+" AI · "+r.hitCount+" kalıp · kalite "+r.quality.overall+"/100");
+        const t1 = (window.performance && performance.now) ? performance.now() : Date.now();
+        const secs = Math.max(0.1, (t1-t0)/1000).toFixed(1);
+        setStatus("done","✓ Tarama bitti · "+secs+" sn · %"+r.pct+" AI · kalite "+r.quality.overall+"/100");
         if(origSnap===null) origSnap={text:input.value, pct:r.pct};
         renderCompare();
         try{ addToHistory(r.pct); }catch(e){}
@@ -1724,7 +1733,7 @@ function runAnalysis(scroll){
       else setStatus("ready","● Metin çok kısa — en az ~12 kelime gir");
     }
     if(scroll){ const sc=document.querySelector(".scorecard"); if(sc && sc.scrollIntoView) sc.scrollIntoView({behavior:"smooth", block:"start"}); }
-  }, 40);
+  }, estMs);
 }
 window.__run = runAnalysis; // inline onclick yedegi — listener baglanamasa bile buton calisir
 
