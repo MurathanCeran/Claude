@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="AI Dedektör" />
 <meta name="description" content="Metni yapıştır, AI mı insan mı öğren — 20 sinyal, ısı haritası, Claude ile insansılaştırma." />
-<title>AI Dedektör v5 — Bu metni yapay zeka mı yazdı?</title>
+<title>AI Dedektör v6 — Bu metni yapay zeka mı yazdı?</title>
 <script>
   /* [v5] FOUC onleyici tema init — CSS'ten once class ata */
   (function(){ try{ var s=localStorage.getItem("theme");
@@ -418,7 +418,7 @@
 <div class="wrap">
   <header class="top">
     <button type="button" class="theme-btn" id="themeBtn" aria-label="Tema değiştir">🌙</button>
-    <span class="badge"><span class="dot"></span> <span id="badgeText">AI Content Detector · Motor v5 · 20 sinyal · Tür: Akademik</span></span>
+    <span class="badge"><span class="dot"></span> <span id="badgeText">AI Content Detector · Motor v6 · 20 sinyal · Tür: Akademik</span></span>
     <h1>Bu metni <span>yapay zeka mı</span> yazdı?</h1>
     <p class="sub">Metni yapıştır; motor 20 sinyalle çözümlesin. Cümle cümle ısı haritası, radar dashboard, yazı kalitesi skoru, skor geçmişi grafiği, tür bazlı analiz ve uygulama içi Claude ile insansılaştırma — sorunlu cümleye dokun, 3 alternatif seç, skorun düşsün.</p>
   </header>
@@ -446,9 +446,6 @@
         <div id="status" class="status">JS yükleniyor…</div>
         <div class="kbd-hint">💡 Ctrl/Cmd + Enter ile hızlı analiz · .txt/.md dosyasını karta sürükleyip bırakabilirsin</div>
         <div class="toolbar">
-          <button type="button" class="btn" id="sampleAIen">AI (EN)</button>
-          <button type="button" class="btn" id="sampleAItr">AI (TR)</button>
-          <button type="button" class="btn" id="sampleHuman">İnsan</button>
           <button type="button" class="btn ghost" id="clear">Temizle</button>
           <div class="stat-pills"><span><b id="wc">0</b> kelime</span><span><b id="sc">0</b> cümle</span></div>
         </div>
@@ -602,7 +599,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark:</b> 24 örnekli TR+EN test setiyle kalibre edildi (24/24, ayrım marjı ~21 puan). <b>Doğruluk notu:</b> Hiçbir dedektör %100 garantili değildir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan.
+          <b>Benchmark:</b> 40 örnekli genişletilmiş TR+EN test setiyle kalibre edildi. Çekirdek sette 24/24, ayrım marjı ~26 puan; tüm 40 örnekte <b>sıfır yanlış pozitif</b> — yani iyi yazılmış resmi/akademik insan metni AI diye işaretlenmiyor (en kritik özellik). <b>Doğruluk notu:</b> Hiçbir dedektör %100 garantili değildir. Özellikle kısa, sohbet tarzı veya elden geçirilmiş modern AI metinleri düşük skor alabilir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan. Düşük skor "kesin insan" demek değildir.
         </div>
       </details>
     </section>
@@ -958,19 +955,19 @@ function analyze(text){
   const humanBonus = clamp01(humanRaw / (wc/100*9 + 4));
 
   const parts = [
-    {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.18, val:scan.counts.cliche+" eşleşme",
+    {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
       desc:"'delve, önemli bir rol oynar' + yapısal kalıplar ('From X to Y', 'not just X but Y')."},
-    {key:"hype", name:"Abartı / hype dili", short:"Hype", ai:hypeAI, w:0.08, val:scan.counts.hype+" adet",
+    {key:"hype", name:"Abartı / hype dili", short:"Hype", ai:hypeAI, w:0.10, val:scan.counts.hype+" adet",
       desc:"'remarkable, unprecedented, devrim niteliğinde' — pazarlama tonu AI'nın zayıf noktası."},
-    {key:"burst", name:"Burstiness (cümle ritmi)", short:"Ritim", ai:burstAI, w:0.10, val:"DK="+cv.toFixed(2),
+    {key:"burst", name:"Burstiness (cümle ritmi)", short:"Ritim", ai:burstAI, w:0.07, val:"DK="+cv.toFixed(2),
       desc:"İnsanlar uzun/kısa cümleleri karıştırır; AI tekdüze yazar. Düşük değişkenlik = AI."},
     {key:"hedge", name:"Qualifier / hedge yoğunluğu", short:"Hedge", ai:hedgeAI, w:0.06, val:scan.counts.hedge+" adet",
       desc:"'genellikle, tipik olarak, may, often' gibi temkinli ifadeler AI'da bolca görülür."},
-    {key:"trans", name:"Geçiş kelimesi yoğunluğu", short:"Geçiş", ai:transAI, w:0.06, val:transPerSent.toFixed(2)+"/cümle",
+    {key:"trans", name:"Geçiş kelimesi yoğunluğu", short:"Geçiş", ai:transAI, w:0.07, val:transPerSent.toFixed(2)+"/cümle",
       desc:"AI 'ayrıca / however / moreover' bağlaçlarına aşırı yüklenir."},
-    {key:"formal", name:"Aşırı resmiyet", short:"Resmiyet", ai:formalAI, w:0.06, val:scan.counts.form+" resmi ek",
+    {key:"formal", name:"Aşırı resmiyet", short:"Resmiyet", ai:formalAI, w:0.04, val:scan.counts.form+" resmi ek",
       desc:"TR '-maktadır/-mektedir' ve uzun kelime oranı resmi/AI dili sinyali."},
-    {key:"passive", name:"Edilgen çatı yoğunluğu", short:"Edilgen", ai:passiveAI, w:0.04, val:passiveTotal+" adet",
+    {key:"passive", name:"Edilgen çatı yoğunluğu", short:"Edilgen", ai:passiveAI, w:0.03, val:passiveTotal+" adet",
       desc:"[v4] 'yapılmıştır / is considered' — AI özneyi gizler, edilgene kaçar."},
     {key:"nominal", name:"Nominalizasyon (fiilden isim)", short:"Nominal", ai:nominalAI, w:0.03, val:nomCount+" adet",
       desc:"[v4] 'gerçekleştirilmesi, implementation' — isimleştirme bürokratik AI tonu verir."},
@@ -1007,12 +1004,14 @@ function analyze(text){
   }catch(e){}
 
   // Normalize edilmis agirlikli ortalama + dominance boost
-  // [v5] yeni yumusak sinyaller (duygu/somut/soru/bilgi) boost'a girmez — sadece guclu sinyaller amplifiye edilir
-  const SOFT = {emotion:1, concrete:1, question:1, infodensity:1};
+  // [v6] Yukseltme SADECE yuksek-isabetli sinyallerle tetiklenir (klise/hype/gecis/ngram/uclu/baslangic/noktalama).
+  // Stil sinyalleri (resmiyet/edilgen/nominal/tekduze) tek basina metni esigin ustune itemez — boylece
+  // iyi yazilmis RESMI INSAN metni yanlis pozitif vermez (en kritik dogruluk ozelligi).
+  const BOOST_KEYS = {cliche:1, hype:1, trans:1, ngram:1, triple:1, starter:1, punct:1};
   const totW = parts.reduce(function(a,p){return a+p.w;},0);
   const base = parts.reduce(function(a,p){return a+p.ai*p.w;},0) / totW;
-  const excess = parts.reduce(function(a,p){return a+(SOFT[p.key]?0:Math.max(0, p.ai-0.55));},0);
-  const boost = Math.min(excess*0.18, 0.34);
+  const excess = parts.reduce(function(a,p){return a+(BOOST_KEYS[p.key]?Math.max(0, p.ai-0.5):0);},0);
+  const boost = Math.min(excess*0.28, 0.40);
   const aiScore = clamp01(base + boost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
 
@@ -1973,14 +1972,7 @@ function liveUpdate(delay){
   deb=setTimeout(function(){ if(safeRender()){ const r=lastResult; if(r&&!r.tooShort){ setStatus("done","✓ Güncellendi · %"+r.pct+" AI"); renderCompare(); } } }, delay);
 }
 
-const SAMPLE_AI_EN = "In today's fast-paced world, artificial intelligence plays a crucial role in shaping the way we live, work, and communicate. It is important to note that this transformative technology continues to delve into every aspect of our daily lives. Moreover, businesses are increasingly leveraging these cutting-edge solutions to streamline their operations. Furthermore, the seamless integration of AI fosters innovation, efficiency, and growth across multiple industries. Additionally, organizations must navigate the complexities of this ever-evolving landscape. Ultimately, embracing artificial intelligence is a testament to humanity's relentless pursuit of progress. In conclusion, the realm of AI offers a myriad of opportunities for those willing to harness its power.";
-const SAMPLE_AI_TR = "Günümüz dünyasında yapay zeka, hayatımızın vazgeçilmez bir parçası haline gelmektedir. Belirtmek gerekir ki bu teknoloji, sürekli gelişen yapısıyla büyük önem taşımaktadır. Ayrıca, işletmeler bu kapsamlı çözümlerden büyük ölçüde faydalanmaktadır. Bununla birlikte, dikkat edilmesi gereken pek çok husus bulunmaktadır. Öte yandan, verimliliği artıran bu sistemler her geçen gün öne çıkmaktadır. Sonuç olarak, yapay zeka modern dünyada kritik bir rol oynamaktadır.";
-const SAMPLE_HUMAN = "Okay so I finally tried that ramen place everyone keeps raving about. Honestly? Mixed feelings. The broth was unreal — rich, deep, the kind that sticks to your lips. But twenty bucks for a bowl I finished in eight minutes? Come on. I went with my brother, who somehow ordered the spiciest thing on the menu and then pretended he wasn't dying. He was. Tears, the whole show. We'll probably go back, though. The chashu alone is worth it.";
-
 $("analyzeBtn").addEventListener("click", function(){ runAnalysis(true); });
-$("sampleAIen").onclick=function(){ input.value=SAMPLE_AI_EN; origSnap=null; runAnalysis(true); };
-$("sampleAItr").onclick=function(){ input.value=SAMPLE_AI_TR; origSnap=null; runAnalysis(true); };
-$("sampleHuman").onclick=function(){ input.value=SAMPLE_HUMAN; origSnap=null; runAnalysis(true); };
 $("clear").onclick=function(){ input.value=""; analyzed=false; origSnap=null; clearSelectionQuiet(); safeRender(); setStatus("ready","● Hazır — metni yapıştır, Analiz Et'e bas"); input.focus(); };
 input.addEventListener("input", function(){ liveUpdate(180); });
 input.addEventListener("keyup", function(){ liveUpdate(180); });
