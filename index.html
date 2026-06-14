@@ -23,8 +23,8 @@
 </script>
 <style>
   :root{
-    --bg-0:#000000;
-    --bg-1:#000000;
+    --bg-0:#101d40;
+    --bg-1:#04060f;
     --card:rgba(255,255,255,.025);
     --card-2:rgba(255,255,255,.045);
     --stroke:rgba(255,255,255,.14);
@@ -44,14 +44,42 @@
   body{
     font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--txt);
-    background:linear-gradient(180deg,var(--bg-0),var(--bg-1));
-    min-height:100vh;padding:34px 18px 70px;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(135% 105% at 50% -8%, #16264f 0%, #0c1734 30%, #070d20 60%, #03050d 100%) fixed, var(--bg-1);
+    min-height:100vh;padding:84px 20px 70px;-webkit-font-smoothing:antialiased;
     overflow-x:hidden;position:relative;
   }
-  /* ===== [v7] Monokrom (Mindloop) ambians — saf siyah + ince merkez parlama ===== */
-  .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;background:
-    radial-gradient(120% 80% at 50% -10%, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 46%),
-    radial-gradient(80% 60% at 50% 120%, rgba(255,255,255,.04) 0%, rgba(255,255,255,0) 50%);}
+  /* ===== [v8] Yildizli lacivert gokyuzu (dis cerceve) ===== */
+  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9;
+    background-image:
+      radial-gradient(1.6px 1.6px at 40px 60px,#fff,transparent),
+      radial-gradient(1.2px 1.2px at 130px 120px,rgba(255,255,255,.85),transparent),
+      radial-gradient(1.1px 1.1px at 220px 40px,rgba(255,255,255,.7),transparent),
+      radial-gradient(1.6px 1.6px at 300px 200px,#fff,transparent),
+      radial-gradient(1.1px 1.1px at 80px 240px,rgba(255,255,255,.6),transparent),
+      radial-gradient(1.2px 1.2px at 360px 300px,rgba(255,255,255,.75),transparent);
+    background-size:400px 400px;background-repeat:repeat;animation:twinkle 6s ease-in-out infinite}
+  .stars::after{content:"";position:absolute;inset:0;
+    background-image:
+      radial-gradient(1px 1px at 60px 160px,rgba(255,255,255,.5),transparent),
+      radial-gradient(1px 1px at 210px 90px,rgba(255,255,255,.45),transparent),
+      radial-gradient(1px 1px at 330px 250px,rgba(255,255,255,.5),transparent);
+    background-size:320px 320px;background-repeat:repeat;animation:twinkle 9s ease-in-out infinite reverse}
+  @keyframes twinkle{0%,100%{opacity:.55}50%{opacity:1}}
+
+  /* ===== [v8] Ust kuselerden sarkan bitkiler (sallanma animasyonlu) ===== */
+  .foliage{position:fixed;top:-12px;width:min(46vw,430px);z-index:7;pointer-events:none;transform-origin:top center;will-change:transform}
+  .foliage svg{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 22px rgba(0,0,0,.55))}
+  .fol-left{left:-26px;animation:sway1 7s ease-in-out infinite}
+  .fol-right{right:-26px;transform:scaleX(-1);animation:sway2 9s ease-in-out infinite}
+  @keyframes sway1{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.5deg)}}
+  @keyframes sway2{0%,100%{transform:scaleX(-1) rotate(-1.2deg)}50%{transform:scaleX(-1) rotate(1.3deg)}}
+  .tendril{transform-box:fill-box;transform-origin:top center}
+  .fol-left .t1,.fol-right .t1{animation:tsway 5s ease-in-out infinite}
+  .fol-left .t2,.fol-right .t2{animation:tsway 6.4s ease-in-out infinite}
+  .fol-left .t3,.fol-right .t3{animation:tsway 7.6s ease-in-out infinite}
+  @keyframes tsway{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
+  @media(prefers-reduced-motion:reduce){.fol-left,.fol-right,.tendril,.stars,.stars::after{animation:none}}
+  @media(max-width:640px){.foliage{width:62vw}}
 
   /* Liquid glass (Mindloop) — ince ust/alt kenar parlamasi */
   .liquid-glass{position:relative;overflow:hidden}
@@ -68,7 +96,11 @@
   .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}
   @media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none;transition:none}}
 
-  .wrap{max-width:1180px;margin:0 auto;position:relative;z-index:1}
+  .wrap{max-width:1100px;margin:0 auto;position:relative;z-index:2;
+    background:rgba(2,4,10,.74);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+    border:1px solid rgba(255,255,255,.08);border-radius:30px;padding:30px 24px 36px;
+    box-shadow:0 50px 130px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.06)}
+  @media(max-width:640px){.wrap{border-radius:22px;padding:22px 14px 28px}}
   header.top{text-align:center;margin:18px auto 38px;max-width:900px}
   .badge{
     display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.26em;text-transform:uppercase;
@@ -309,8 +341,9 @@
     --accent:#111111; --accent-2:#444444; --human:#22b07a; --mid:#d4a83a; --ai:#e04860;
     --shadow:0 20px 60px rgba(0,0,0,.08);
   }
-  :root.light .vortex{display:none}
-  :root.light .blob{opacity:.18}
+  :root.light .vortex,:root.light .blob,:root.light .stars,:root.light .foliage{display:none}
+  :root.light body{background:linear-gradient(180deg,var(--bg-0),var(--bg-1))}
+  :root.light .wrap{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.08);box-shadow:0 30px 80px rgba(0,0,0,.1)}
   :root.light textarea{background:rgba(0,0,0,.04)}
   :root.light .preview, :root.light .cmp .pane, :root.light .selbox, :root.light .keyrow input{background:rgba(0,0,0,.03)}
   :root.light .bar, :root.light .qbar, :root.light .reason .rbar, :root.light .sparkbox{background:rgba(0,0,0,.06)}
@@ -325,8 +358,8 @@
   :root.light .genre-btn.on{background:rgba(124,92,224,.14)}
 
   /* theme button */
-  .theme-btn{position:absolute;top:0;right:0;border:1px solid var(--stroke);background:rgba(255,255,255,.05);
-    color:var(--txt);width:38px;height:38px;border-radius:11px;font-size:17px;cursor:pointer;transition:.18s}
+  .theme-btn{position:fixed;top:14px;right:14px;z-index:30;border:1px solid var(--stroke);background:rgba(0,0,0,.45);backdrop-filter:blur(6px);
+    color:var(--txt);width:40px;height:40px;border-radius:50%;font-size:17px;cursor:pointer;transition:.18s}
   .theme-btn:hover{border-color:var(--accent);transform:translateY(-1px)}
   header.top{position:relative}
 
@@ -432,14 +465,91 @@
 </script>
 </head>
 <body>
-<div class="ambient" aria-hidden="true"></div>
+<div class="stars" aria-hidden="true"></div>
+
+<svg class="svgdefs" width="0" height="0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="leafg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f8159"/><stop offset="1" stop-color="#163322"/></linearGradient>
+    <linearGradient id="leafg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#79b079"/><stop offset="1" stop-color="#2b5538"/></linearGradient>
+    <path id="leaf" d="M0 0 C 18 -14 46 -8 54 12 C 46 34 16 34 0 20 C -8 12 -7 4 0 0 Z"/>
+  </defs>
+</svg>
+
+<div class="foliage fol-left" aria-hidden="true">
+  <svg viewBox="0 0 500 470" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g class="tendril t1"><path d="M86 34 Q 112 150 96 268" stroke="#26432e" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(96 110) rotate(135) scale(1.1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg2)" transform="translate(102 180) rotate(118) scale(1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(92 232) rotate(150) scale(.9)"/>
+      <circle cx="96" cy="276" r="6" fill="#cdd9c2"/><circle cx="108" cy="258" r="4.5" fill="#b9c9ab"/></g>
+    <g class="tendril t2"><path d="M188 52 Q 214 190 200 320" stroke="#243f2b" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(200 140) rotate(140) scale(1.1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg2)" transform="translate(206 214) rotate(122) scale(1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(196 282) rotate(150) scale(.85)"/>
+      <circle cx="200" cy="328" r="6.5" fill="#cdd9c2"/></g>
+    <g class="tendril t3"><path d="M286 40 Q 308 132 298 232" stroke="#26432e" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(298 120) rotate(140) scale(.95)"/>
+      <use xlink:href="#leaf" fill="url(#leafg2)" transform="translate(302 188) rotate(125) scale(.85)"/>
+      <circle cx="298" cy="240" r="5.5" fill="#c2d2b4"/></g>
+    <g fill="url(#leafg)">
+      <use xlink:href="#leaf" transform="translate(2 6) rotate(20) scale(2.2)"/>
+      <use xlink:href="#leaf" transform="translate(64 -2) rotate(42) scale(1.95)"/>
+      <use xlink:href="#leaf" transform="translate(128 4) rotate(62) scale(1.7)"/>
+      <use xlink:href="#leaf" transform="translate(190 10) rotate(80) scale(1.5)"/>
+      <use xlink:href="#leaf" transform="translate(248 18) rotate(95) scale(1.35)"/>
+      <use xlink:href="#leaf" transform="translate(304 28) rotate(108) scale(1.15)"/>
+      <use xlink:href="#leaf" transform="translate(352 42) rotate(118) scale(1)"/>
+      <use xlink:href="#leaf" transform="translate(-8 58) rotate(112) scale(1.7)"/>
+      <use xlink:href="#leaf" transform="translate(4 118) rotate(124) scale(1.4)"/>
+      <use xlink:href="#leaf" transform="translate(14 176) rotate(134) scale(1.15)"/>
+    </g>
+    <g fill="url(#leafg2)">
+      <use xlink:href="#leaf" transform="translate(34 30) rotate(55) scale(1.5)"/>
+      <use xlink:href="#leaf" transform="translate(104 34) rotate(78) scale(1.3)"/>
+      <use xlink:href="#leaf" transform="translate(168 40) rotate(92) scale(1.15)"/>
+      <use xlink:href="#leaf" transform="translate(228 48) rotate(104) scale(1)"/>
+    </g>
+  </svg>
+</div>
+<div class="foliage fol-right" aria-hidden="true">
+  <svg viewBox="0 0 500 470" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g class="tendril t1"><path d="M86 34 Q 112 150 96 268" stroke="#26432e" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(96 110) rotate(135) scale(1.1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg2)" transform="translate(102 180) rotate(118) scale(1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(92 232) rotate(150) scale(.9)"/>
+      <circle cx="96" cy="276" r="6" fill="#cdd9c2"/><circle cx="108" cy="258" r="4.5" fill="#b9c9ab"/></g>
+    <g class="tendril t2"><path d="M188 52 Q 214 190 200 320" stroke="#243f2b" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(200 140) rotate(140) scale(1.1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg2)" transform="translate(206 214) rotate(122) scale(1)"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(196 282) rotate(150) scale(.85)"/>
+      <circle cx="200" cy="328" r="6.5" fill="#cdd9c2"/></g>
+    <g class="tendril t3"><path d="M286 40 Q 308 132 298 232" stroke="#26432e" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <use xlink:href="#leaf" fill="url(#leafg)" transform="translate(298 120) rotate(140) scale(.95)"/>
+      <use xlink:href="#leaf" fill="url(#leafg2)" transform="translate(302 188) rotate(125) scale(.85)"/>
+      <circle cx="298" cy="240" r="5.5" fill="#c2d2b4"/></g>
+    <g fill="url(#leafg)">
+      <use xlink:href="#leaf" transform="translate(2 6) rotate(20) scale(2.2)"/>
+      <use xlink:href="#leaf" transform="translate(64 -2) rotate(42) scale(1.95)"/>
+      <use xlink:href="#leaf" transform="translate(128 4) rotate(62) scale(1.7)"/>
+      <use xlink:href="#leaf" transform="translate(190 10) rotate(80) scale(1.5)"/>
+      <use xlink:href="#leaf" transform="translate(248 18) rotate(95) scale(1.35)"/>
+      <use xlink:href="#leaf" transform="translate(304 28) rotate(108) scale(1.15)"/>
+      <use xlink:href="#leaf" transform="translate(352 42) rotate(118) scale(1)"/>
+      <use xlink:href="#leaf" transform="translate(-8 58) rotate(112) scale(1.7)"/>
+      <use xlink:href="#leaf" transform="translate(4 118) rotate(124) scale(1.4)"/>
+      <use xlink:href="#leaf" transform="translate(14 176) rotate(134) scale(1.15)"/>
+    </g>
+    <g fill="url(#leafg2)">
+      <use xlink:href="#leaf" transform="translate(34 30) rotate(55) scale(1.5)"/>
+      <use xlink:href="#leaf" transform="translate(104 34) rotate(78) scale(1.3)"/>
+      <use xlink:href="#leaf" transform="translate(168 40) rotate(92) scale(1.15)"/>
+      <use xlink:href="#leaf" transform="translate(228 48) rotate(104) scale(1)"/>
+    </g>
+  </svg>
+</div>
+
+<button type="button" class="theme-btn" id="themeBtn" aria-label="Tema değiştir">🌙</button>
 <div class="wrap">
-  <header class="top">
-    <button type="button" class="theme-btn" id="themeBtn" aria-label="Tema değiştir">🌙</button>
-    <span class="badge"><span class="dot"></span> <span id="badgeText">Tür: Akademik</span></span>
-    <h1 class="reveal up">Yapay zekâ mı, <span class="ser">insan</span> mı?</h1>
-    <p class="sub reveal up d1">Metni yapıştır, gerisini bırak. Yirmi dilsel sinyal; cümle cümle ısı haritası, kalite skoru, radar ve isteğe bağlı insansılaştırma — sade, hızlı, net.</p>
-  </header>
 
   <div id="jsWarn">
     <b>⚠️ JavaScript bu görünümde çalışmıyor.</b> Dosyayı bir <b>dosya önizlemesinde</b> (ör. sohbet uygulamasının veya iOS'in hızlı bakışında) açtıysan butonlar çalışmaz — önizlemeler kodu çalıştırmaz.<br>
