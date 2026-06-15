@@ -249,6 +249,14 @@
   .keyrow input{flex:1;background:rgba(0,0,0,.32);border:1px solid var(--stroke);border-radius:10px;color:var(--txt);padding:9px 12px;font-size:13px;font-family:inherit;min-width:0}
   .keyrow input:focus{outline:none;border-color:var(--accent)}
   .keynote{font-size:11px;color:var(--faint);line-height:1.5;margin-bottom:13px}
+  .deeprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .deepnote{font-size:10.5px;color:var(--faint);line-height:1.4;flex:1;min-width:140px}
+  .deepbox{margin-top:11px;background:rgba(0,0,0,.32);border:1px solid var(--stroke);border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.6}
+  .deepbox .drow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .deepbox .dpct{font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .deepbox .dtag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .deepbox .dcombined{margin:10px 0;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--stroke);font-weight:600}
+  .deepbox .dreason{color:var(--muted);font-size:12.5px;border-top:1px solid var(--stroke);padding-top:9px;margin-top:4px}
   .selbox{background:rgba(0,0,0,.24);border:1px dashed rgba(255,255,255,.4);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.6;margin-bottom:11px;min-height:46px;color:var(--muted)}
   .selbox.has{color:var(--txt);border-style:solid}
   .selbox .schip{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;margin-bottom:6px;color:#0a0a14}
@@ -586,6 +594,12 @@
           <button type="button" class="btn" id="keySave">Kaydet</button>
         </div>
         <div class="keynote">🔒 Anahtar sadece bu tarayıcıda (localStorage) saklanır, hiçbir sunucumuza gitmez — istekler doğrudan senin tarayıcından Anthropic'e gider. Anahtar almak için: console.anthropic.com → API Keys.</div>
+        <div class="deeprow">
+          <button type="button" class="btn primary" id="btnDeep">🧠 Claude ile Derin AI Analizi</button>
+          <span class="deepnote">Gizlenmiş/modern AI'yı sezgisel motordan çok daha iyi yakalar · metni Anthropic'e gönderir, token harcar</span>
+        </div>
+        <div class="rwstatus" id="deepStatus"></div>
+        <div class="deepbox" id="deepBox" style="display:none"></div>
         <div class="selbox" id="selBox">Isı haritasından bir cümleye dokun — burada görünsün.</div>
         <div class="rwbtns">
           <button type="button" class="btn primary" id="btnRwSent" disabled>✨ Bu cümleyi insansılaştır</button>
@@ -640,7 +654,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 44 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%48</b>; bu tür <b>gizlenmiş AI'da yakalama oranı çok düşüktür</b> — bu, tüm dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI düşük skor alır.
+          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 44 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%48</b>; bu tür <b>gizlenmiş AI'da yakalama oranı çok düşüktür</b> — bu, tüm dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). Bir LLM bu işte sezgisel motordan kat kat iyidir ve heuristic + Claude birleşik skoru gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
         </div>
       </details>
     </section>
@@ -1495,6 +1509,42 @@ function callClaude(userPrompt, maxTokens, onOk, onErr){
 }
 function setRwStatus(cls, msg){ const el=$("rwStatus"); el.className="rwstatus "+(cls||""); el.textContent=msg||""; }
 
+/* [v13] Claude derin-analiz motoru (LLM-as-judge) — gizlenmis/modern AI'yi sezgisel motordan cok daha iyi yakalar */
+function setDeepStatus(cls, msg){ var el=$("deepStatus"); if(!el) return; el.className="rwstatus "+(cls||""); el.textContent=msg||""; }
+function deepVerdict(p){ if(p>=70) return "Büyük olasılıkla YAPAY ZEKA"; if(p>=50) return "Muhtemelen yapay zeka"; if(p>=30) return "Karışık / belirsiz"; return "Büyük olasılıkla İNSAN"; }
+function deepAnalyze(){
+  var text=(input.value||"").trim();
+  var wc=0; try{ wc=(text.match(/\S+/g)||[]).length; }catch(e){ wc=0; }
+  if(wc<12){ setDeepStatus("err","En az ~12 kelimelik metin gerekli — önce kutuya metin yapıştır."); return; }
+  if(!getKey()){ setDeepStatus("err","Önce yukarıya Anthropic API anahtarını (sk-ant-...) girip Kaydet'e bas."); try{ $("apiKey").focus(); }catch(e){} return; }
+  try{ $("deepBox").style.display="none"; }catch(e){}
+  try{ $("btnDeep").disabled=true; }catch(e){}
+  setDeepStatus("busy","🧠 Claude analiz ediyor… (birkaç saniye)");
+  var prompt = "Sen uzman bir yapay-zeka metin dedektorusun. Asagidaki metnin bir buyuk dil modeli (ChatGPT/Claude/Gemini vb.) tarafindan mi yoksa bir insan tarafindan mi yazildigini degerlendir. Ozellikle paraphrase edilmis veya 'humanize' edilmis (insana benzetilmis) AI metinlerine dikkat et: asiri tutarli ritim, kisisel/somut ayrintilarin yoklugu ve kusursuz ama genel ifadeler AI isaretidir; dagilan ritim, gercek anekdot/rakam, ozgun ses ve kucuk tutarsizliklar insan isaretidir. SADECE asagidaki formatta yanit ver, baska hicbir sey yazma:\n"
+    + "AI_OLASILIK: <0-100 arasi tam sayi>\nGUVEN: <dusuk|orta|yuksek>\nGEREKCE: <en fazla 2 kisa cumle, Turkce>\n\nMETIN:\n\"\"\"\n" + text + "\n\"\"\"";
+  callClaude(prompt, 350, function(out){
+    try{ $("btnDeep").disabled=false; }catch(e){}
+    var m=out.match(/AI[_\s]*OLASILIK[:\s]*([0-9]{1,3})/i);
+    var cp = m ? parseInt(m[1],10) : NaN;
+    if(isNaN(cp)){ var m2=out.match(/([0-9]{1,3})/); cp = m2 ? parseInt(m2[1],10) : NaN; }
+    if(isNaN(cp)){ setDeepStatus("err","Claude yanıtı okunamadı: "+out.slice(0,120)); return; }
+    cp=Math.max(0, Math.min(100, cp));
+    var conf=""; var cf=out.match(/GUVEN[:\s]*([A-Za-zçğıöşüÇĞİÖŞÜ]+)/i); if(cf) conf=cf[1];
+    var gm=out.match(/GEREKCE[:\s]*([\s\S]+)/i); var reason=gm ? gm[1].replace(/^["'\s]+|["'\s]+$/g,"") : "";
+    var hr=null; try{ var rr=analyze(text); if(!rr.tooShort) hr=rr.pct; }catch(e){}
+    var combined = (hr!=null) ? Math.round(cp*0.7 + hr*0.3) : cp;
+    var col=lerpColor(cp/100);
+    var html='<div class="drow"><span class="dpct" style="color:'+col+'">%'+cp+'</span><span class="dtag">Claude: '+deepVerdict(cp)+(conf?(" · güven "+htmlEsc(conf)):"")+'</span></div>';
+    if(hr!=null) html+='<div class="dcombined">⚖️ Birleşik skor (Claude %70 + sezgisel %30): <b>%'+combined+'</b> — '+deepVerdict(combined)+'<br><span style="font-weight:400;color:var(--faint);font-size:11.5px">Sezgisel motor: %'+hr+' · Claude: %'+cp+'</span></div>';
+    if(reason) html+='<div class="dreason">🧠 '+htmlEsc(reason)+'</div>';
+    var box=$("deepBox"); box.innerHTML=html; box.style.display="block";
+    setDeepStatus("ok","✓ Derin analiz tamamlandı");
+  }, function(err){
+    try{ $("btnDeep").disabled=false; }catch(e){}
+    setDeepStatus("err","⚠️ "+err);
+  });
+}
+
 function selectSentence(i){
   if(!sentsCache[i]) return;
   selIdx = i;
@@ -2042,6 +2092,7 @@ $("keySave").onclick=function(){
 };
 $("btnRwSent").onclick=rewriteSentenceMulti;
 $("btnRwAll").onclick=rewriteAll;
+try{ $("btnDeep").onclick=deepAnalyze; }catch(e){}
 $("copyAll").onclick=function(){ if(lastResult && !lastResult.tooShort) copyText(buildMasterPrompt(lastResult, input.value), $("copyAll")); };
 
 $("btnRestore").onclick=function(){ if(origSnap){ input.value=origSnap.text; clearSelectionQuiet(); runAnalysis(false); } };
