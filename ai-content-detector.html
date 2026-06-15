@@ -640,7 +640,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark:</b> 100 örnekli zorlu TR+EN test setinde (klasik AI, paraphrase'lenmiş "humanized" AI ve anadili-İngilizce-olmayan insan metinleri dahil) ölçüldü: <b>%87.9 doğruluk</b>, <b>%100 precision</b>, <b>%75 recall</b> ve <b>sıfır yanlış pozitif</b> (hiçbir insan metni — akademik/resmi/ESL dahil — AI diye işaretlenmedi). Karşılaştırma: bağımsız testlerde ticari dedektörler ~%65–88 doğrulukta ve öğrenci metinlerinde %43–83, anadili-İngilizce-olmayanlarda ~%61'e varan <b>yanlış pozitif</b> üretiyor. <b>Doğruluk notu:</b> Bilerek gizlenmiş (humanized) veya kısa/sohbet tarzı AI düşük skor alabilir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan. Düşük skor "kesin insan" demek değildir.
+          <b>Benchmark:</b> 100 örnekli zorlu TR+EN test setinde (klasik AI, paraphrase'lenmiş "humanized" AI ve anadili-İngilizce-olmayan insan metinleri dahil) ölçüldü: <b>%91.9 doğruluk</b>, <b>%100 precision</b>, <b>%83 recall</b> ve <b>sıfır yanlış pozitif</b> (hiçbir insan metni — akademik/resmi/ESL dahil — AI diye işaretlenmedi). Karşılaştırma: bağımsız testlerde ticari dedektörler ~%65–88 doğrulukta ve öğrenci metinlerinde %43–83, anadili-İngilizce-olmayanlarda ~%61'e varan <b>yanlış pozitif</b> üretiyor. <b>Doğruluk notu:</b> Bilerek gizlenmiş (humanized) veya kısa/sohbet tarzı AI düşük skor alabilir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan. Düşük skor "kesin insan" demek değildir.
         </div>
       </details>
     </section>
@@ -708,7 +708,13 @@ const AI_PHRASES = [
   "hope this helps","i hope this message finds you well","feel free to","do not hesitate to","don't hesitate to",
   "let me know if","i'm here to help","as an ai","of course!","i completely understand","you've got this",
   "memnuniyetle","yardımcı olayım","yardımcı olabilirim","umarım bu","umarım yardımcı","sormaktan çekinmeyin",
-  "çekinmeyin","iletişime geçmekten çekinmeyin","umarım açıklayıcı","yardımcı olmaktan memnuniyet"
+  "çekinmeyin","iletişime geçmekten çekinmeyin","umarım açıklayıcı","yardımcı olmaktan memnuniyet",
+  /* [v11] Motivasyon + aciklayici AI kaliplari — bu register insan akademik/resmi yazida nadir */
+  "believe in yourself","never give up","you are capable","every great achievement","the key to success",
+  "stay focused on","your dreams","dare to","perseverance is","step of the journey","embrace each",
+  "be kind to yourself","within reach","think of it as","the good news is","here's the thing","in a nutshell",
+  "easier than you might think","remember to","it is essential to recognize",
+  "kendine inan","asla pes etme","başarının anahtarı","hayallerine","cesaret edersen","pes etme","her büyük","azmin"
 ];
 
 const HYPE = [
