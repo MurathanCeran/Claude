@@ -1006,8 +1006,25 @@ function analyze(text){
   const firstPerson = countRe(text, /\b(i|i'm|i've|me|my|ben|bana|benim|bence|bizce)\b/gi);
   const parenth = countRe(text, /\([^)]{1,60}\)/g);
   const numerals = countRe(text, /\b\d+[.,]?\d*\b/g);
-  const humanRaw = casual*2 + exclaim*0.6 + questions*0.6 + ellipsis*0.8 + Math.min(firstPerson,8)*0.5 + contractions*0.4 + parenth*0.6 + Math.min(numerals,6)*0.35;
+  // [v14] Spontanlik (insan): kendini-duzeltme / vurgu / dogal konusma — humanized AI bunlari iyi taklit edemez
+  var spont = countRe(text, /\b(i mean|i guess|honestly|to be honest|you know|kind of|kinda|sort of|sorta|or rather|my bad|tbh|ngl|idc|imo|aslinda|aslında|yani|iste|işte|hani|valla|vallahi|sanirim|sanırım|galiba|ya |falan|filan|abi|kanka)\b/gi)
+    + countRe(text, /!{2,}|\?{2,}|\?!|\.\.\.|…/g)
+    + Math.min(countRe(text, /\b[A-ZÇĞİÖŞÜ]{3,}\b/g), 4)*0.4;
+  const humanRaw = casual*2 + exclaim*0.6 + questions*0.6 + ellipsis*0.8 + Math.min(firstPerson,8)*0.5 + contractions*0.4 + parenth*0.6 + Math.min(numerals,6)*0.35 + Math.min(spont,7)*0.7;
   const humanBonus = clamp01(humanRaw / (wc/100*9 + 4));
+  // [v14] Makine-duzgunlugu (AI): cumle uzunlugu + virgul ritmi asiri tekduze VE spontanlik yok
+  var smoothAI = 0;
+  try{
+    var commasPer = sentences.map(function(s){ return (s.match(/,/g)||[]).length; });
+    var cMean = commasPer.reduce(function(a,b){return a+b;},0)/(commasPer.length||1);
+    var cStd = Math.sqrt(commasPer.reduce(function(a,b){return a+Math.pow(b-cMean,2);},0)/(commasPer.length||1));
+    if(sc>=5 && cMean>=0.5){
+      var evenLen = clamp01((0.5 - cv)/0.45);
+      var evenComma = clamp01((0.85 - cStd)/0.85);
+      var noSpont = clamp01(1 - spont/2.5);
+      smoothAI = clamp01(evenLen*0.40 + evenComma*0.30 + noSpont*0.30);
+    }
+  }catch(e){ smoothAI = 0; }
 
   const parts = [
     {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
@@ -1049,7 +1066,9 @@ function analyze(text){
     {key:"question", name:"Soru kullanımı", short:"Soru", ai:questionAI, w:0.03, val:questionsCount+" soru",
       desc:"[v5] İnsan retorik soru sorar; AI açıklayıcı moda saplanır."},
     {key:"infodensity", name:"Bilgi yoğunluğu varyansı", short:"Bilgi Yoğ.", ai:infoDensityAI, w:0.03, val:ttrStd!==null?("σ="+ttrStd.toFixed(2)):"yetersiz",
-      desc:"[v5] AI her cümleye eşit bilgi yükler; insanda yoğun/geçiş cümleler değişir."}
+      desc:"[v5] AI her cümleye eşit bilgi yükler; insanda yoğun/geçiş cümleler değişir."},
+    {key:"smooth", name:"Makine düzgünlüğü", short:"Düzgünlük", ai:smoothAI, w:0.05, val:(smoothAI>0?("%"+Math.round(smoothAI*100)):"—"),
+      desc:"[v14] Cümle uzunluğu + virgül ritmi aşırı tekdüze ve hiç spontanlık (kendini düzeltme, vurgu) yoksa makine işi sinyali."}
   ];
 
   // [v5] Tür (genre) bazli agirliklandirma — her sinyalin ai degerini ture gore carp
