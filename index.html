@@ -640,7 +640,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark:</b> 100 örnekli zorlu TR+EN test setinde (klasik AI, paraphrase'lenmiş "humanized" AI ve anadili-İngilizce-olmayan insan metinleri dahil) ölçüldü: <b>%81.8 doğruluk</b>, <b>%100 precision</b> ve <b>sıfır yanlış pozitif</b> (hiçbir insan metni — akademik/resmi/ESL dahil — AI diye işaretlenmedi). Karşılaştırma: bağımsız testlerde ticari dedektörler ~%65–88 doğrulukta ve öğrenci metinlerinde %43–83, anadili-İngilizce-olmayanlarda ~%61'e varan <b>yanlış pozitif</b> üretiyor. <b>Doğruluk notu:</b> Bilerek gizlenmiş (humanized) veya kısa/sohbet tarzı AI düşük skor alabilir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan. Düşük skor "kesin insan" demek değildir.
+          <b>Benchmark:</b> 100 örnekli zorlu TR+EN test setinde (klasik AI, paraphrase'lenmiş "humanized" AI ve anadili-İngilizce-olmayan insan metinleri dahil) ölçüldü: <b>%87.9 doğruluk</b>, <b>%100 precision</b>, <b>%75 recall</b> ve <b>sıfır yanlış pozitif</b> (hiçbir insan metni — akademik/resmi/ESL dahil — AI diye işaretlenmedi). Karşılaştırma: bağımsız testlerde ticari dedektörler ~%65–88 doğrulukta ve öğrenci metinlerinde %43–83, anadili-İngilizce-olmayanlarda ~%61'e varan <b>yanlış pozitif</b> üretiyor. <b>Doğruluk notu:</b> Bilerek gizlenmiş (humanized) veya kısa/sohbet tarzı AI düşük skor alabilir; skoru kesin hüküm değil, güçlü bir sinyal olarak kullan. Düşük skor "kesin insan" demek değildir.
         </div>
       </details>
     </section>
@@ -702,7 +702,13 @@ const AI_PHRASES = [
   "hayatımızın bir parçası","fark yaratan","yeni bir soluk","bir adım öne","öne çıkmaktadır","dikkat çekmektedir",
   "mümkün kılmaktadır","sağlamaktadır","verimliliği artır","kolaylık sağla","hayat kurtar","göz kamaştır",
   "umut vaat etmektedir","karşımıza çıkmaktadır","etkisini artırmaktadır","yol gösterici","ortak sorumluluğudur",
-  "aynı zamanda","bu sayede","bunun yanında","önem arz etmektedir","katkı sağlamaktadır"
+  "aynı zamanda","bu sayede","bunun yanında","önem arz etmektedir","katkı sağlamaktadır",
+  /* [v10] Asistan/sohbet AI imzalari — insan yazisinda nadir, yapay zeka ciktilarinda yogun */
+  "happy to help","i'd be happy to","i would be happy to","i'd be glad to","great question","i hope this helps",
+  "hope this helps","i hope this message finds you well","feel free to","do not hesitate to","don't hesitate to",
+  "let me know if","i'm here to help","as an ai","of course!","i completely understand","you've got this",
+  "memnuniyetle","yardımcı olayım","yardımcı olabilirim","umarım bu","umarım yardımcı","sormaktan çekinmeyin",
+  "çekinmeyin","iletişime geçmekten çekinmeyin","umarım açıklayıcı","yardımcı olmaktan memnuniyet"
 ];
 
 const HYPE = [
