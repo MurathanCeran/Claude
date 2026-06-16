@@ -251,6 +251,8 @@
   .keynote{font-size:11px;color:var(--faint);line-height:1.5;margin-bottom:13px}
   .deeprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
   .deepnote{font-size:10.5px;color:var(--faint);line-height:1.4;flex:1;min-width:140px}
+  .deepauto{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--muted);line-height:1.4;margin:8px 0 2px;cursor:pointer}
+  .deepauto input{margin-top:1px;flex:0 0 auto}
   .deepbox{margin-top:11px;background:rgba(0,0,0,.32);border:1px solid var(--stroke);border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.6}
   .deepbox .drow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
   .deepbox .dpct{font-size:30px;font-weight:800;letter-spacing:-.02em}
@@ -598,6 +600,7 @@
           <button type="button" class="btn primary" id="btnDeep">🧠 Claude ile Derin AI Analizi</button>
           <span class="deepnote">Gizlenmiş/modern AI'yı sezgisel motordan çok daha iyi yakalar · metni Anthropic'e gönderir, token harcar</span>
         </div>
+        <label class="deepauto"><input type="checkbox" id="deepAutoChk" checked> <span>Birleşik mod: "Analiz Et"e basınca Claude'u <b>otomatik</b> çalıştır (anahtar girilmişse)</span></label>
         <div class="rwstatus" id="deepStatus"></div>
         <div class="deepbox" id="deepBox" style="display:none"></div>
         <div class="selbox" id="selBox">Isı haritasından bir cümleye dokun — burada görünsün.</div>
@@ -1485,6 +1488,8 @@ function lastRadarZero(){ const z=[]; for(let i=0;i<20;i++)z.push(0); return z; 
 
 /* ----- [v4] Claude API (kullanicinin kendi anahtariyla, dogrudan tarayicidan) ----- */
 function getKey(){ try{ return localStorage.getItem("anthropic_api_key")||""; }catch(e){ return ""; } }
+function deepAuto(){ try{ return localStorage.getItem("deep_auto")!=="0"; }catch(e){ return true; } }
+function setDeepAuto(on){ try{ localStorage.setItem("deep_auto", on?"1":"0"); }catch(e){} }
 function saveKey(v){ try{ localStorage.setItem("anthropic_api_key", v); }catch(e){} }
 function callClaude(userPrompt, maxTokens, onOk, onErr){
   const key=getKey();
@@ -1531,11 +1536,11 @@ function setRwStatus(cls, msg){ const el=$("rwStatus"); el.className="rwstatus "
 /* [v13] Claude derin-analiz motoru (LLM-as-judge) — gizlenmis/modern AI'yi sezgisel motordan cok daha iyi yakalar */
 function setDeepStatus(cls, msg){ var el=$("deepStatus"); if(!el) return; el.className="rwstatus "+(cls||""); el.textContent=msg||""; }
 function deepVerdict(p){ if(p>=70) return "Büyük olasılıkla YAPAY ZEKA"; if(p>=50) return "Muhtemelen yapay zeka"; if(p>=30) return "Karışık / belirsiz"; return "Büyük olasılıkla İNSAN"; }
-function deepAnalyze(){
+function deepAnalyze(auto){
   var text=(input.value||"").trim();
   var wc=0; try{ wc=(text.match(/\S+/g)||[]).length; }catch(e){ wc=0; }
-  if(wc<12){ setDeepStatus("err","En az ~12 kelimelik metin gerekli — önce kutuya metin yapıştır."); return; }
-  if(!getKey()){ setDeepStatus("err","Önce yukarıya Anthropic API anahtarını (sk-ant-...) girip Kaydet'e bas."); try{ $("apiKey").focus(); }catch(e){} return; }
+  if(wc<12){ if(!auto) setDeepStatus("err","En az ~12 kelimelik metin gerekli — önce kutuya metin yapıştır."); return; }
+  if(!getKey()){ if(!auto){ setDeepStatus("err","Önce yukarıya Anthropic API anahtarını (sk-ant-...) girip Kaydet'e bas."); try{ $("apiKey").focus(); }catch(e){} } return; }
   try{ $("deepBox").style.display="none"; }catch(e){}
   try{ $("btnDeep").disabled=true; }catch(e){}
   setDeepStatus("busy","🧠 Claude analiz ediyor… (birkaç saniye)");
@@ -1560,9 +1565,11 @@ function deepAnalyze(){
     if(reason) html+='<div class="dreason">🧠 '+htmlEsc(reason)+'</div>';
     var box=$("deepBox"); box.innerHTML=html; box.style.display="block";
     setDeepStatus("ok","✓ Derin analiz tamamlandı");
+    // [v16] Birlesik modda ust durum cubugunu birlesik skorla guncelle
+    if(hr!=null){ try{ setStatus("done","✓ Birleşik: %"+combined+" AI · Claude %"+cp+" · sezgisel %"+hr); }catch(e){} }
   }, function(err){
     try{ $("btnDeep").disabled=false; }catch(e){}
-    setDeepStatus("err","⚠️ "+err);
+    if(auto) setDeepStatus("err","🧠 Claude'a ulaşılamadı: "+err+" (sezgisel skor geçerli)"); else setDeepStatus("err","⚠️ "+err);
   });
 }
 
@@ -1845,6 +1852,8 @@ function runAnalysis(scroll){
         try{ renderBenchmark(r.pct); }catch(e){}
         try{ saveAnalysis(input.value, r); renderAnalysisHistory(); }catch(e){}
         try{ celebrate(r.pct); }catch(e){}
+        // [v16] Birlesik mod: anahtar varsa ve otomatik acik ise Claude'u da calistir, birlesik skoru goster
+        try{ if(getKey() && deepAuto()) deepAnalyze(true); }catch(e){}
       }
       else setStatus("ready","● Metin çok kısa — en az ~12 kelime gir");
     }
@@ -2113,7 +2122,8 @@ $("keySave").onclick=function(){
 };
 $("btnRwSent").onclick=rewriteSentenceMulti;
 $("btnRwAll").onclick=rewriteAll;
-try{ $("btnDeep").onclick=deepAnalyze; }catch(e){}
+try{ $("btnDeep").onclick=function(){ deepAnalyze(false); }; }catch(e){}
+try{ var dac=$("deepAutoChk"); dac.checked=deepAuto(); dac.onchange=function(){ setDeepAuto(dac.checked); }; }catch(e){}
 $("copyAll").onclick=function(){ if(lastResult && !lastResult.tooShort) copyText(buildMasterPrompt(lastResult, input.value), $("copyAll")); };
 
 $("btnRestore").onclick=function(){ if(origSnap){ input.value=origSnap.text; clearSelectionQuiet(); runAnalysis(false); } };
