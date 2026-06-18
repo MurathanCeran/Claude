@@ -171,6 +171,27 @@
     color: #cfeefb; backdrop-filter: blur(4px); transition: all 0.2s;
   }
   .mute:active { transform: scale(0.9); }
+
+  /* aşama / ilerleme göstergesi (alt mor alan) */
+  .stage {
+    position: fixed; left: 0; right: 0;
+    bottom: calc(26px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-size: 0.78rem; letter-spacing: 0.22rem; text-transform: uppercase;
+    color: #c9b3ff; text-shadow: 0 0 12px rgba(150,110,235,0.5);
+    pointer-events: none; z-index: 4; transition: color 0.4s;
+    padding: 0 16px; text-align: center;
+  }
+  .stage .dot-led {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #8f7ab8; box-shadow: 0 0 8px #8f7ab8; flex: 0 0 auto;
+  }
+  body.on-state  .stage { color: #cdb6ff; } body.on-state  .dot-led { background:#a878ff; box-shadow:0 0 10px #a878ff; }
+  body.thinking  .stage { color: #d8c2ff; } body.thinking  .dot-led { background:#b48bff; box-shadow:0 0 12px #b48bff; animation: ledpulse 0.9s ease-in-out infinite; }
+  body.speaking  .stage { color: #ffe39a; } body.speaking  .dot-led { background:#ffd166; box-shadow:0 0 12px #ffd166; }
+  .stage.busy .dot-led { animation: ledpulse 0.9s ease-in-out infinite; }
+  @keyframes ledpulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.5); } }
+
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
@@ -181,6 +202,10 @@
 
   <div class="mute" id="muteBtn" role="button" aria-label="Sesi aç/kapat">🔊</div>
 
+  <!-- Aşama / ilerleme göstergesi -->
+  <div class="stage" id="stage"><span class="dot-led" id="led"></span><span id="stageText">Beklemede</span></div>
+
+<script src="jarvis-brain.js"></script>
 <script>
 /* ============================================================
    J.A.R.V.I.S — Sade arayüz, tam beyin
@@ -202,30 +227,12 @@
   const MALE_HINTS   = /(male|erkek|man|mehmet|tolga|baris|barış|emir|deniz|cem|kerem|google türkçe|murat|daniel|arthur|george|rishi)/i;
   const FEMALE_HINTS = /(female|kadın|woman|yelda|filiz|seda|aylin|elif|zeynep|samantha|karen|tessa)/i;
 
-  /* ====================== METİN NORMALLEŞTİRME & FUZZY ======================
-     Daha esnek komut algılama için: küçült, Türkçe karakterleri sadeleştir,
-     noktalama temizle. Hem komutlar hem anahtarlar bununla karşılaştırılır. */
-  function norm(s){
-    return String(s).toLocaleLowerCase("tr-TR")
-      .replace(/ı/g,"i").replace(/İ/g,"i").replace(/ç/g,"c").replace(/ğ/g,"g")
-      .replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u")
-      .replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
-  }
-  // Levenshtein (yanlış duyulan kelimeleri yakalamak için)
-  function lev(a,b){
-    const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
-    const d=Array.from({length:m+1},(_,i)=>[i,...Array(n).fill(0)]);
-    for(let j=0;j<=n;j++) d[0][j]=j;
-    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
-      d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
-    return d[m][n];
-  }
-  // "Jarvis" wake word'ünü bulanık yakala (carvis, jarvıs, cervis, jervis...)
-  function matchesWake(text){
-    const n = norm(text);
-    if (n.includes("jarvis") || n.includes("carvis") || n.includes("carvis")) return true;
-    return n.split(" ").some(w => w.length>=4 && lev(w,"jarvis")<=2);
-  }
+  /* ====================== BEYİN (jarvis-brain.js) ======================
+     Tüm bilgi ve mantık ortak beyinden gelir; testlerle aynı kaynağı kullanır. */
+  const B = window.JARVIS || {};
+  const norm = B.norm, lev = B.lev, matchesWake = B.matchesWake, stripWake = B.stripWake,
+        KNOWLEDGE = B.KNOWLEDGE, WEATHER_CODES = B.WEATHER_CODES,
+        findKnowledge = B.findKnowledge, classifyIntent = B.classifyIntent;
 
   /* ====================== KONUM & İZİN DURUMU ====================== */
   let lastCoords = null;            // { lat, lon, ts }
@@ -233,152 +240,14 @@
   function geoConsent(){ return localStorage.getItem("jarvis_geo_consent")==="1"; }
   function setGeoConsent(v){ localStorage.setItem("jarvis_geo_consent", v?"1":"0"); }
 
-  /* ====================== BİLGİ VERİTABANI ======================
-     Hızlı çevrimdışı cevaplar. Eşleşmezse Wikipedia (canlı medya) devreye girer.
-     Anahtarlar eşleşme anında normalize edilir; Türkçe karakter sorun olmaz. */
-  const KNOWLEDGE = [
-    // --- Sağlık & günlük yaşam ---
-    { keys:["su iç","ne kadar su","günde kaç bardak su"], a:"Günde yaklaşık 2 ila 2,5 litre, yani 8-10 bardak su önerilir Murathan." },
-    { keys:["uyku","kaç saat uyu","ne kadar uyumalı"], a:"Yetişkinler için 7 ila 9 saat uyku idealdir Murathan. Her gün aynı saatte yatıp kalkmak kaliteyi artırır." },
-    { keys:["mola","ekran molası","20 20 20","gözlerim yoruldu"], a:"20-20-20 kuralı Murathan: her 20 dakikada bir, 20 saniye, 20 metre uzağa bakın." },
-    { keys:["stres","gergin","sakinleş","nefes egzersizi"], a:"4-7-8 nefes tekniği: 4 saniye alın, 7 saniye tutun, 8 saniyede verin Murathan." },
-    { keys:["pomodoro","odaklan","verimli çalış","konsantrasyon"], a:"Pomodoro: 25 dakika çalışma, 5 dakika mola. Dört turdan sonra uzun mola Murathan." },
-    { keys:["spor","egzersiz","ne kadar hareket"], a:"Haftada en az 150 dakika orta tempolu hareket önerilir Murathan." },
-    { keys:["sağlıklı beslen","ne yemeli","beslenme","diyet"], a:"Tabağınızın yarısını sebze-meyveye ayırın, işlenmiş gıdayı azaltın, bol su için Murathan." },
-    { keys:["acil","112","acil numara"], a:"Türkiye'de tüm acil durumlar için 112'yi arayın Murathan; sağlık, polis, itfaiye ve jandarma tek numarada." },
-    { keys:["ilk yardım","kanama"], a:"Acil durumda önce 112'yi arayın Murathan, ciddi kanamada yaraya temiz bezle baskı uygulayın." },
-    { keys:["kalori","günlük kalori"], a:"Ortalama bir yetişkin günde kadınlarda yaklaşık 2000, erkeklerde 2500 kalori tüketir Murathan." },
-    { keys:["normal nabız","kalp atışı"], a:"Dinlenme halinde normal nabız dakikada 60 ila 100 atımdır Murathan." },
-    { keys:["normal vücut sıcaklığı","ateş kaç derece"], a:"Normal vücut sıcaklığı yaklaşık 36,5 ila 37 derecedir; 38 derece ve üzeri ateş sayılır Murathan." },
-
-    // --- Uzay & astronomi ---
-    { keys:["ışık hızı","ışığın hızı"], a:"Işık boşlukta saniyede yaklaşık 299 bin 792 kilometre hızla yol alır Murathan." },
-    { keys:["ses hızı","sesin hızı"], a:"Ses, havada saniyede yaklaşık 343 metre hızla ilerler Murathan." },
-    { keys:["evrenin yaşı","evren kaç yaşında","big bang"], a:"Evren, Büyük Patlama'dan bu yana yaklaşık 13,8 milyar yaşındadır Murathan." },
-    { keys:["dünyanın yaşı","dünya kaç yaşında"], a:"Dünya yaklaşık 4,5 milyar yaşındadır Murathan." },
-    { keys:["kaç gezegen"], a:"Güneş sistemimizde sekiz gezegen vardır Murathan: Merkür, Venüs, Dünya, Mars, Jüpiter, Satürn, Uranüs ve Neptün." },
-    { keys:["en büyük gezegen"], a:"En büyük gezegen Jüpiter'dir Murathan." },
-    { keys:["en küçük gezegen"], a:"En küçük gezegen Merkür'dür Murathan." },
-    { keys:["kızıl gezegen","mars hangi"], a:"Kızıl Gezegen olarak bilinen Mars'tır Murathan; rengini yüzeyindeki demir oksitten alır." },
-    { keys:["güneşe uzaklık","dünya güneş arası"], a:"Dünya ile Güneş arası ortalama 150 milyon kilometredir Murathan." },
-    { keys:["aya uzaklık","ay ne kadar uzak"], a:"Dünya ile Ay arası ortalama 384 bin kilometredir Murathan." },
-    { keys:["en yakın yıldız","dünyaya en yakın yıldız"], a:"Bize en yakın yıldız Güneş, ondan sonrası ise Proxima Centauri'dir Murathan." },
-    { keys:["kara delik nedir"], a:"Kara delik, çekim kuvveti o kadar güçlü olan bir bölgedir ki ışık bile ondan kaçamaz Murathan." },
-
-    // --- Coğrafya ---
-    { keys:["kaç kıta"], a:"Dünyada yedi kıta vardır Murathan: Asya, Afrika, Avrupa, Kuzey Amerika, Güney Amerika, Avustralya ve Antarktika." },
-    { keys:["en yüksek dağ","everest"], a:"Dünyanın en yüksek dağı 8 bin 849 metreyle Everest'tir Murathan." },
-    { keys:["en uzun nehir"], a:"Dünyanın en uzun nehri Nil'dir; Amazon ise en büyük su hacmine sahiptir Murathan." },
-    { keys:["en büyük okyanus"], a:"En büyük ve en derin okyanus Pasifik Okyanusu'dur Murathan." },
-    { keys:["en büyük ülke","yüzölçümü en büyük"], a:"Yüzölçümü en büyük ülke Rusya'dır Murathan." },
-    { keys:["en kalabalık ülke"], a:"En kalabalık ülke Hindistan'dır, onu Çin izler Murathan." },
-    { keys:["türkiye başkenti","türkiyenin başkenti"], a:"Türkiye'nin başkenti Ankara'dır Murathan." },
-    { keys:["türkiye nüfus"], a:"Türkiye'nin nüfusu yaklaşık 85 milyondur Murathan." },
-    { keys:["türkiye kaç il","kaç il var"], a:"Türkiye'de 81 il bulunmaktadır Murathan." },
-    { keys:["en yüksek dağ türkiye","ağrı dağı"], a:"Türkiye'nin en yüksek dağı 5 bin 137 metreyle Ağrı Dağı'dır Murathan." },
-    { keys:["dünya nüfusu"], a:"Dünya nüfusu 8 milyarı aşmıştır Murathan." },
-
-    // --- Bilim & matematik ---
-    { keys:["su kaç derecede kaynar","kaynama"], a:"Saf su deniz seviyesinde 100 derecede kaynar, sıfır derecede donar Murathan." },
-    { keys:["yerçekimi"], a:"Dünya'nın yerçekimi ivmesi yaklaşık 9,81 metre bölü saniye karedir Murathan." },
-    { keys:["pi sayısı"], a:"Pi sayısı yaklaşık 3,14159'dur; bir çemberin çevresinin çapına oranıdır Murathan." },
-    { keys:["dna nedir"], a:"DNA, canlıların genetik bilgisini taşıyan çift sarmal yapıda bir moleküldür Murathan." },
-    { keys:["fotosentez nedir"], a:"Fotosentez, bitkilerin güneş ışığı, su ve karbondioksiti kullanarak besin ve oksijen üretmesidir Murathan." },
-    { keys:["periyodik tablo kaç element","kaç element"], a:"Periyodik tabloda şu an 118 element bulunmaktadır Murathan." },
-    { keys:["kalbin görevi","kalp ne işe yarar"], a:"Kalp, kanı tüm vücuda pompalayarak hücrelere oksijen ve besin taşıyan bir kas organıdır Murathan." },
-    { keys:["kemik sayısı","kaç kemik"], a:"Yetişkin bir insan vücudunda 206 kemik bulunur Murathan." },
-
-    // --- Teknoloji ---
-    { keys:["yapay zeka nedir"], a:"Yapay zeka, makinelerin öğrenme, akıl yürütme ve problem çözme gibi insana özgü yetenekleri taklit etmesidir Murathan." },
-    { keys:["internet nedir"], a:"İnternet, dünya genelindeki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır Murathan." },
-    { keys:["byte kaç bit","bayt nedir","bit nedir"], a:"Bir bayt sekiz bittir Murathan; bilgisayarda en küçük adreslenebilir veri birimidir." },
-    { keys:["http nedir"], a:"HTTP, web tarayıcıları ile sunucular arasında veri aktarımını sağlayan iletişim protokolüdür Murathan." },
-
-    // --- Tarih ---
-    { keys:["cumhuriyet ne zaman","cumhuriyet kaç","cumhuriyet ilan"], a:"Türkiye Cumhuriyeti 29 Ekim 1923'te ilan edilmiştir Murathan." },
-    { keys:["atatürk kaç","atatürk ne zaman doğdu"], a:"Mustafa Kemal Atatürk 1881'de Selanik'te doğmuş, 10 Kasım 1938'de vefat etmiştir Murathan." },
-    { keys:["birinci dünya savaşı ne zaman"], a:"Birinci Dünya Savaşı 1914 ile 1918 yılları arasında yaşanmıştır Murathan." },
-    { keys:["ikinci dünya savaşı ne zaman"], a:"İkinci Dünya Savaşı 1939 ile 1945 yılları arasında yaşanmıştır Murathan." },
-
-    // --- Marvel / Iron Man (tema) ---
-    { keys:["iron man kim","demir adam"], a:"Iron Man, gerçek adıyla Tony Stark, dahi bir mucit ve milyarderdir Murathan; benim de yaratıcımdır sayılır." },
-    { keys:["tony stark"], a:"Tony Stark, Stark Industries'in başındaki dahi mucittir Murathan. Beni o tasarladı; senin için elimden gelenin en iyisini yapacağım." },
-    { keys:["avengers","yenilmezler"], a:"Avengers, dünyayı korumak için bir araya gelen süper kahraman takımıdır Murathan." },
-    { keys:["jarvis ne demek","jarvis açılımı"], a:"Jarvis, 'Just A Rather Very Intelligent System', yani 'Sadece Oldukça Zeki Bir Sistem' demektir Murathan." },
-
-    // ===================== GÜNLÜK HAYAT =====================
-    { keys:["hafta sonu mu","bugün hafta sonu","tatil mi"], a:"Bunu sana hemen söyleyeyim: bugünün gününü 'bugün günlerden ne' diye sorarsan tam tarihi veririm; cumartesi ve pazar hafta sonudur Murathan." },
-    { keys:["kahvaltıda ne","ne kahvaltı","kahvaltı öner"], a:"Dengeli bir kahvaltı için yumurta, peynir, zeytin, domates, salatalık ve tam tahıllı ekmek iyi gider Murathan. Yanına bol su veya çay ekle." },
-    { keys:["akşam ne yesem","ne pişirsem","yemek öner","ne yemek"], a:"Pratik bir akşam yemeği için fırında tavuk ve sebze, makarna ya da mercimek çorbasıyla salata önerebilirim Murathan." },
-    { keys:["uykum gelmiyor","uyuyamıyorum","nasıl uyurum"], a:"Uyumadan bir saat önce ekranları bırak, odanı serin ve karanlık tut, derin nefes al Murathan. Kafein ve ağır yemekten kaçın." },
-    { keys:["yorgunum","enerjim yok","halsizim"], a:"Kısa bir yürüyüş, bir bardak su ve 10 dakikalık mola enerjini toparlar Murathan. Uzun süre aç kalmadığından da emin ol." },
-    { keys:["sabah erken kalk","erken uyan"], a:"Erken kalkmak için her gün aynı saatte yat, alarmı yataktan uzağa koy ve uyanınca perdeleri açıp gün ışığı al Murathan." },
-    { keys:["leke çıkar","leke nasıl","kıyafetteki leke"], a:"Çoğu lekeye hemen soğuk suyla müdahale et Murathan. Yağlı lekede bulaşık deterjanı, kan lekesinde soğuk su ve tuz işe yarar; sıcak su lekeyi sabitler, ondan kaçın." },
-    { keys:["kravat nasıl bağlanır","kravat bağla"], a:"Basit dört-in-hand düğümü için: geniş ucu ince ucun üzerinden geçir, arkadan dolandır, tekrar öne getir, boyun ilmiğinden yukarı sok ve oluşan halkadan aşağı indirip sıkıştır Murathan." },
-    { keys:["yumurta kaç dakika","yumurta haşla"], a:"Kaynar suda: rafadan için 6, kayısı kıvamı için 8, tam katı için 10 dakika haşla Murathan." },
-    { keys:["pirinç nasıl","pilav nasıl"], a:"Genel oran bir ölçü pirince bir buçuk ölçü sudur Murathan. Tuzu ekle, kaynayınca kısık ateşte suyunu çekene kadar pişir, sonra demlenmeye bırak." },
-    { keys:["nasıl tasarruf","para biriktir","tasarruf"], a:"50-30-20 kuralını dene Murathan: gelirinin yüzde ellisi ihtiyaçlara, otuzu isteklere, yirmisi birikim ve borç ödemeye. Otomatik birikim talimatı çok işe yarar." },
-    { keys:["mülakat ipucu","iş görüşmesi","mülakata nasıl"], a:"Mülakat öncesi şirketi araştır, somut örneklerle konuş, sorulara hazırlıklı git ve sonunda sen de soru sor Murathan. Güçlü ama dürüst ol." },
-    { keys:["nasıl sunum","sunum ipucu"], a:"İyi bir sunum için her slaytta tek fikir tut, az metin çok görsel kullan, prova yap ve göz teması kur Murathan. Güçlü bir açılış ve net bir kapanış belirle." },
-    { keys:["telefon şarjı","pil ömrü","batarya"], a:"Pil sağlığı için telefonu yüzde 20 ile 80 arasında tutmaya çalış, aşırı sıcaktan kaçın ve gece boyu şarjda bırakma Murathan." },
-    { keys:["nasıl motive","erteleme","prokrastinasyon"], a:"Ertelemeyi yenmek için işi iki dakikalık ilk adıma böl Murathan. Sadece başla; harekete geçmek motivasyonu getirir, tersi değil." },
-    { keys:["su baskını","elektrik kesintisi","deprem anında"], a:"Deprem anında çök-kapan-tutun yap, sağlam bir masanın yanına geç ve sarsıntı bitene kadar bekle Murathan. Asansör ve pencere kenarından uzak dur." },
-    { keys:["nasıl özür","özür dile"], a:"İçten bir özür için ne yaptığını net söyle, mazeret üretme, karşının duygusunu kabul et ve telafi için somut bir adım öner Murathan." },
-
-    // ===================== KOMPLİKE KONULAR =====================
-    { keys:["görelilik","izafiyet","einstein teorisi"], a:"Einstein'ın göreliliğine göre zaman ve uzay mutlak değildir Murathan. Hızın arttıkça zaman senin için yavaşlar ve kütle uzay-zamanı bükerek yerçekimini oluşturur." },
-    { keys:["kuantum","kuantum fiziği","süperpozisyon"], a:"Kuantum fiziği atom altı dünyayı anlatır Murathan. Parçacıklar ölçülene kadar aynı anda birden fazla durumda olabilir; buna süperpozisyon denir." },
-    { keys:["bileşik faiz","faiz nasıl işler"], a:"Bileşik faizde kazandığın faiz de faiz getirir Murathan. Yani paran katlanarak büyür; ne kadar erken başlarsan etki o kadar büyük olur." },
-    { keys:["enflasyon nedir"], a:"Enflasyon, fiyatların genel seviyesinin zamanla yükselmesidir Murathan. Aynı parayla daha az mal alırsın, yani paranın alım gücü düşer." },
-    { keys:["blockchain","blok zinciri","bitcoin nasıl"], a:"Blok zinciri, kayıtların birbirine bağlı bloklar halinde, dağıtık ve değiştirilemez biçimde tutulduğu bir defterdir Murathan. Bitcoin gibi kripto paralar bu teknolojiyle çalışır." },
-    { keys:["makine öğrenmesi","machine learning","nasıl öğrenir yapay zeka"], a:"Makine öğrenmesinde bir modele bol veri gösterilir ve model örneklerden örüntüleri kendi çıkarır Murathan. Açıkça programlanmadan tahmin yapmayı öğrenir." },
-    { keys:["nasıl çalışır internet","internet nasıl çalışır"], a:"İnternette verin küçük paketlere bölünür, IP adresleriyle adreslenip yönlendiriciler üzerinden hedefe ulaşır ve orada yeniden birleştirilir Murathan. Hepsi saniyenin altında olur." },
-    { keys:["dna nasıl çalışır","gen nedir"], a:"DNA'daki diziler genleri oluşturur Murathan. Genler, vücudun protein üretmek için kullandığı talimatlardır; bu proteinler de hücrelerinin nasıl çalışacağını belirler." },
-    { keys:["iklim değişikliği","küresel ısınma"], a:"İklim değişikliği, başta fosil yakıtlar olmak üzere insan kaynaklı sera gazlarının atmosferde ısı tutmasıyla gezegenin ısınmasıdır Murathan." },
-    { keys:["fotosentez nasıl"], a:"Bitkiler yapraklarındaki klorofil ile güneş ışığını yakalar, su ve karbondioksiti şekere ve oksijene dönüştürür Murathan. Böylece hem beslenir hem de soluduğumuz oksijeni üretir." },
-
-    // ===================== DÖVÜŞ SANATLARI (genel) =====================
-    { keys:["dövüş sanatı nedir","dövüş sanatları nedir"], a:"Dövüş sanatları, kendini savunma, spor, disiplin ve zihinsel gelişim için geliştirilmiş kavga sistemleridir Murathan. Vuruş, tutuş, fırlatma ve yer mücadelesi gibi farklı alanlara odaklanırlar." },
-    { keys:["en iyi dövüş sanatı","hangi dövüş sanatı"], a:"En iyi tek bir dövüş sanatı yoktur Murathan; amaca bağlıdır. Sokak savunması için boks ve muay thai, yer hakimiyeti için Brezilya jiu-jitsu, genel kavga için ise karma dövüş sanatları yani MMA çok etkilidir." },
-    { keys:["dövüş sanatı başla","hangi sporla başla","yeni başlayan dövüş"], a:"Yeni başlıyorsan boks ya da muay thai temel ayak ve yumruk hissi verir, Brezilya jiu-jitsu ise yer mücadelesini öğretir Murathan. Vücuduna ve hedefine en uygun olanı seçip iyi bir hocayla başlamanı öneririm." },
-    { keys:["dövüş sanatı faydaları","dövüş sporu fayda"], a:"Dövüş sanatları kondisyon, refleks, denge ve özgüven kazandırır Murathan. Ayrıca disiplin, stres yönetimi ve öz kontrol gibi zihinsel faydaları da vardır." },
-    { keys:["kemer sırası","kuşak renkleri","siyah kuşak"], a:"Çoğu dövüş sanatında ilerleme kuşak renkleriyle gösterilir Murathan; genellikle beyazdan başlayıp siyah kuşağa doğru ilerler. Siyah kuşak ustalığın başlangıcı sayılır, sonu değil." },
-
-    // --- Belirli sanatlar ---
-    { keys:["karate nedir","karate"], a:"Karate, Japonya'nın Okinawa bölgesinden çıkan, yumruk, tekme, diz ve dirsek vuruşlarına dayanan bir dövüş sanatıdır Murathan. Kata denen kalıplaşmış hareket dizileriyle teknik ve disiplin geliştirilir." },
-    { keys:["taekwondo nedir","tekvando","taekwondo"], a:"Taekwondo, Kore kökenli, özellikle yüksek ve hızlı tekmeleriyle bilinen bir dövüş sanatıdır Murathan. Olimpik bir spordur ve esneklik ile mesafe kullanımına büyük önem verir." },
-    { keys:["judo nedir","judo"], a:"Judo, Jigoro Kano tarafından kurulan, rakibi dengesini bozarak fırlatma ve yere indirmeye dayanan Japon dövüş sanatıdır Murathan. 'Yumuşaklığın yolu' anlamına gelir ve rakibin gücünü ona karşı kullanır." },
-    { keys:["aikido nedir","aikido"], a:"Aikido, saldırının enerjisini yönlendirip rakibi etkisiz hale getirmeye dayanan, eklem kilitleri ve fırlatmalar içeren Japon dövüş sanatıdır Murathan. Saldırganı incitmeden kontrol etme felsefesine sahiptir." },
-    { keys:["muay thai nedir","muay thai","thai boks"], a:"Muay Thai, Tayland'ın milli sporudur ve 'sekiz uzvun sanatı' olarak bilinir Murathan; yumruk, tekme, diz ve dirsek olmak üzere sekiz vuruş noktasını birlikte kullanır." },
-    { keys:["boks nedir","boks"], a:"Boks, yalnızca yumruklarla, baş hareketi ve ayak çalışmasına dayanan bir dövüş sporudur Murathan. Mesafe ayarı, zamanlama ve savunma konusunda eşsiz bir temel verir." },
-    { keys:["kung fu nedir","kung fu","wing chun"], a:"Kung Fu, Çin kökenli yüzlerce stili kapsayan genel bir terimdir Murathan. Wing Chun gibi yakın mesafe stillerinden, hayvan hareketlerini taklit eden akıcı stillere kadar çok geniş bir yelpazesi vardır." },
-    { keys:["jiu jitsu nedir","brezilya jiu","bjj","jujitsu"], a:"Brezilya jiu-jitsu, yer mücadelesine, pozisyon kontrolüne, boğma ve eklem kilitlerine dayanan bir dövüş sanatıdır Murathan. Küçük bir kişinin tekniğiyle daha büyük rakibi alt edebilmesi felsefesiyle ünlüdür." },
-    { keys:["mma nedir","karma dövüş","ufc nedir"], a:"MMA, yani karma dövüş sanatları, boks, muay thai, güreş ve jiu-jitsu gibi farklı disiplinleri tek bir kurallar setinde birleştiren tam temaslı bir spordur Murathan. UFC bu sporun en büyük organizasyonudur." },
-    { keys:["güreş nedir","wrestling"], a:"Güreş, rakibi tutarak dengesini bozma, yere indirme ve kontrol altında tutmaya dayanan dünyanın en eski sporlarından biridir Murathan. Türkiye'de yağlı güreş geleneksel bir milli spordur." },
-    { keys:["kickboks nedir","kick boks","kickboks"], a:"Kickboks, boksun yumruk tekniklerini tekmelerle birleştiren bir dövüş sporudur Murathan. Ayakta, vuruş ağırlıklı ve tempolu bir mücadele biçimidir." },
-    { keys:["kapoeyra","capoeira"], a:"Capoeira, Brezilya'da köleler tarafından geliştirilen, dans, akrobasi ve müzikle iç içe geçmiş bir dövüş sanatıdır Murathan. Akıcı, ritmik ve aldatıcı hareketleriyle tanınır." },
-    { keys:["krav maga","kravmaga"], a:"Krav Maga, İsrail ordusu için geliştirilmiş, kural tanımayan, gerçek tehditleri en hızlı şekilde etkisiz kılmaya odaklı bir kendini savunma sistemidir Murathan. Sporla değil pratik savunmayla ilgilenir." },
-
-    // ===================== DÖVÜŞ SANATLARI (komplike / kavramsal) =====================
-    { keys:["vuruş gücü nereden","güç nasıl gelir","kalçadan güç"], a:"Dövüşte gerçek güç koldan değil, yerden başlayıp bacak, kalça ve gövde rotasyonuyla aktarılan kinetik zincirden gelir Murathan. Bu yüzden ustalar 'yumruğu kalçanla at' der; ayak ve kalça dönmezse vuruş yarı güçte kalır." },
-    { keys:["mesafe yönetimi","menzil dövüş","distance dövüş"], a:"Mesafe yönetimi dövüşün belkemiğidir Murathan. Her dövüşçünün vuruşlarının en etkili olduğu bir menzili vardır; ustalık, rakibi kendi rahat menzilinden çıkarıp seni kendi menzilinde tutmaktır." },
-    { keys:["kaldıraç dövüş","kaldıraç jiu","leverage"], a:"Yer mücadelesinde kas gücü değil kaldıraç ve açı belirleyicidir Murathan. Doğru açıyla uygulanan bir kol kilidi, çok daha güçlü bir rakibi bile teslim olmaya zorlar; teknik kasa galip gelir." },
-    { keys:["zamanlama dövüş","timing","ritim dövüş"], a:"İleri seviye dövüş hızdan çok zamanlamaya dayanır Murathan. Rakibin saldırısını önceden okuyup tam o boşlukta karşılık vermek, daha hızlı ama geç kalan bir vuruştan üstündür. Buna karşı vuruş, yani counter denir." },
-    { keys:["nefes dövüş","nefes kontrolü dövüş"], a:"Doğru nefes, dayanıklılığın ve gücün anahtarıdır Murathan. Vuruş anında keskin nefes verme gövdeyi sıkar ve darbe gücünü artırırken, dengeli nefes uzun mücadelede yorgunluğu geciktirir." },
-    { keys:["zihin dövüş","dövüş felsefesi","savaşçı zihni"], a:"Çoğu dövüş sanatının özünde teknikten çok zihin kontrolü yatar Murathan. Sakin kalmak, ego ve öfkeyi bırakmak, rakibe değil kendi disiplinine odaklanmak gerçek ustalığın temelidir. Bruce Lee'nin dediği gibi, 'su gibi ol'." },
-    { keys:["güç mü teknik mi","teknik mi kuvvet mi"], a:"Genelde teknik, ham kuvvete galip gelir Murathan. Kuvvet bir avantajdır ama zamanlama, mesafe ve kaldıraçtan yoksunsa boşa harcanır. İyi bir teknik, az enerjiyle çok iş çıkarır." },
-  ];
-  const WEATHER_CODES = {0:"açık",1:"az bulutlu",2:"parçalı bulutlu",3:"kapalı",45:"sisli",48:"kırağılı sis",
-    51:"hafif çiseleme",53:"çiseleme",55:"yoğun çiseleme",56:"donan hafif çiseleme",57:"donan çiseleme",
-    61:"hafif yağmurlu",63:"yağmurlu",65:"şiddetli yağmurlu",66:"donan hafif yağmur",67:"donan yağmur",
-    71:"hafif kar yağışlı",73:"kar yağışlı",75:"yoğun kar yağışlı",77:"kar taneli",80:"hafif sağanak",
-    81:"sağanak",82:"şiddetli sağanak",85:"hafif kar sağanağı",86:"yoğun kar sağanağı",
-    95:"gök gürültülü fırtına",96:"dolulu fırtına",99:"şiddetli dolulu fırtına"};
+  /* Bilgi veritabanı ve hava kodları jarvis-brain.js içinde */
 
   /* ====================== DOM & State ====================== */
   const body = document.body;
   const jarvis = document.getElementById("jarvis");
   const muteBtn = document.getElementById("muteBtn");
+  const stageEl = document.getElementById("stage");
+  const stageText = document.getElementById("stageText");
 
   let recognition=null, listening=false, awake=false, muted=false;
   let awakeTimer=null, proactiveTimer=null, lastInteraction=Date.now();
@@ -387,9 +256,12 @@
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const synth = window.speechSynthesis;
 
-  /* görsel durumu süren minimal yardımcılar (yazı yok) */
-  function setStatus(){ /* görsel durum CSS sınıflarıyla yönetiliyor */ }
-  function addLog(){ /* arayüzde yazı gösterilmiyor */ }
+  /* Aşama / ilerleme göstergesi (alt mor alan) */
+  function setStatus(text, kind){
+    if (stageText) stageText.textContent = text;
+    if (stageEl) stageEl.classList.toggle("busy", kind === "busy");
+  }
+  function addLog(){ /* arayüzde konuşma metni gösterilmiyor */ }
   let liveText = { set textContent(_) {} };
 
   /* ====================== Ses tanıma ====================== */
@@ -399,7 +271,7 @@
     r.continuous = !(isIOS || isSafari);
     r.interimResults = true;
     r.maxAlternatives = 5;   // daha fazla aday -> daha hassas yakalama
-    r.onstart = () => { setStatus(awake?"komut":"dinleniyor","active"); };
+    r.onstart = () => { if(!isSpeaking) setStatus(awake?"Komut bekleniyor":"Dinleniyor"); };
     r.onresult = (event) => {
       if (isSpeaking) return;
       let finalText="", interim="";
@@ -439,52 +311,36 @@
     }
     route(stripWake(lower));
   }
-  // Cümleden "jarvis" ve yakın varyasyonlarını ayıkla
-  function stripWake(s){
-    return s.split(/\s+/).filter(w => !(norm(w).length>=4 && lev(norm(w),"jarvis")<=2) && norm(w)!=="jarvis" && norm(w)!=="carvis").join(" ").trim();
-  }
-  function wake() { awake=true; resetAwakeTimer(); }
-  function resetAwakeTimer() { clearTimeout(awakeTimer); awakeTimer=setTimeout(()=>{ awake=false; }, 20000); }
+  function wake() { awake=true; setStatus("Komut bekleniyor"); resetAwakeTimer(); }
+  function resetAwakeTimer() { clearTimeout(awakeTimer); awakeTimer=setTimeout(()=>{ awake=false; if(listening && !isSpeaking) setStatus("Dinleniyor"); }, 20000); }
 
+  /* Yönlendirici: niyeti ortak beyinden al, ona göre yeteneği çalıştır */
   function route(cmd) {
     resetAwakeTimer(); lastInteraction=Date.now();
-    if (!cmd) { speak("Seni dinliyorum Murathan."); return; }
-    const n = norm(cmd);                              // normalize edilmiş komut
-    const has=(...w)=>w.some(x=>n.includes(norm(x))); // esnek, Türkçe-karakter bağımsız
-
-    // --- Kişisel bilgi (isim hafızası) ---
-    if (has("adımı kaydet","ismimi kaydet","benim adım","benim ismim","bana de ki","bana adımla")) { saveName(cmd); return; }
-    if (has("adımı biliyor musun","adım ne","ismim ne","ben kimim")) { tellName(); return; }
-
-    // --- Konum ---
-    if (has("neredeyim","konumum nerede","konumumu söyle","ben neredeyim","neresideyim")) { tellLocation(); return; }
-
-    // --- Ne giymeliyim? (hava + sıcaklığa göre öneri) ---
-    if (has("ne giy","ne giymeli","ne giyeyim","ne giysem","kıyafet öner","kıyafet ne","üzerime ne","mont giy","montumu","şemsiye almalı","şemsiye lazım","şemsiye gerek")) { recommendClothing(cmd); return; }
-
-    // --- Hava durumu (konumsal & bölgesel) ---
-    if (has("hava")) { handleWeather(cmd); return; }
-
-    if (has("saat kaç","saat ne","saati söyle")) { speak("Saat şu an "+nowTime()+" Murathan."); return; }
-    if (has("günlerden ne","bugün ne","tarih","hangi gün","bugün hangi")) { speak("Bugün "+nowDate()+" Murathan."); return; }
-    if (has("not al","not et","kaydet","sunu yaz","not düş")) { addNote(cmd); return; }
-    if (has("notlarım","notları oku","notları söyle","notlarımı")) { readNotes(); return; }
-    if (has("notları sil","notları temizle","notlarımı sil")) { localStorage.removeItem("jarvis_notes"); speak("Tüm notlarını sildim Murathan."); return; }
-    if (has("hatırlat","alarm kur","zamanlayıcı","süre kur","dakika sonra","saat sonra")) { setReminder(cmd); return; }
-    if (has("hesapla","kaç eder","kaç yapar","artı","eksi","kere","bölü","çarpı","topla","çıkar")) { doMath(cmd); return; }
-
-    // Genişletilmiş bilgi veritabanı (normalize edilmiş eşleşme)
-    const known = KNOWLEDGE.find(it => it.keys.some(k => n.includes(norm(k))));
-    if (known) { speak(known.a); return; }
-
-    if (has("merhaba","selam","hey","günaydın","iyi akşamlar","iyi günler")) { speak(greeting()); return; }
-    if (has("adın ne","kimsin","sen kimsin","sen nesin")) { speak("Ben Jarvis Murathan, kişisel yapay zeka asistanın."); return; }
-    if (has("neler yapabilir","yeteneklerin","ne yapabilirsin","yardım et","komutlar")) { listSkills(); return; }
-    if (has("nasılsın","naber","ne haber")) { speak("Tüm sistemlerim optimal çalışıyor Murathan, teşekkür ederim."); return; }
-    if (has("teşekkür","sağol","sağ ol","eyvallah")) { speak("Rica ederim Murathan, her zaman buradayım."); return; }
-    if (has("şaka","espri","güldür","komik bir şey")) { speak(randomJoke()); return; }
-    if (has("kapan","uyu","görüşürüz","kendini kapat","dinlemeyi durdur")) { speak("Uykuya geçiyorum Murathan. Beni 'Jarvis' diyerek uyandırabilirsin."); awake=false; return; }
-
+    const intent = classifyIntent(cmd);
+    switch (intent) {
+      case "empty":      speak("Seni dinliyorum Murathan."); return;
+      case "name_set":   saveName(cmd); return;
+      case "name_get":   tellName(); return;
+      case "location":   setStatus("Konum alınıyor","busy"); tellLocation(); return;
+      case "clothing":   recommendClothing(cmd); return;
+      case "weather":    handleWeather(cmd); return;
+      case "time":       speak("Saat şu an "+nowTime()+" Murathan."); return;
+      case "date":       speak("Bugün "+nowDate()+" Murathan."); return;
+      case "note_add":   addNote(cmd); return;
+      case "note_read":  readNotes(); return;
+      case "note_clear": localStorage.removeItem("jarvis_notes"); speak("Tüm notlarını sildim Murathan."); return;
+      case "reminder":   setReminder(cmd); return;
+      case "math":       doMath(cmd); return;
+      case "knowledge":  { const k = findKnowledge(cmd); if (k) { speak(k.a); return; } break; }
+      case "greeting":   speak(greeting()); return;
+      case "identity":   speak("Ben Jarvis Murathan, kişisel yapay zeka asistanın."); return;
+      case "skills":     listSkills(); return;
+      case "smalltalk":  speak("Tüm sistemlerim optimal çalışıyor Murathan, teşekkür ederim."); return;
+      case "thanks":     speak("Rica ederim Murathan, her zaman buradayım."); return;
+      case "joke":       speak(randomJoke()); return;
+      case "sleep":      speak("Uykuya geçiyorum Murathan. Beni 'Jarvis' diyerek uyandırabilirsin."); awake=false; return;
+    }
     // Açık uçlu her şey -> Wikipedia (canlı medya)
     askWikipedia(cmd);
   }
@@ -511,7 +367,7 @@
   function askWikipedia(cmd) {
     const q = cleanQuery(cmd);
     if (!q || q.length < 2) { speak("Bunu tam anlayamadım Murathan, biraz daha açar mısın?"); return; }
-    body.classList.add("thinking");
+    body.classList.add("thinking"); setStatus("Araştırıyorum","busy");
     const searchUrl = "https://tr.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search="+encodeURIComponent(q);
     fetch(searchUrl).then(r=>r.json()).then(data=>{
       const title = data && data[1] && data[1][0];
@@ -562,6 +418,7 @@
   function recommendClothing(cmd){
     const city = cmd ? extractCity(cmd) : null;     // "İstanbul'da ne giysem" gibi
     speak("Hava durumuna bakıp sana uygun kıyafeti söylüyorum.");
+    setStatus("Hava durumu alınıyor","busy");
     const give = (lat,lon) => {
       const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto";
       fetch(url).then(r=>r.json()).then(d=>{
@@ -604,6 +461,7 @@
   function extractCity(cmd){ let c=cmd.replace(/hava durumu|hava nasıl|hava|nasıl|durumu|tahmin|bugün|yarın|için|de|da|te|ta/g," ").replace(/[^a-zçğıöşü\s]/gi," ").replace(/\s+/g," ").trim(); if(!c||c.length<3) return null; return c.split(" ").filter(w=>w.length>2).slice(-2).join(" ").trim()||null; }
   function geocode(name){ return fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name)+"&count=1&language=tr&format=json").then(r=>r.json()).then(d=>(d&&d.results&&d.results.length)?{latitude:d.results[0].latitude,longitude:d.results[0].longitude,name:d.results[0].name+(d.results[0].admin1?", "+d.results[0].admin1:"")}:null); }
   function fetchWeather(lat,lon,label){
+    setStatus("Hava durumu alınıyor","busy");
     const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2";
     fetch(url).then(r=>r.json()).then(d=>{
       if(!d||!d.current){ speak("Hava durumu verisini alamadım Murathan."); return; }
@@ -672,8 +530,8 @@
     const u=new SpeechSynthesisUtterance(text);
     u.lang=LANG; u.rate=VOICE.rate; u.pitch=VOICE.pitch; u.volume=1;
     const v=chosenVoice||pickVoice(); if(v) u.voice=v;
-    u.onstart=()=>{ isSpeaking=true; body.classList.add("speaking"); startKeepAlive(); };
-    u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); restartRecognition(); };
+    u.onstart=()=>{ isSpeaking=true; body.classList.add("speaking"); setStatus("Yanıtlıyor"); startKeepAlive(); };
+    u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); setStatus(listening?(awake?"Komut bekleniyor":"Dinleniyor"):"Beklemede"); restartRecognition(); };
     u.onerror=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); restartRecognition(); };
     if((isIOS||isSafari)&&recognition){ try{ recognition.stop(); }catch(_){} }
     synth.speak(u);
@@ -725,6 +583,7 @@
     if(synth) synth.cancel();
     body.classList.remove("on-state","speaking","thinking"); jarvis.classList.remove("on");
     jarvis.setAttribute("aria-label","Jarvis — başlatmak için dokun");
+    setStatus("Beklemede");
   }
   function toggle(){ listening ? stopListening() : startListening(); }
 

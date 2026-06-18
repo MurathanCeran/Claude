@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>J.A.R.V.I.S — Test & Eğitim Paneli</title>
+<style>
+  :root { --ok:#6effa6; --bad:#ff6e7f; --pur:#b48bff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:system-ui,-apple-system,'Segoe UI',sans-serif; background:radial-gradient(circle at 50% 0%,#1a1338,#0b0918 70%); color:#eaf7ff; min-height:100vh; padding:24px 16px 60px; }
+  h1 { font-weight:300; letter-spacing:.3rem; color:var(--pur); text-align:center; text-shadow:0 0 16px rgba(180,139,255,.5); }
+  .sub { text-align:center; color:#9c84c8; font-size:.85rem; margin:6px 0 22px; letter-spacing:.1rem; }
+  .summary { max-width:820px; margin:0 auto 18px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .card { background:rgba(40,28,72,.5); border:1px solid #3a2d5e; border-radius:12px; padding:14px 22px; text-align:center; min-width:130px; }
+  .card .num { font-size:1.8rem; font-weight:600; }
+  .card.ok .num { color:var(--ok); } .card.bad .num { color:var(--bad); } .card.tot .num { color:var(--pur); }
+  .card .lbl { font-size:.72rem; color:#9c84c8; text-transform:uppercase; letter-spacing:.12rem; margin-top:2px; }
+  .bar { max-width:820px; height:10px; margin:0 auto 22px; background:#241a3d; border-radius:6px; overflow:hidden; }
+  .bar > i { display:block; height:100%; background:linear-gradient(90deg,#6effa6,#b48bff); width:0; transition:width .6s; }
+  .controls { max-width:820px; margin:0 auto 18px; text-align:center; }
+  button { font-family:inherit; font-size:.85rem; letter-spacing:.06rem; text-transform:uppercase; color:var(--pur); background:transparent; border:1px solid var(--pur); padding:11px 22px; border-radius:9px; cursor:pointer; }
+  button:hover { background:var(--pur); color:#0b0918; }
+  .group { max-width:820px; margin:0 auto 16px; }
+  .group h2 { font-size:.8rem; letter-spacing:.16rem; text-transform:uppercase; color:#bda6e8; margin:18px 0 8px; border-bottom:1px solid #2e2350; padding-bottom:6px; }
+  .row { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:8px; font-size:.9rem; }
+  .row:nth-child(even){ background:rgba(255,255,255,.02); }
+  .row .tag { flex:0 0 26px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; }
+  .row.pass .tag { background:rgba(110,255,166,.15); color:var(--ok); }
+  .row.fail .tag { background:rgba(255,110,127,.15); color:var(--bad); }
+  .row .q { flex:1; color:#dcd2f0; }
+  .row .exp { color:#8f7ab8; font-size:.78rem; }
+  .row.fail .exp { color:var(--bad); }
+  .note { max-width:820px; margin:24px auto 0; font-size:.78rem; color:#7d6aa0; line-height:1.6; text-align:center; }
+  code { color:var(--pur); background:rgba(180,139,255,.1); padding:1px 6px; border-radius:4px; }
+</style>
+</head>
+<body>
+  <h1>J.A.R.V.I.S · TEST & EĞİTİM</h1>
+  <div class="sub">Beyin (jarvis-brain.js) yüzlerce örnek komutla sınanıyor — kaldığı yerleri görüp öğretiyoruz</div>
+
+  <div class="summary">
+    <div class="card tot"><div class="num" id="nTotal">0</div><div class="lbl">Toplam</div></div>
+    <div class="card ok"><div class="num" id="nPass">0</div><div class="lbl">Geçti</div></div>
+    <div class="card bad"><div class="num" id="nFail">0</div><div class="lbl">Kaldı</div></div>
+    <div class="card"><div class="num" id="nRate">0%</div><div class="lbl">Başarı</div></div>
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="controls"><button id="rerun">↻ Testleri Tekrar Çalıştır</button></div>
+
+  <div id="results"></div>
+
+  <p class="note">
+    Bu panel Jarvis'in <b>komut anlama</b> ve <b>bilgi</b> motorunu sınar. Kaldığı (kırmızı) satırlar,
+    Jarvis'e öğretmemiz gereken yeni kalıpları gösterir: <code>jarvis-brain.js</code> içine ilgili anahtarı
+    eklemek yeterli. Test sonuçları her çalıştırmada anlıktır.
+  </p>
+
+<script src="jarvis-brain.js"></script>
+<script>
+(function(){
+  const J = window.JARVIS;
+  const results = [];
+  function ok(cond, group, desc, extra){ results.push({ pass: !!cond, group, desc, extra: extra||"" }); }
+
+  /* ---------- 1) Uyandırma kelimesi (fuzzy) ---------- */
+  [["jarvis",true],["carvis",true],["jarvıs",true],["jervis",true],["carvis hava nasıl",true],
+   ["jarvis bugün ne giymeliyim",true],["merhaba",false],["araba",false],["servis",true]
+  ].forEach(([t,exp])=> ok(J.matchesWake(t)===exp, "Uyandırma (wake)", '"'+t+'" → '+(exp?"uyanmalı":"uyanmamalı")));
+
+  /* ---------- 2) Wake ayıklama ---------- */
+  ok(J.stripWake("jarvis hava nasıl")==="hava nasıl", "Wake ayıklama", '"jarvis hava nasıl" → "hava nasıl"');
+  ok(J.stripWake("carvis saat kaç")==="saat kaç", "Wake ayıklama", '"carvis saat kaç" → "saat kaç"');
+
+  /* ---------- 3) Niyet sınıflandırma ---------- */
+  const intents = [
+    ["hava nasıl","weather"],["istanbul hava durumu","weather"],["konumumun havası nasıl","weather"],
+    ["bugün ne giymeliyim","clothing"],["üzerime ne alayım","clothing"],["şemsiye almalı mıyım","clothing"],
+    ["saat kaç","time"],["saati söyle","time"],
+    ["bugün günlerden ne","date"],["hangi gün bugün","date"],
+    ["not al süt almayı unutma","note_add"],["şunu yaz toplantı var","note_add"],
+    ["notlarım neler","note_read"],["notları oku","note_read"],
+    ["notları sil","note_clear"],["notlarımı temizle","note_clear"],
+    ["10 dakika sonra hatırlat","reminder"],["alarm kur","reminder"],
+    ["25 çarpı 4 kaç eder","math"],["100 artı 50 hesapla","math"],
+    ["benim adım Murathan","name_set"],["adım ne","name_get"],
+    ["neredeyim","location"],["konumum nerede","location"],
+    ["merhaba","greeting"],["günaydın","greeting"],
+    ["adın ne","identity"],["sen kimsin","identity"],
+    ["neler yapabilirsin","skills"],["nasılsın","smalltalk"],
+    ["teşekkürler","thanks"],["bana şaka yap","joke"],
+    ["kendini kapat","sleep"],
+    ["asdf qwerty zxcv","wikipedia"]
+  ];
+  intents.forEach(([q,exp])=>{
+    const got=J.classifyIntent(q);
+    ok(got===exp, "Niyet sınıflandırma", '"'+q+'"', "→ "+got+(got===exp?"":" (beklenen "+exp+")"));
+  });
+
+  /* ---------- 4) Bilgi veritabanı eşleşmeleri ---------- */
+  const know = [
+    "kara delik nedir","ışık hızı nedir","kaç gezegen var","everest ne kadar yüksek",
+    "mona lisa nedir","van gogh kimdir","beethoven kim","minecraft en çok satan mı",
+    "zeus kim","truva atı nedir","sokrates kim","görelilik nedir","kuantum nedir",
+    "muay thai nedir","brezilya jiu jitsu nedir","mma nedir","karate nedir",
+    "dünya kupası kaç yılda","maraton kaç kilometre","pizza nereden gelir",
+    "shakespeare kim","mario kim","ahtapotun kaç kalbi var","istanbul ne zaman fethedildi"
+  ];
+  know.forEach(q=>{
+    const k=J.findKnowledge(q);
+    ok(!!k, "Bilgi veritabanı", '"'+q+'"', k? "✓ cevap var" : "✗ bilgi yok (öğretilebilir)");
+  });
+
+  /* ---------- 5) Normalleştirme ---------- */
+  ok(J.norm("İSTANBUL'da")==="istanbul da", "Normalleştirme", '"İSTANBUL\'da" → "istanbul da"');
+  ok(J.norm("Şükrü, ÇİĞ köfte")==="sukru cig kofte", "Normalleştirme", 'Türkçe karakter sadeleştirme');
+
+  /* ---------- Raporla ---------- */
+  const groups={}; let pass=0;
+  results.forEach(r=>{ (groups[r.group]=groups[r.group]||[]).push(r); if(r.pass) pass++; });
+  const total=results.length, fail=total-pass, rate=Math.round(pass/total*100);
+  document.getElementById("nTotal").textContent=total;
+  document.getElementById("nPass").textContent=pass;
+  document.getElementById("nFail").textContent=fail;
+  document.getElementById("nRate").textContent=rate+"%";
+  document.getElementById("barFill").style.width=rate+"%";
+
+  const out=document.getElementById("results"); out.innerHTML="";
+  Object.keys(groups).forEach(g=>{
+    const wrap=document.createElement("div"); wrap.className="group";
+    const gp=groups[g].filter(r=>r.pass).length;
+    wrap.innerHTML="<h2>"+g+" — "+gp+"/"+groups[g].length+"</h2>";
+    groups[g].forEach(r=>{
+      const row=document.createElement("div"); row.className="row "+(r.pass?"pass":"fail");
+      row.innerHTML='<span class="tag">'+(r.pass?"✓":"✗")+'</span><span class="q">'+r.desc+'</span><span class="exp">'+r.extra+'</span>';
+      wrap.appendChild(row);
+    });
+    out.appendChild(wrap);
+  });
+  console.log("JARVIS testleri:", pass+"/"+total, "(%"+rate+")");
+})();
+</script>
+<script>document.getElementById("rerun").addEventListener("click",()=>location.reload());</script>
+</body>
+</html>
