@@ -172,6 +172,50 @@
   }
   .mute:active { transform: scale(0.9); }
 
+  /* model seç butonu (sol alt) */
+  .modelbtn {
+    position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); left: 18px;
+    display: flex; align-items: center; gap: 7px; z-index: 5; cursor: pointer;
+    height: 46px; padding: 0 16px; border-radius: 24px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(180,139,255,0.35);
+    color: #d7c6ff; backdrop-filter: blur(4px); transition: all 0.2s;
+    font-size: 0.8rem; letter-spacing: 0.04rem; max-width: 55vw;
+  }
+  .modelbtn:active { transform: scale(0.95); }
+  .modelbtn .mico { font-size: 1rem; }
+  .modelbtn #modelName { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* model seçim modalı */
+  .modal {
+    position: fixed; inset: 0; z-index: 20; display: none;
+    align-items: center; justify-content: center; padding: 18px;
+    background: rgba(6,5,16,0.72); backdrop-filter: blur(5px);
+  }
+  .modal.open { display: flex; }
+  .sheet {
+    width: min(420px, 100%); max-height: 82vh; overflow-y: auto;
+    background: linear-gradient(180deg, #1c1540, #140f2e);
+    border: 1px solid #3a2d6e; border-radius: 18px; padding: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .sheet h3 { font-weight: 400; letter-spacing: 0.12rem; color: #c9b3ff; text-transform: uppercase; font-size: 0.95rem; }
+  .sheet .msub { font-size: 0.76rem; color: #9c84c8; line-height: 1.5; margin: 8px 0 16px; }
+  .mlist { display: flex; flex-direction: column; gap: 10px; }
+  .mitem {
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+    padding: 13px 14px; border-radius: 12px;
+    border: 1px solid #322657; background: rgba(255,255,255,0.03); transition: all 0.15s;
+  }
+  .mitem:active { transform: scale(0.98); }
+  .mitem.sel { border-color: var(--purple); background: rgba(180,139,255,0.12); box-shadow: 0 0 16px rgba(180,139,255,0.25); }
+  .mitem .ic { font-size: 1.4rem; flex: 0 0 auto; width: 30px; text-align: center; }
+  .mitem .tx { flex: 1; }
+  .mitem .tx b { display: block; color: #eee6ff; font-size: 0.92rem; font-weight: 600; }
+  .mitem .tx span { font-size: 0.72rem; color: #9c84c8; }
+  .mitem .chk { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid #4a3a78; }
+  .mitem.sel .chk { border-color: var(--purple); background: radial-gradient(circle, var(--purple) 45%, transparent 50%); }
+  .mclose { margin-top: 18px; width: 100%; border-color: var(--purple); color: var(--purple); }
+
   /* üst ses dalgası (sesimi ifade eder) */
   .voicebar {
     position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 0; right: 0;
@@ -222,6 +266,17 @@
   </div>
 
   <div class="mute" id="muteBtn" role="button" aria-label="Sesi aç/kapat">🔊</div>
+  <div class="modelbtn" id="modelBtn" role="button" aria-label="Model seç"><span class="mico">🧠</span><span id="modelName">Jarvis</span></div>
+
+  <!-- Model seçim paneli -->
+  <div class="modal" id="modelModal" aria-hidden="true">
+    <div class="sheet">
+      <h3>Beyin / Model Seç</h3>
+      <p class="msub">Jarvis çevrimdışı çalışır; AI modelleri açık uçlu sorulara gerçek bir yapay zeka gibi yanıt verir (bedava, anahtarsız).</p>
+      <div class="mlist" id="mlist"></div>
+      <button class="mclose" id="modelClose">Kapat</button>
+    </div>
+  </div>
 
   <!-- Aşama / ilerleme göstergesi -->
   <div class="stage" id="stage"><span class="dot-led" id="led"></span><span id="stageText">Beklemede</span></div>
@@ -359,13 +414,13 @@
       case "greeting":   speak(greeting()); return;
       case "identity":   speak("Ben Jarvis Murathan, kişisel yapay zeka asistanın."); return;
       case "skills":     listSkills(); return;
-      case "smalltalk":  speak("Tüm sistemlerim optimal çalışıyor Murathan, teşekkür ederim."); return;
+      case "smalltalk":  if(aiActive()){ askAI(cmd); return; } speak("Tüm sistemlerim optimal çalışıyor Murathan, teşekkür ederim."); return;
       case "thanks":     speak("Rica ederim Murathan, her zaman buradayım."); return;
       case "joke":       speak(randomJoke()); return;
       case "sleep":      speak("Uykuya geçiyorum Murathan. Beni 'Jarvis' diyerek uyandırabilirsin."); awake=false; return;
     }
-    // Açık uçlu her şey -> Wikipedia (canlı medya)
-    askWikipedia(cmd);
+    // Açık uçlu her şey -> seçili modele göre AI ya da Wikipedia
+    answerOpen(cmd);
   }
 
   /* ====================== Kişisel bilgi (isim) ====================== */
@@ -708,6 +763,79 @@
   jarvis.addEventListener("click", toggle);
   jarvis.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
   muteBtn.addEventListener("click", e=>{ e.stopPropagation(); muted=!muted; muteBtn.textContent=muted?"🔇":"🔊"; if(muted&&synth) synth.cancel(); });
+
+  /* ====================== MODEL / BEYİN SEÇİMİ ======================
+     Jarvis = yerleşik (çevrimdışı + Wikipedia). AI modelleri açık uçlu
+     sorulara gerçek bir yapay zeka gibi yanıt verir; bedava ve anahtarsız
+     Pollinations üzerinden çalışır. Cihaz komutları (hava, saat, not...)
+     her durumda yerel kalır. */
+  const MODELS = [
+    { id:"jarvis", ic:"🤖", name:"Jarvis (Yerleşik)", desc:"Çevrimdışı beyin + Wikipedia · her zaman çalışır" },
+    { id:"openai", ic:"✨", name:"GPT (OpenAI)",       desc:"Bedava · doğal sohbet ve genel bilgi" },
+    { id:"mistral",ic:"🌬️", name:"Mistral",            desc:"Bedava · hızlı ve akıcı" },
+    { id:"llama",  ic:"🦙", name:"Llama 3",            desc:"Bedava · Meta açık model" },
+    { id:"qwen",   ic:"🐉", name:"Qwen",               desc:"Bedava · çok dilli, güçlü" },
+    { id:"deepseek",ic:"🔎", name:"DeepSeek",          desc:"Bedava · akıl yürütme odaklı" },
+  ];
+  const modelBtn   = document.getElementById("modelBtn");
+  const modelName  = document.getElementById("modelName");
+  const modelModal = document.getElementById("modelModal");
+  const modelClose = document.getElementById("modelClose");
+  const mlist      = document.getElementById("mlist");
+
+  function currentModel(){ return localStorage.getItem("jarvis_model") || "jarvis"; }
+  function modelInfo(id){ return MODELS.find(m=>m.id===id) || MODELS[0]; }
+  function aiActive(){ return currentModel() !== "jarvis"; }
+  function refreshModelLabel(){ modelName.textContent = modelInfo(currentModel()).name.replace(/ \(.*\)/,""); }
+
+  function renderModels(){
+    const cur = currentModel();
+    mlist.innerHTML = "";
+    MODELS.forEach(m=>{
+      const el = document.createElement("div");
+      el.className = "mitem" + (m.id===cur ? " sel" : "");
+      el.innerHTML = '<span class="ic">'+m.ic+'</span><span class="tx"><b>'+m.name+'</b><span>'+m.desc+'</span></span><span class="chk"></span>';
+      el.addEventListener("click", ()=> setModel(m.id));
+      mlist.appendChild(el);
+    });
+  }
+  function setModel(id){
+    localStorage.setItem("jarvis_model", id);
+    refreshModelLabel(); renderModels(); closeModal();
+    const info = modelInfo(id);
+    if (id==="jarvis") speak("Yerleşik beynime geçtim Murathan; çevrimdışı çalışır ve gerisini Wikipedia'dan araştırırım.");
+    else speak(info.name+" modeline geçtim Murathan. Artık açık uçlu sorulara yapay zeka gibi yanıt vereceğim.");
+  }
+  function openModal(){ renderModels(); modelModal.classList.add("open"); modelModal.setAttribute("aria-hidden","false"); }
+  function closeModal(){ modelModal.classList.remove("open"); modelModal.setAttribute("aria-hidden","true"); }
+
+  modelBtn.addEventListener("click", e=>{ e.stopPropagation(); primeTTS(); openModal(); });
+  modelClose.addEventListener("click", e=>{ e.stopPropagation(); closeModal(); });
+  modelModal.addEventListener("click", e=>{ if(e.target===modelModal) closeModal(); });
+  refreshModelLabel();
+
+  /* ====================== BEDAVA AI (Pollinations, anahtarsız) ====================== */
+  function trimReply(t){
+    let s = String(t).replace(/[*_`#>]/g," ").replace(/\s+/g," ").trim();
+    if (s.length > 600) { const cut = s.slice(0,600); const p = cut.lastIndexOf("."); s = (p>200? cut.slice(0,p+1) : cut)+"…"; }
+    return s;
+  }
+  function askAI(cmd){
+    const model = currentModel();
+    if (model === "jarvis") { askWikipedia(cmd); return; }
+    body.classList.add("thinking"); setStatus("Düşünüyor","busy");
+    const sys = "Sen Jarvis adında, Murathan'in kisisel yapay zeka asistanisin. Iron Man'deki Jarvis gibi kibar, sakin, kendinden emin ve yardimseversin. Daima Turkce, kisa (en fazla 3-4 cumle), dogal ve dostca konus. Kullaniciya 'Murathan' diye hitap et, asla 'efendim' deme.";
+    const prompt = sys + "\n\nMurathan: " + cmd + "\nJarvis:";
+    const url = "https://text.pollinations.ai/" + encodeURIComponent(prompt) + "?model=" + encodeURIComponent(model) + "&private=true";
+    fetch(url).then(r=> r.ok ? r.text() : Promise.reject(0)).then(t=>{
+      body.classList.remove("thinking");
+      const out = trimReply(t);
+      if (!out || /error|not found/i.test(out)) throw 0;
+      speak(out);
+    }).catch(()=>{ body.classList.remove("thinking"); askWikipedia(cmd); }); // AI olmazsa Wikipedia'ya düş
+  }
+  // route bu fonksiyonla açık uçlu soruları yönlendirir
+  function answerOpen(cmd){ aiActive() ? askAI(cmd) : askWikipedia(cmd); }
 
   if(synth) synth.onvoiceschanged = pickVoice;
 
