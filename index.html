@@ -3,196 +3,241 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#04070d" />
-<meta name="description" content="J.A.R.V.I.S — Iron Man'den ilham alan, sesli komut ve sesli yanıt veren kişisel yapay zeka asistanı. Hava durumu, bilgi, notlar ve daha fazlası." />
+<meta name="theme-color" content="#16384f" />
+<meta name="description" content="J.A.R.V.I.S — sesli yapay zeka asistanı." />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="JARVIS" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>J.A.R.V.I.S — Sesli Yapay Zeka Asistanı</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%2338e0ff' stroke-width='6'/><circle cx='50' cy='50' r='20' fill='%2338e0ff'/></svg>" />
+<title>J.A.R.V.I.S</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='none' stroke='%2356e6ff' stroke-width='6'/><circle cx='50' cy='50' r='18' fill='%2356e6ff'/></svg>" />
 <style>
   :root {
-    --cyan: #38e0ff; --cyan-dim: #1a7a8c; --gold: #ffd166;
-    --green: #6effa6; --red: #ff6e7f;
-    --bg-deep: #04070d; --bg-panel: rgba(10, 22, 36, 0.78);
+    --accent: #56e6ff;        /* anlık duruma göre değişir */
+    --accent-soft: #9af0ff;
+    --idle: #4f7f95;
+    --gold: #ffd166;
+    --purple: #b48bff;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; }
+  html, body { height: 100%; overflow: hidden; }
   body {
-    font-family: 'Segoe UI', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
-    background: radial-gradient(circle at 50% 22%, #0a1c2e 0%, var(--bg-deep) 72%);
-    color: #e8f6ff; min-height: 100vh; min-height: 100dvh;
-    display: flex; flex-direction: column; align-items: center;
-    overflow-x: hidden;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    /* daha açık ton arka plan */
+    background: radial-gradient(circle at 50% 38%, #21506e 0%, #163a52 45%, #0e2839 100%);
+    color: #eaf7ff;
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; align-items: center; justify-content: center;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    transition: background 0.8s ease;
   }
+  /* hafif ızgara dokusu */
   body::before {
-    content: ""; position: fixed; inset: 0;
+    content: ""; position: fixed; inset: 0; pointer-events: none;
     background-image:
-      linear-gradient(rgba(56,224,255,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(56,224,255,0.05) 1px, transparent 1px);
-    background-size: 38px 38px; z-index: 0; pointer-events: none;
+      linear-gradient(rgba(120,200,230,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,200,230,0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 78%);
+    -webkit-mask-image: radial-gradient(circle at 50% 45%, #000 0%, transparent 78%);
   }
-  header { text-align: center; margin-top: 18px; z-index: 1; padding: 0 12px; }
-  header h1 { font-size: 2rem; letter-spacing: 0.45rem; font-weight: 300; color: var(--cyan); text-shadow: 0 0 16px rgba(56,224,255,0.6); }
-  header p { margin-top: 4px; font-size: 0.7rem; letter-spacing: 0.18rem; color: #7fb6cc; text-transform: uppercase; }
+  body.speaking { background: radial-gradient(circle at 50% 38%, #2a4a52 0%, #163a45 45%, #0e2832 100%); }
+  body.thinking { background: radial-gradient(circle at 50% 38%, #34355e 0%, #232447 45%, #131428 100%); }
 
-  .reactor-wrap { position: relative; margin: 22px 0 12px; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; z-index: 1; }
-  .ring { position: absolute; border-radius: 50%; border: 2px solid var(--cyan-dim); }
-  .ring.r1 { width: 180px; height: 180px; border-top-color: var(--cyan); animation: spin 8s linear infinite; }
-  .ring.r2 { width: 142px; height: 142px; border-bottom-color: var(--cyan); animation: spin 6s linear infinite reverse; }
-  .ring.r3 { width: 104px; height: 104px; border-left-color: var(--gold); opacity: 0.5; animation: spin 10s linear infinite; }
-  .core { width: 76px; height: 76px; border-radius: 50%;
-    background: radial-gradient(circle, #bff4ff 0%, var(--cyan) 40%, var(--cyan-dim) 100%);
-    box-shadow: 0 0 36px rgba(56,224,255,0.8), inset 0 0 22px rgba(255,255,255,0.5); transition: transform 0.12s ease; }
-  body.listening .core { animation: pulse 1.4s ease-in-out infinite; }
-  body.speaking .core { background: radial-gradient(circle, #fff0c2 0%, var(--gold) 45%, #b8860b 100%); box-shadow: 0 0 44px rgba(255,209,102,0.9); }
-  body.thinking .core { background: radial-gradient(circle, #d9c2ff 0%, #9d6bff 50%, #5a2ea6 100%); box-shadow: 0 0 44px rgba(157,107,255,0.9); }
+  /* ====== JARVIS SEMBOLÜ ====== */
+  .jarvis {
+    position: relative;
+    width: min(78vw, 340px); height: min(78vw, 340px);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    filter: drop-shadow(0 0 18px rgba(86,230,255,0.25));
+    transition: filter 0.6s ease, transform 0.3s ease;
+  }
+  .jarvis:active { transform: scale(0.97); }
+  .jarvis.on { filter: drop-shadow(0 0 40px rgba(86,230,255,0.6)); }
+  body.speaking .jarvis { filter: drop-shadow(0 0 46px rgba(255,209,102,0.6)); }
+  body.thinking .jarvis { filter: drop-shadow(0 0 46px rgba(180,139,255,0.6)); }
+
+  .layer { position: absolute; border-radius: 50%; left: 50%; top: 50%; translate: -50% -50%; }
+
+  /* dış tik halkası */
+  .ticks {
+    width: 100%; height: 100%;
+    background: repeating-conic-gradient(var(--accent) 0deg 1.2deg, transparent 1.2deg 6deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 11px), #000 calc(100% - 10px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 11px), #000 calc(100% - 10px));
+    opacity: 0.55; animation: spin 26s linear infinite;
+    transition: background 0.6s ease;
+  }
+  /* dış ince halka */
+  .ring-outer {
+    width: 86%; height: 86%; border: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-top-color: var(--accent); border-left-color: var(--accent);
+    animation: spin 14s linear infinite;
+  }
+  /* segmentli orta halka (ters yön) */
+  .ring-mid {
+    width: 68%; height: 68%;
+    border: 3px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+    animation: spin-rev 10s linear infinite;
+    opacity: 0.8;
+  }
+  /* iç parlayan halka */
+  .ring-inner {
+    width: 52%; height: 52%;
+    border: 1px solid color-mix(in srgb, var(--accent) 80%, transparent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 60%, transparent),
+                inset 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
+    animation: spin 7s linear infinite;
+  }
+  /* radar tarama süpürmesi */
+  .scan {
+    width: 86%; height: 86%;
+    background: conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, var(--accent) 38%, transparent) 50deg, transparent 90deg);
+    -webkit-mask: radial-gradient(farthest-side, #000 40%, transparent 72%);
+            mask: radial-gradient(farthest-side, #000 40%, transparent 72%);
+    animation: spin 4s linear infinite; opacity: 0.7;
+  }
+  /* altıgen çekirdek çerçevesi */
+  .hex {
+    width: 40%; height: 40%;
+    border: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    border-radius: 0;
+    animation: spin-rev 18s linear infinite, hexpulse 3s ease-in-out infinite;
+  }
+
+  /* yörünge noktaları */
+  .orbit { width: 100%; height: 100%; animation: spin var(--dur,9s) linear infinite; }
+  .orbit.o2 { width: 74%; height: 74%; animation: spin-rev 12s linear infinite; }
+  .orbit.o3 { width: 60%; height: 60%; animation: spin 6s linear infinite; }
+  .orbit .dot {
+    position: absolute; top: -4px; left: 50%; translate: -50% 0;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent-soft);
+    box-shadow: 0 0 12px var(--accent), 0 0 22px var(--accent);
+  }
+  .orbit.o2 .dot { width: 6px; height: 6px; }
+  .orbit.o3 .dot { width: 7px; height: 7px; }
+
+  /* merkez çekirdek */
+  .core {
+    width: 26%; height: 26%; border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, #ffffff 0%, var(--accent-soft) 30%, var(--accent) 65%, color-mix(in srgb, var(--accent) 50%, #04121a) 100%);
+    box-shadow: 0 0 30px var(--accent), 0 0 60px color-mix(in srgb, var(--accent) 60%, transparent), inset 0 0 18px rgba(255,255,255,0.6);
+    animation: breathe 3.4s ease-in-out infinite;
+    transition: background 0.6s ease, box-shadow 0.6s ease;
+  }
+
+  /* merkez "J" damgası */
+  .glyph {
+    position: absolute; font-weight: 300; letter-spacing: 1px;
+    font-size: min(8vw, 34px); color: #04222e;
+    text-shadow: 0 0 6px rgba(255,255,255,0.6);
+    pointer-events: none; user-select: none;
+  }
+
+  /* ===== DURUM RENKLERİ ===== */
+  /* kapalı (idle): soluk ve yavaş */
+  body:not(.on-state) .jarvis { --accent: var(--idle); --accent-soft: #8fb6c6; }
+  body:not(.on-state) .ticks,
+  body:not(.on-state) .scan { animation-play-state: paused; }
+  body:not(.on-state) .core { animation-duration: 6s; opacity: 0.85; }
+
+  /* açık (dinliyor): parlak camgöbeği, hızlı */
+  body.on-state .jarvis { --accent: #56e6ff; --accent-soft: #b9f4ff; }
+
+  /* düşünüyor: mor */
+  body.thinking .jarvis { --accent: var(--purple); --accent-soft: #ddc9ff; }
+  body.thinking .scan { animation-duration: 1.6s; }
+
+  /* konuşuyor: altın + canlı çekirdek */
+  body.speaking .jarvis { --accent: var(--gold); --accent-soft: #fff0c0; }
+  body.speaking .core { animation: talk 0.5s ease-in-out infinite; }
+  body.speaking .scan { animation-duration: 2.4s; }
+
+  /* aktifken genel hızlanma */
+  body.on-state .ring-outer { animation-duration: 9s; }
+  body.on-state .ring-inner { animation-duration: 4.5s; }
+
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.16); } }
+  @keyframes spin-rev { to { transform: rotate(-360deg); } }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+  @keyframes talk { 0%,100% { transform: scale(1); } 25% { transform: scale(1.18); } 60% { transform: scale(0.94); } }
+  @keyframes hexpulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
 
-  .status { z-index: 1; font-size: 0.8rem; letter-spacing: 0.12rem; text-transform: uppercase;
-    padding: 7px 18px; border-radius: 30px; border: 1px solid var(--cyan-dim);
-    background: var(--bg-panel); color: var(--cyan); transition: all 0.3s; text-align: center; }
-  .status.active { color: var(--green); border-color: #1f7a4d; box-shadow: 0 0 12px rgba(110,255,166,0.4); }
-  .status.error  { color: var(--red); border-color: #7a1f2b; }
-
-  .panel { z-index: 1; width: min(680px, 94vw); margin-top: 16px; background: var(--bg-panel);
-    border: 1px solid var(--cyan-dim); border-radius: 14px; backdrop-filter: blur(6px); overflow: hidden; }
-  .live-line { padding: 12px 16px; min-height: 48px; font-size: 0.98rem; color: var(--gold);
-    border-bottom: 1px solid rgba(56,224,255,0.15); display: flex; align-items: center; gap: 10px; }
-  .log { max-height: 42vh; overflow-y: auto; padding: 10px 16px; -webkit-overflow-scrolling: touch; }
-  .log .msg { margin: 7px 0; line-height: 1.5; font-size: 0.92rem; animation: fadein 0.4s; word-wrap: break-word; }
-  .log .you b { color: var(--cyan); } .log .you { color: #9fd8ff; }
-  .log .jarvis b { color: var(--gold); } .log .jarvis { color: #ffe9b3; }
-  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-  .controls { z-index: 1; margin: 16px 0 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: min(680px, 94vw); padding: 0 4px; }
-  button { font-family: inherit; font-size: 0.82rem; letter-spacing: 0.05rem; text-transform: uppercase;
-    color: var(--cyan); background: transparent; border: 1px solid var(--cyan); padding: 12px 18px;
-    border-radius: 9px; cursor: pointer; transition: all 0.2s; flex: 1 1 auto; min-width: 130px; }
-  button:active { transform: scale(0.96); } button:hover { background: var(--cyan); color: var(--bg-deep); }
-  button.primary { border-color: var(--gold); color: var(--gold); } button.primary:hover { background: var(--gold); color: var(--bg-deep); }
-  button:disabled { opacity: 0.35; }
-
-  .textrow { z-index: 1; width: min(680px, 94vw); display: flex; gap: 8px; margin: 4px 0; padding: 0 4px; }
-  .textrow input { flex: 1; background: var(--bg-panel); border: 1px solid var(--cyan-dim); color: #e8f6ff;
-    padding: 12px 14px; border-radius: 9px; font-family: inherit; font-size: 0.95rem; }
-  .textrow input:focus { outline: none; border-color: var(--cyan); }
-  .textrow button { flex: 0 0 auto; min-width: auto; }
-
-  .chips { z-index: 1; width: min(680px, 94vw); display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 8px 0 10px; padding: 0 6px; }
-  .chip { font-size: 0.74rem; color: #bfeaff; background: rgba(56,224,255,0.08); border: 1px solid var(--cyan-dim);
-    border-radius: 20px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; }
-  .chip:active { background: rgba(56,224,255,0.25); transform: scale(0.95); }
-
-  .hint { z-index: 1; font-size: 0.74rem; color: #6e95a8; text-align: center; max-width: 620px; line-height: 1.6; margin: 8px 0 24px; padding: 0 18px; }
-  .hint code { color: var(--gold); background: rgba(255,209,102,0.1); padding: 1px 6px; border-radius: 4px; }
-  .note { z-index:1; font-size: 0.72rem; color: #5d8298; text-align:center; max-width: 600px; margin-bottom: 26px; padding: 0 18px; line-height:1.5;}
+  /* küçük sessize alma simgesi */
+  .mute {
+    position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); right: 18px;
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer; z-index: 5;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(150,210,235,0.25);
+    color: #cfeefb; backdrop-filter: blur(4px); transition: all 0.2s;
+  }
+  .mute:active { transform: scale(0.9); }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>
 </head>
 <body>
-  <header>
-    <h1>J.A.R.V.I.S</h1>
-    <p>Just A Rather Very Intelligent System</p>
-  </header>
-
-  <div class="reactor-wrap">
-    <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-    <div class="core" id="core"></div>
+  <div class="jarvis" id="jarvis" role="button" aria-label="Jarvis — başlatmak için dokun" tabindex="0">
+    <div class="layer ticks"></div>
+    <div class="layer scan"></div>
+    <div class="layer ring-outer"></div>
+    <div class="layer ring-mid"></div>
+    <div class="layer ring-inner"></div>
+    <div class="layer orbit o1"><span class="dot"></span></div>
+    <div class="layer orbit o2"><span class="dot"></span></div>
+    <div class="layer orbit o3"><span class="dot"></span></div>
+    <div class="layer hex"></div>
+    <div class="layer core"></div>
+    <div class="glyph">J</div>
   </div>
 
-  <div class="status" id="status">Beklemede</div>
-
-  <div class="panel">
-    <div class="live-line" id="liveLine"><span>🎙️</span><span id="liveText">Sizi dinlemeye hazırım, efendim.</span></div>
-    <div class="log" id="log"></div>
-  </div>
-
-  <div class="controls">
-    <button class="primary" id="startBtn">🎤 Dinlemeyi Başlat</button>
-    <button id="stopBtn" disabled>⏹ Durdur</button>
-    <button id="muteBtn">🔇 Sesi Kapat</button>
-  </div>
-
-  <!-- Yazılı komut: Safari/iOS'ta mikrofon kısıtlıysa her zaman çalışır -->
-  <div class="textrow">
-    <input id="textInput" type="text" placeholder="Buraya yazıp Enter'a basabilirsin (örn: 'kara delik nedir')" />
-    <button id="sendBtn">Gönder</button>
-  </div>
-
-  <div class="chips" id="chips"></div>
-
-  <p class="hint">
-    Sesli mod: <code>Jarvis</code> de, sonra komutunu söyle.<br>
-    Örnek: <code>Jarvis hava nasıl</code> · <code>Jarvis Einstein kimdir</code> ·
-    <code>Jarvis fotosentez nedir</code> · <code>Jarvis not al süt al</code>
-  </p>
-  <p class="note" id="safariNote"></p>
+  <div class="mute" id="muteBtn" role="button" aria-label="Sesi aç/kapat">🔊</div>
 
 <script>
 /* ============================================================
-   J.A.R.V.I.S — Aşama 3
-   - Sesli komut (Web Speech API) + "Jarvis" wake word + yazılı giriş
-   - Sesli yanıt (TTS) — Safari/iOS uyumlu (ilk dokunuşta uyandırma,
-     konuşurken dinlemeyi duraklatma)
-   - Genişletilmiş bilgi veritabanı + CANLI Wikipedia beyni (anahtarsız)
-   - Konum & şehir bazlı hava durumu (Open-Meteo)
-   - Notlar, hatırlatıcı, hesap, proaktif kontrol
+   J.A.R.V.I.S — Sade arayüz, tam beyin
+   Sembole dokun -> başlat/durdur. Sembolün rengi/animasyonu durumu gösterir:
+   soluk+yavaş = kapalı · camgöbeği = dinliyor · mor = düşünüyor · altın = konuşuyor
    ============================================================ */
 (function () {
   "use strict";
   const WAKE_WORD = "jarvis";
   const LANG = "tr-TR";
 
-  /* ====================== TARAYICI ALGISI ====================== */
   const ua = navigator.userAgent;
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isSafari = /^((?!chrome|android|crios|fxios|edg).)*safari/i.test(ua);
 
-  /* ====================== GENİŞLETİLMİŞ BİLGİ VERİTABANI ======================
-     Hızlı, çevrimdışı cevaplar. Açık uçlu sorularda Wikipedia devreye girer. */
+  /* ====================== BİLGİ VERİTABANI ====================== */
   const KNOWLEDGE = [
-    // --- Sağlık & günlük yaşam ---
-    { keys:["su iç","ne kadar su","günde kaç bardak su"], a:"Günde yaklaşık 2 ila 2,5 litre, yani 8-10 bardak su önerilir efendim. Susamayı beklemeden düzenli için." },
+    { keys:["su iç","ne kadar su","günde kaç bardak su"], a:"Günde yaklaşık 2 ila 2,5 litre, yani 8-10 bardak su önerilir efendim." },
     { keys:["uyku","kaç saat uyu","ne kadar uyumalı"], a:"Yetişkinler için 7 ila 9 saat uyku idealdir efendim. Her gün aynı saatte yatıp kalkmak kaliteyi artırır." },
     { keys:["mola","ekran molası","20 20 20","gözlerim yoruldu"], a:"20-20-20 kuralı efendim: her 20 dakikada bir, 20 saniye, 20 metre uzağa bakın." },
-    { keys:["stres","gergin","sakinleş","nefes egzersizi"], a:"4-7-8 nefes tekniği: 4 saniye alın, 7 saniye tutun, 8 saniyede verin. Birkaç tekrar rahatlatır efendim." },
-    { keys:["pomodoro","odaklan","verimli çalış","konsantrasyon"], a:"Pomodoro: 25 dakika çalışma, 5 dakika mola. Dört turdan sonra 15-20 dakika uzun mola efendim." },
-    { keys:["spor","egzersiz","ne kadar hareket"], a:"Haftada en az 150 dakika orta tempolu hareket önerilir efendim. Günde 30 dakika yürüyüş bile fark yaratır." },
-    { keys:["sağlıklı beslen","ne yemeli","beslenme"], a:"Tabağınızın yarısını sebze-meyveye ayırın, işlenmiş gıda ve şekeri azaltın, bol su için efendim." },
-    { keys:["acil","112","acil numara"], a:"Türkiye'de tüm acil durumlar için 112'yi arayın efendim: sağlık, polis, itfaiye ve jandarma tek numarada." },
-    { keys:["ilk yardım","kanama","boğulma"], a:"Acil durumda önce 112'yi arayın efendim. Bilinç ve solunumu kontrol edin; ciddi kanamada yaraya temiz bezle baskı uygulayın." },
-
-    // --- Genel kültür & bilim ---
+    { keys:["stres","gergin","sakinleş","nefes egzersizi"], a:"4-7-8 nefes tekniği: 4 saniye alın, 7 saniye tutun, 8 saniyede verin efendim." },
+    { keys:["pomodoro","odaklan","verimli çalış","konsantrasyon"], a:"Pomodoro: 25 dakika çalışma, 5 dakika mola. Dört turdan sonra uzun mola efendim." },
+    { keys:["spor","egzersiz","ne kadar hareket"], a:"Haftada en az 150 dakika orta tempolu hareket önerilir efendim." },
+    { keys:["sağlıklı beslen","ne yemeli","beslenme"], a:"Tabağınızın yarısını sebze-meyveye ayırın, işlenmiş gıdayı azaltın, bol su için efendim." },
+    { keys:["acil","112","acil numara"], a:"Türkiye'de tüm acil durumlar için 112'yi arayın efendim." },
+    { keys:["ilk yardım","kanama"], a:"Acil durumda önce 112'yi arayın efendim, ciddi kanamada yaraya temiz bezle baskı uygulayın." },
     { keys:["ışık hızı","ışığın hızı"], a:"Işık boşlukta saniyede yaklaşık 299 bin 792 kilometre hızla yol alır efendim." },
-    { keys:["ses hızı","sesin hızı"], a:"Ses, deniz seviyesindeki havada saniyede yaklaşık 343 metre hızla ilerler efendim." },
-    { keys:["su kaç derecede kaynar","kaynama"], a:"Saf su deniz seviyesinde 100 santigrat derecede kaynar, sıfır derecede donar efendim." },
+    { keys:["ses hızı","sesin hızı"], a:"Ses, havada saniyede yaklaşık 343 metre hızla ilerler efendim." },
+    { keys:["su kaç derecede kaynar","kaynama"], a:"Saf su deniz seviyesinde 100 derecede kaynar, sıfır derecede donar efendim." },
     { keys:["dünyanın yaşı","dünya kaç yaşında"], a:"Dünya yaklaşık 4,5 milyar yaşındadır efendim." },
-    { keys:["evrenin yaşı","evren kaç yaşında","big bang"], a:"Evren, Büyük Patlama'dan bu yana yaklaşık 13,8 milyar yaşındadır efendim." },
-    { keys:["güneş sistemi kaç gezegen","kaç gezegen"], a:"Güneş sistemimizde sekiz gezegen vardır efendim: Merkür, Venüs, Dünya, Mars, Jüpiter, Satürn, Uranüs ve Neptün." },
-    { keys:["en büyük gezegen"], a:"Güneş sistemindeki en büyük gezegen Jüpiter'dir efendim." },
-    { keys:["dünyaya en yakın yıldız","en yakın yıldız"], a:"Bize en yakın yıldız Güneş'tir efendim; ondan sonra ise Proxima Centauri gelir." },
-    { keys:["kıta sayısı","kaç kıta"], a:"Dünyada yedi kıta vardır efendim: Asya, Afrika, Avrupa, Kuzey Amerika, Güney Amerika, Avustralya ve Antarktika." },
-    { keys:["en yüksek dağ","everest"], a:"Dünyanın en yüksek dağı, 8 bin 849 metreyle Everest'tir efendim." },
-    { keys:["en uzun nehir"], a:"Dünyanın en uzun nehri Nil'dir; Amazon ise en büyük su hacmine sahiptir efendim." },
-    { keys:["en büyük okyanus"], a:"En büyük ve en derin okyanus Pasifik Okyanusu'dur efendim." },
-    { keys:["türkiye nüfus","türkiye kaç nüfus"], a:"Türkiye'nin nüfusu yaklaşık 85 milyondur efendim." },
+    { keys:["evrenin yaşı","evren kaç yaşında","big bang"], a:"Evren yaklaşık 13,8 milyar yaşındadır efendim." },
+    { keys:["kaç gezegen"], a:"Güneş sistemimizde sekiz gezegen vardır efendim." },
+    { keys:["en büyük gezegen"], a:"En büyük gezegen Jüpiter'dir efendim." },
+    { keys:["kaç kıta"], a:"Dünyada yedi kıta vardır efendim." },
+    { keys:["en yüksek dağ","everest"], a:"En yüksek dağ 8 bin 849 metreyle Everest'tir efendim." },
+    { keys:["en uzun nehir"], a:"En uzun nehir Nil'dir efendim." },
+    { keys:["en büyük okyanus"], a:"En büyük ve en derin okyanus Pasifik'tir efendim." },
     { keys:["türkiye başkenti","türkiye'nin başkenti"], a:"Türkiye'nin başkenti Ankara'dır efendim." },
-    { keys:["dünya nüfusu"], a:"Dünya nüfusu 8 milyarı aşmış durumdadır efendim." },
-    { keys:["pi sayısı"], a:"Pi sayısı yaklaşık 3,14159'dur efendim; bir çemberin çevresinin çapına oranıdır." },
-    { keys:["dna nedir"], a:"DNA, canlıların genetik bilgisini taşıyan, çift sarmal yapıda bir moleküldür efendim." },
-    { keys:["yerçekimi"], a:"Dünya'nın yerçekimi ivmesi yaklaşık 9,81 metre bölü saniye karedir efendim." },
-    { keys:["kalbin görevi","kalp ne işe yarar"], a:"Kalp, kanı tüm vücuda pompalayarak hücrelere oksijen ve besin taşıyan bir kas organıdır efendim." },
-
-    // --- Teknoloji ---
-    { keys:["yapay zeka nedir"], a:"Yapay zeka, makinelerin öğrenme, akıl yürütme ve problem çözme gibi insana özgü yetenekleri taklit etmesidir efendim." },
-    { keys:["internet nedir"], a:"İnternet, dünya genelindeki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır efendim." },
-    { keys:["bit nedir","byte nedir","bayt"], a:"Bir bayt sekiz bittir efendim; bilgisayarda en küçük adreslenebilir veri birimidir." },
+    { keys:["dünya nüfusu"], a:"Dünya nüfusu 8 milyarı aşmıştır efendim." },
+    { keys:["pi sayısı"], a:"Pi sayısı yaklaşık 3,14159'dur efendim." },
+    { keys:["yapay zeka nedir"], a:"Yapay zeka, makinelerin öğrenme ve akıl yürütme gibi insana özgü yetenekleri taklit etmesidir efendim." },
   ];
-
-  /* Hava durumu kodları (Open-Meteo WMO) */
   const WEATHER_CODES = {0:"açık",1:"az bulutlu",2:"parçalı bulutlu",3:"kapalı",45:"sisli",48:"kırağılı sis",
     51:"hafif çiseleme",53:"çiseleme",55:"yoğun çiseleme",56:"donan hafif çiseleme",57:"donan çiseleme",
     61:"hafif yağmurlu",63:"yağmurlu",65:"şiddetli yağmurlu",66:"donan hafif yağmur",67:"donan yağmur",
@@ -200,15 +245,11 @@
     81:"sağanak",82:"şiddetli sağanak",85:"hafif kar sağanağı",86:"yoğun kar sağanağı",
     95:"gök gürültülü fırtına",96:"dolulu fırtına",99:"şiddetli dolulu fırtına"};
 
-  /* ====================== DOM ====================== */
-  const body=document.body, statusEl=document.getElementById("status"),
-    liveText=document.getElementById("liveText"), logEl=document.getElementById("log"),
-    startBtn=document.getElementById("startBtn"), stopBtn=document.getElementById("stopBtn"),
-    muteBtn=document.getElementById("muteBtn"), chipsEl=document.getElementById("chips"),
-    textInput=document.getElementById("textInput"), sendBtn=document.getElementById("sendBtn"),
-    safariNote=document.getElementById("safariNote");
+  /* ====================== DOM & State ====================== */
+  const body = document.body;
+  const jarvis = document.getElementById("jarvis");
+  const muteBtn = document.getElementById("muteBtn");
 
-  /* ====================== State ====================== */
   let recognition=null, listening=false, awake=false, muted=false;
   let awakeTimer=null, proactiveTimer=null, lastInteraction=Date.now();
   let isSpeaking=false, ttsPrimed=false;
@@ -216,55 +257,38 @@
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const synth = window.speechSynthesis;
 
-  if (!SpeechRecognition) {
-    startBtn.textContent = "🎤 Ses tanıma yok";
-    startBtn.disabled = true;
-    safariNote.textContent = "Bu tarayıcı canlı ses tanımayı desteklemiyor; aşağıdaki yazı kutusunu ve dokunmatik komutları kullanabilirsin. Sesli yanıtlar yine çalışır.";
-  } else if (isIOS || isSafari) {
-    safariNote.textContent = "Safari ipucu: 'Dinlemeyi Başlat'a basıp mikrofon iznini ver. iOS, konuşma tanımayı kısa aralıklarla yapar — Jarvis her duraklamada otomatik yeniden dinler. Sorun olursa yazı kutusunu kullan.";
-  }
+  /* görsel durumu süren minimal yardımcılar (yazı yok) */
+  function setStatus(){ /* görsel durum CSS sınıflarıyla yönetiliyor */ }
+  function addLog(){ /* arayüzde yazı gösterilmiyor */ }
+  let liveText = { set textContent(_) {} };
 
-  /* ====================== Ses tanıma kurulumu ====================== */
+  /* ====================== Ses tanıma ====================== */
   function buildRecognition() {
     const r = new SpeechRecognition();
     r.lang = LANG;
-    // iOS Safari sürekli modda kararsız olabilir; her iki durumda da onend ile yeniden başlatıyoruz
     r.continuous = !(isIOS || isSafari);
     r.interimResults = true;
     r.maxAlternatives = 1;
-    r.onstart = () => { setStatus(awake ? "Komut bekleniyor" : "Dinleniyor — 'Jarvis' de", "active"); body.classList.add("listening"); };
+    r.onstart = () => { setStatus(awake?"komut":"dinleniyor","active"); };
     r.onresult = (event) => {
-      if (isSpeaking) return; // Jarvis konuşurken kendi sesini dinlemesin
-      let interim="", finalText="";
-      for (let i=event.resultIndex; i<event.results.length; i++) {
-        const t=event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalText+=t; else interim+=t;
-      }
-      if (interim) liveText.textContent = interim;
+      if (isSpeaking) return;
+      let finalText="";
+      for (let i=event.resultIndex; i<event.results.length; i++)
+        if (event.results[i].isFinal) finalText += event.results[i][0].transcript;
       if (finalText) handleSpeech(finalText.trim());
     };
     r.onerror = (e) => {
       if (e.error==="no-speech"||e.error==="aborted") return;
-      if (e.error==="not-allowed"||e.error==="service-not-allowed") { setStatus("Mikrofon izni reddedildi","error"); stopListening(); return; }
-      console.warn("Tanıma hatası:", e.error);
+      if (e.error==="not-allowed"||e.error==="service-not-allowed") { stopListening(); return; }
     };
-    r.onend = () => {
-      body.classList.remove("listening");
-      if (listening && !isSpeaking) { try { r.start(); } catch(_){} }
-      else if (!listening) setStatus("Beklemede");
-    };
+    r.onend = () => { if (listening && !isSpeaking) { try { r.start(); } catch(_){} } };
     return r;
   }
+  function restartRecognition(){ if (listening && recognition) { try { recognition.start(); } catch(_){} } }
 
-  function restartRecognition() {
-    if (listening && recognition) { try { recognition.start(); } catch(_){} }
-  }
-
-  /* ====================== Konuşma yönlendirme ====================== */
+  /* ====================== Yönlendirme ====================== */
   function handleSpeech(text) {
     const lower = text.toLocaleLowerCase("tr-TR");
-    addLog("you","Sen",text);
-    liveText.textContent = "…";
     lastInteraction = Date.now();
     if (!awake) {
       if (lower.includes(WAKE_WORD)) {
@@ -276,18 +300,13 @@
     }
     route(lower.replace(WAKE_WORD,"").trim());
   }
-  function wake() { awake=true; setStatus("Aktif — komut bekleniyor","active"); resetAwakeTimer(); }
-  function resetAwakeTimer() {
-    clearTimeout(awakeTimer);
-    awakeTimer = setTimeout(() => { awake=false; setStatus(listening?"Dinleniyor — 'Jarvis' de":"Beklemede", listening?"active":""); }, 20000);
-  }
+  function wake() { awake=true; resetAwakeTimer(); }
+  function resetAwakeTimer() { clearTimeout(awakeTimer); awakeTimer=setTimeout(()=>{ awake=false; }, 20000); }
 
-  /* ====================== Komut yönlendirici ====================== */
   function route(cmd) {
     resetAwakeTimer(); lastInteraction=Date.now();
     if (!cmd) { speak("Sizi dinliyorum efendim."); return; }
     const has=(...w)=>w.some(x=>cmd.includes(x));
-
     if (has("hava")) { handleWeather(cmd); return; }
     if (has("saat kaç","saat ne")) { speak("Saat şu an "+nowTime()+" efendim."); return; }
     if (has("günlerden ne","bugün ne","tarih","hangi gün")) { speak("Bugün "+nowDate()+" efendim."); return; }
@@ -296,181 +315,112 @@
     if (has("notları sil","notları temizle")) { localStorage.removeItem("jarvis_notes"); speak("Tüm notlarınızı sildim efendim."); return; }
     if (has("hatırlat","alarm kur","zamanlayıcı","süre kur","dakika sonra")) { setReminder(cmd); return; }
     if (has("hesapla","kaç eder","kaç yapar","artı","eksi","kere","bölü","çarpı")) { doMath(cmd); return; }
-
-    // Hızlı bilgi veritabanı
     const known = KNOWLEDGE.find(it => it.keys.some(k => cmd.includes(k)));
     if (known) { speak(known.a); return; }
-
-    // Sohbet
     if (has("merhaba","selam","hey")) { speak(greeting()); return; }
-    if (has("adın ne","kimsin","sen kimsin")) { speak("Ben Jarvis efendim, kişisel yapay zeka asistanınız. Hava durumu, genel bilgi, notlar, hatırlatıcılar ve hesaplama konularında yardımcı olabilirim."); return; }
+    if (has("adın ne","kimsin","sen kimsin")) { speak("Ben Jarvis efendim, kişisel yapay zeka asistanınız."); return; }
     if (has("neler yapabilir","yeteneklerin","ne yapabilirsin","yardım et")) { listSkills(); return; }
     if (has("nasılsın","naber")) { speak("Tüm sistemlerim optimal çalışıyor efendim, teşekkür ederim."); return; }
     if (has("teşekkür","sağol","eyvallah")) { speak("Rica ederim efendim, her zaman buradayım."); return; }
     if (has("şaka","espri","güldür")) { speak(randomJoke()); return; }
     if (has("kapan","uyu","görüşürüz","kendini kapat")) { speak("Uykuya geçiyorum efendim. Beni 'Jarvis' diyerek uyandırabilirsiniz."); awake=false; return; }
-
-    // Açık uçlu genel bilgi → Wikipedia beyni
     askWikipedia(cmd);
   }
 
-  /* ====================== WIKIPEDIA BEYNİ (anahtarsız, CORS açık) ====================== */
+  /* ====================== Wikipedia beyni ====================== */
   function cleanQuery(cmd) {
-    return cmd
-      .replace(/(nedir|kimdir|kim|ne demek|nerededir|nedendir|anlat|hakkında bilgi ver|hakkında|söyle|açıkla|bana)\??/g, " ")
-      .replace(/\s+/g, " ").trim();
+    return cmd.replace(/(nedir|kimdir|kim|ne demek|nerededir|nedendir|anlat|hakkında bilgi ver|hakkında|söyle|açıkla|bana)\??/g," ").replace(/\s+/g," ").trim();
   }
   function askWikipedia(cmd) {
     const q = cleanQuery(cmd);
     if (!q || q.length < 2) { speak("Bunu tam anlayamadım efendim, biraz daha açar mısınız?"); return; }
-    setStatus("Araştırıyorum…","active"); body.classList.add("thinking");
-    const searchUrl = "https://tr.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search=" + encodeURIComponent(q);
-    fetch(searchUrl)
-      .then(r => r.json())
-      .then(data => {
-        const title = data && data[1] && data[1][0];
-        if (!title) throw new Error("notfound");
-        return fetch("https://tr.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title));
-      })
-      .then(r => r.json())
-      .then(s => {
-        body.classList.remove("thinking");
-        if (s && s.extract && !/olabilir:/.test(s.extract)) {
-          speak(firstSentences(s.extract, 3));
-        } else {
-          speak("Bu konuda net bir bilgi bulamadım efendim. Sorunuzu farklı kelimelerle dener misiniz?");
-        }
-      })
-      .catch(() => {
-        body.classList.remove("thinking");
-        speak("Bu konuda bir bilgiye ulaşamadım efendim. İnternet bağlantınızı kontrol edip tekrar deneyebilirsiniz.");
-      });
+    body.classList.add("thinking");
+    const searchUrl = "https://tr.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search="+encodeURIComponent(q);
+    fetch(searchUrl).then(r=>r.json()).then(data=>{
+      const title = data && data[1] && data[1][0];
+      if (!title) throw new Error("notfound");
+      return fetch("https://tr.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title));
+    }).then(r=>r.json()).then(s=>{
+      body.classList.remove("thinking");
+      if (s && s.extract && !/olabilir:/.test(s.extract)) speak(firstSentences(s.extract,3));
+      else speak("Bu konuda net bir bilgi bulamadım efendim, farklı kelimelerle dener misiniz?");
+    }).catch(()=>{ body.classList.remove("thinking"); speak("Bu konuda bilgiye ulaşamadım efendim, bağlantınızı kontrol edin."); });
   }
-  function firstSentences(text, n) {
-    const parts = text.replace(/\s+/g," ").match(/[^.!?]+[.!?]+/g);
-    if (!parts) return text;
-    let out = parts.slice(0, n).join(" ").trim();
-    if (out.length > 360) out = out.slice(0, 357) + "...";
-    return out;
-  }
+  function firstSentences(text,n){ const p=text.replace(/\s+/g," ").match(/[^.!?]+[.!?]+/g); if(!p) return text; let o=p.slice(0,n).join(" ").trim(); if(o.length>360) o=o.slice(0,357)+"..."; return o; }
 
-  /* ====================== HAVA DURUMU ====================== */
+  /* ====================== Hava durumu ====================== */
   function handleWeather(cmd) {
     const city = extractCity(cmd);
     if (city) {
-      speak(city + " için hava durumunu kontrol ediyorum efendim.");
-      geocode(city).then(loc => loc ? fetchWeather(loc.latitude, loc.longitude, loc.name) : speak(city+" adında bir yer bulamadım efendim."))
-                   .catch(() => speak("Hava durumu servisine ulaşamadım efendim."));
+      speak(city+" için hava durumunu kontrol ediyorum efendim.");
+      geocode(city).then(loc=> loc ? fetchWeather(loc.latitude,loc.longitude,loc.name) : speak(city+" adında bir yer bulamadım efendim.")).catch(()=>speak("Hava durumu servisine ulaşamadım efendim."));
       return;
     }
-    if (!navigator.geolocation) { speak("Konum servisi yok efendim. Bir şehir söyleyin, örneğin 'Jarvis Ankara hava durumu'."); return; }
+    if (!navigator.geolocation) { speak("Konum servisi yok efendim, bir şehir söyleyin."); return; }
     speak("Konumunuza göre hava durumunu kontrol ediyorum efendim.");
     navigator.geolocation.getCurrentPosition(
-      pos => fetchWeather(pos.coords.latitude, pos.coords.longitude, "Konumunuz"),
-      err => { if (err.code===1) speak("Konum izni vermediniz efendim. Bir şehir adıyla deneyin, örneğin 'Jarvis İzmir hava durumu'."); else speak("Konumunuzu alamadım efendim, lütfen bir şehir söyleyin."); },
+      pos=>fetchWeather(pos.coords.latitude,pos.coords.longitude,"Konumunuz"),
+      err=>{ if(err.code===1) speak("Konum izni vermediniz efendim, bir şehir adıyla deneyin."); else speak("Konumunuzu alamadım efendim, lütfen bir şehir söyleyin."); },
       { timeout:10000, enableHighAccuracy:false }
     );
   }
-  function extractCity(cmd) {
-    let c = cmd.replace(/hava durumu|hava nasıl|hava|nasıl|durumu|tahmin|bugün|yarın|için|de|da|te|ta/g," ");
-    c = c.replace(/[^a-zçğıöşü\s]/gi," ").replace(/\s+/g," ").trim();
-    if (!c || c.length<3) return null;
-    return c.split(" ").filter(w=>w.length>2).slice(-2).join(" ").trim() || null;
-  }
-  function geocode(name) {
-    return fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name)+"&count=1&language=tr&format=json")
-      .then(r=>r.json()).then(d => (d&&d.results&&d.results.length) ? { latitude:d.results[0].latitude, longitude:d.results[0].longitude, name:d.results[0].name+(d.results[0].admin1?", "+d.results[0].admin1:"") } : null);
-  }
-  function fetchWeather(lat, lon, label) {
-    const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+
-      "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m"+
-      "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2";
-    fetch(url).then(r=>r.json()).then(d => {
-      if (!d||!d.current) { speak("Hava durumu verisini alamadım efendim."); return; }
-      const c=d.current, desc=WEATHER_CODES[c.weather_code]||"değişken",
-        temp=Math.round(c.temperature_2m), feels=Math.round(c.apparent_temperature),
-        hum=c.relative_humidity_2m, wind=Math.round(c.wind_speed_10m);
+  function extractCity(cmd){ let c=cmd.replace(/hava durumu|hava nasıl|hava|nasıl|durumu|tahmin|bugün|yarın|için|de|da|te|ta/g," ").replace(/[^a-zçğıöşü\s]/gi," ").replace(/\s+/g," ").trim(); if(!c||c.length<3) return null; return c.split(" ").filter(w=>w.length>2).slice(-2).join(" ").trim()||null; }
+  function geocode(name){ return fetch("https://geocoding-api.open-meteo.com/v1/search?name="+encodeURIComponent(name)+"&count=1&language=tr&format=json").then(r=>r.json()).then(d=>(d&&d.results&&d.results.length)?{latitude:d.results[0].latitude,longitude:d.results[0].longitude,name:d.results[0].name+(d.results[0].admin1?", "+d.results[0].admin1:"")}:null); }
+  function fetchWeather(lat,lon,label){
+    const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2";
+    fetch(url).then(r=>r.json()).then(d=>{
+      if(!d||!d.current){ speak("Hava durumu verisini alamadım efendim."); return; }
+      const c=d.current, desc=WEATHER_CODES[c.weather_code]||"değişken", temp=Math.round(c.temperature_2m), feels=Math.round(c.apparent_temperature), hum=c.relative_humidity_2m, wind=Math.round(c.wind_speed_10m);
       let msg=label+" için şu an hava "+desc+", sıcaklık "+temp+" derece";
-      if (Math.abs(feels-temp)>=2) msg+=", hissedilen "+feels+" derece";
+      if(Math.abs(feels-temp)>=2) msg+=", hissedilen "+feels+" derece";
       msg+=" efendim. Nem yüzde "+hum+", rüzgar saatte "+wind+" kilometre.";
-      if (d.daily && d.daily.time && d.daily.time.length>1) {
-        const tmax=Math.round(d.daily.temperature_2m_max[1]), tmin=Math.round(d.daily.temperature_2m_min[1]),
-          tdesc=WEATHER_CODES[d.daily.weather_code[1]]||"değişken",
-          rain=d.daily.precipitation_probability_max?d.daily.precipitation_probability_max[1]:null;
+      if(d.daily&&d.daily.time&&d.daily.time.length>1){
+        const tmax=Math.round(d.daily.temperature_2m_max[1]),tmin=Math.round(d.daily.temperature_2m_min[1]),tdesc=WEATHER_CODES[d.daily.weather_code[1]]||"değişken",rain=d.daily.precipitation_probability_max?d.daily.precipitation_probability_max[1]:null;
         msg+=" Yarın ise "+tdesc+", "+tmin+" ile "+tmax+" derece arası bekleniyor";
-        if (rain!=null && rain>=40) msg+=", yağış ihtimali yüzde "+rain+", şemsiye almanızı öneririm";
+        if(rain!=null&&rain>=40) msg+=", yağış ihtimali yüzde "+rain+", şemsiye almanızı öneririm";
         msg+=".";
       }
-      if (temp<=5) msg+=" Hava soğuk, kalın giyinin efendim.";
-      else if (temp>=30) msg+=" Hava sıcak, bol su için ve güneşten korunun efendim.";
-      if ([61,63,65,80,81,82,95,96,99].includes(c.weather_code)) msg+=" Dışarı çıkacaksanız şemsiye alın.";
+      if(temp<=5) msg+=" Hava soğuk, kalın giyinin efendim.";
+      else if(temp>=30) msg+=" Hava sıcak, bol su için efendim.";
+      if([61,63,65,80,81,82,95,96,99].includes(c.weather_code)) msg+=" Dışarı çıkacaksanız şemsiye alın.";
       speak(msg);
     }).catch(()=>speak("Hava durumu servisine ulaşırken sorun oluştu efendim."));
   }
 
-  /* ====================== NOTLAR ====================== */
+  /* ====================== Notlar / Hatırlatıcı / Hesap ====================== */
   function getNotes(){ try { return JSON.parse(localStorage.getItem("jarvis_notes")||"[]"); } catch { return []; } }
   function saveNotes(n){ localStorage.setItem("jarvis_notes", JSON.stringify(n)); }
-  function addNote(cmd){
-    let note=cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g,"").trim();
-    if (!note) { speak("Ne not almamı istersiniz efendim?"); return; }
-    const n=getNotes(); n.push({text:note, at:new Date().toLocaleString("tr-TR")}); saveNotes(n);
-    speak("Not alındı efendim: "+note);
-  }
-  function readNotes(){
-    const n=getNotes();
-    if (!n.length) { speak("Kayıtlı notunuz yok efendim."); return; }
-    speak(n.length+" notunuz var efendim. "+n.map((x,i)=>(i+1)+". "+x.text).join(". "));
-  }
-
-  /* ====================== HATIRLATICI ====================== */
+  function addNote(cmd){ let note=cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g,"").trim(); if(!note){ speak("Ne not almamı istersiniz efendim?"); return; } const n=getNotes(); n.push({text:note,at:new Date().toLocaleString("tr-TR")}); saveNotes(n); speak("Not alındı efendim: "+note); }
+  function readNotes(){ const n=getNotes(); if(!n.length){ speak("Kayıtlı notunuz yok efendim."); return; } speak(n.length+" notunuz var efendim. "+n.map((x,i)=>(i+1)+". "+x.text).join(". ")); }
   function setReminder(cmd){
     const m=cmd.match(/(\d+)\s*(saniye|dakika|dk|saat)/);
-    if (!m) { speak("Ne kadar süre sonra hatırlatayım efendim? Örneğin '10 dakika sonra hatırlat'."); return; }
+    if(!m){ speak("Ne kadar süre sonra hatırlatayım efendim?"); return; }
     let amount=parseInt(m[1],10); const unit=m[2]; let ms=amount*1000;
-    if (unit.startsWith("dak")||unit==="dk") ms=amount*60000; else if (unit==="saat") ms=amount*3600000;
+    if(unit.startsWith("dak")||unit==="dk") ms=amount*60000; else if(unit==="saat") ms=amount*3600000;
     let what=cmd.split(/hatırlat|alarm|zamanlayıcı/)[0].replace(/(\d+)\s*(saniye|dakika|dk|saat)\s*(sonra)?/,"").trim()||"hatırlatma";
     speak(amount+" "+unit+" sonra hatırlatacağım efendim: "+what);
     setTimeout(()=>{ speak("Hatırlatma zamanı geldi efendim: "+what); try{ navigator.vibrate&&navigator.vibrate([200,100,200]); }catch(_){} }, ms);
   }
-
-  /* ====================== HESAPLAMA ====================== */
   function doMath(cmd){
-    let expr=cmd.replace(/hesapla|kaç eder|kaç yapar|kaçtır/g,"")
-      .replace(/artı|topla|toplam/g,"+").replace(/eksi|çıkar/g,"-")
-      .replace(/çarpı|kere|çarp/g,"*").replace(/bölü|böl/g,"/")
-      .replace(/[^0-9+\-*/.,()\s]/g,"").replace(/,/g,".").trim();
-    if (!expr||!/[0-9]/.test(expr)) { speak("Hangi işlemi hesaplamamı istersiniz efendim?"); return; }
-    try {
-      if (!/^[0-9+\-*/.()\s]+$/.test(expr)) throw 0;
-      const res=Function('"use strict";return ('+expr+')')();
-      if (typeof res!=="number"||!isFinite(res)) throw 0;
-      speak("Sonuç "+(Math.round(res*1000)/1000)+" efendim.");
-    } catch { speak("Bu işlemi hesaplayamadım efendim, tekrar dener misiniz?"); }
+    let expr=cmd.replace(/hesapla|kaç eder|kaç yapar|kaçtır/g,"").replace(/artı|topla|toplam/g,"+").replace(/eksi|çıkar/g,"-").replace(/çarpı|kere|çarp/g,"*").replace(/bölü|böl/g,"/").replace(/[^0-9+\-*/.,()\s]/g,"").replace(/,/g,".").trim();
+    if(!expr||!/[0-9]/.test(expr)){ speak("Hangi işlemi hesaplamamı istersiniz efendim?"); return; }
+    try { if(!/^[0-9+\-*/.()\s]+$/.test(expr)) throw 0; const res=Function('"use strict";return ('+expr+')')(); if(typeof res!=="number"||!isFinite(res)) throw 0; speak("Sonuç "+(Math.round(res*1000)/1000)+" efendim."); }
+    catch { speak("Bu işlemi hesaplayamadım efendim."); }
   }
 
-  /* ====================== TTS (Safari/iOS uyumlu) ====================== */
-  function pickVoice(){
-    const v = synth ? synth.getVoices() : [];
-    return v.find(x=>x.lang===LANG) || v.find(x=>x.lang&&x.lang.toLowerCase().startsWith("tr")) || v[0] || null;
-  }
-  // iOS, sesi yalnızca bir kullanıcı hareketinden sonra çalar; ilk dokunuşta "uyandır"
-  function primeTTS(){
-    if (ttsPrimed || !synth) return;
-    try { const u=new SpeechSynthesisUtterance(""); u.volume=0; synth.speak(u); ttsPrimed=true; } catch(_){}
-  }
+  /* ====================== TTS ====================== */
+  function pickVoice(){ const v=synth?synth.getVoices():[]; return v.find(x=>x.lang===LANG)||v.find(x=>x.lang&&x.lang.toLowerCase().startsWith("tr"))||v[0]||null; }
+  function primeTTS(){ if(ttsPrimed||!synth) return; try{ const u=new SpeechSynthesisUtterance(""); u.volume=0; synth.speak(u); ttsPrimed=true; }catch(_){} }
   function speak(text){
-    addLog("jarvis","Jarvis",text);
-    if (muted || !synth) { restartRecognition(); return; }
+    if(muted||!synth){ restartRecognition(); return; }
     synth.cancel();
     const u=new SpeechSynthesisUtterance(text);
     u.lang=LANG; u.rate=1.02; u.pitch=0.95;
-    const v=pickVoice(); if (v) u.voice=v;
+    const v=pickVoice(); if(v) u.voice=v;
     u.onstart=()=>{ isSpeaking=true; body.classList.add("speaking"); };
     u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); restartRecognition(); };
     u.onerror=()=>{ isSpeaking=false; body.classList.remove("speaking"); restartRecognition(); };
-    // konuşurken kendi sesini duymasın diye dinlemeyi kısa süre durdur (özellikle iOS)
-    if ((isIOS||isSafari) && recognition) { try { recognition.stop(); } catch(_){} }
+    if((isIOS||isSafari)&&recognition){ try{ recognition.stop(); }catch(_){} }
     synth.speak(u);
   }
 
@@ -478,70 +428,44 @@
   function nowTime(){ return new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); }
   function nowDate(){ return new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
   function greeting(){ const h=new Date().getHours(); const p=h<6?"İyi geceler":h<12?"Günaydın":h<18?"İyi günler":"İyi akşamlar"; return p+" efendim. Size nasıl yardımcı olabilirim?"; }
-  function randomJoke(){ const j=["Bir yapay zeka neden denize gitmiş? Bulutlardan sıkıldığı için efendim.","Bilgisayar neden üşümüş? Pencerelerini açık bırakmış efendim.","Robot neden kahve içmez? Kısa devre yapmaktan korkar efendim.","İki algoritma karşılaşmış, biri demiş ki: senden daha iyi sıralanırım."]; return j[Math.floor(Math.random()*j.length)]; }
-  function listSkills(){ speak("Şunları yapabilirim efendim: konum ve şehir bazlı hava durumu, saat ve tarih, not alma ve okuma, hatırlatıcı kurma, matematik işlemleri, sağlık ve genel kültür bilgileri. Ayrıca bilmediğim bir şey sorduğunuzda Wikipedia'dan araştırıp size özetleyebilirim."); }
-  function setStatus(t,k){ statusEl.textContent=t; statusEl.className="status"+(k?" "+k:""); }
-  function addLog(who,label,text){ const d=document.createElement("div"); d.className="msg "+who; d.innerHTML="<b>"+label+":</b> "+escapeHtml(text); logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; }
-  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+  function randomJoke(){ const j=["Bir yapay zeka neden denize gitmiş? Bulutlardan sıkıldığı için efendim.","Bilgisayar neden üşümüş? Pencerelerini açık bırakmış efendim.","Robot neden kahve içmez? Kısa devre yapmaktan korkar efendim."]; return j[Math.floor(Math.random()*j.length)]; }
+  function listSkills(){ speak("Hava durumu, saat ve tarih, not alma, hatırlatıcı, matematik ve genel bilgi konularında yardımcı olabilirim efendim. Bilmediğimi Wikipedia'dan araştırırım."); }
 
-  /* ====================== PROAKTİF KONTROL ====================== */
+  /* ====================== Proaktif kontrol ====================== */
   function startProactive(){
     clearInterval(proactiveTimer);
     proactiveTimer=setInterval(()=>{
-      if (!listening||muted) return;
-      if (Date.now()-lastInteraction > 4*60*1000) {
-        const p=["Efendim, bir şeye ihtiyacınız var mı?","Buradayım efendim, yardımcı olabileceğim bir şey var mı?","Her şey yolunda mı efendim? İhtiyaç olursa beni 'Jarvis' diyerek çağırın.","Bir mola verip su içmenin tam zamanı olabilir efendim."];
-        speak(p[Math.floor(Math.random()*p.length)]); lastInteraction=Date.now();
-      }
+      if(!listening||muted) return;
+      if(Date.now()-lastInteraction>4*60*1000){ const p=["Efendim, bir şeye ihtiyacınız var mı?","Buradayım efendim, yardımcı olabileceğim bir şey var mı?","Her şey yolunda mı efendim?"]; speak(p[Math.floor(Math.random()*p.length)]); lastInteraction=Date.now(); }
     }, 60*1000);
   }
 
-  /* ====================== Başlat / Durdur ====================== */
+  /* ====================== Başlat / Durdur (sembole dokun) ====================== */
   function startListening(){
     primeTTS();
-    if (listening || !SpeechRecognition) { if (!SpeechRecognition) speak("Sesli tanıma bu tarayıcıda yok efendim, yazı kutusunu kullanabilirsiniz."); return; }
+    if(listening) return;
+    if(!SpeechRecognition){ body.classList.add("on-state"); jarvis.classList.add("on"); speak("Sesli tanıma bu tarayıcıda yok efendim, fakat sesli yanıt verebilirim."); return; }
     listening=true; recognition=buildRecognition();
-    try { recognition.start(); } catch(_){}
-    startBtn.disabled=true; stopBtn.disabled=false; lastInteraction=Date.now(); startProactive();
+    try{ recognition.start(); }catch(_){}
+    body.classList.add("on-state"); jarvis.classList.add("on");
+    jarvis.setAttribute("aria-label","Jarvis dinliyor — durdurmak için dokun");
+    lastInteraction=Date.now(); startProactive();
     speak("Sistemler çevrimiçi efendim. Sizi dinliyorum.");
   }
   function stopListening(){
     listening=false; awake=false; clearTimeout(awakeTimer); clearInterval(proactiveTimer);
-    if (recognition){ try{ recognition.stop(); }catch(_){} }
-    body.classList.remove("listening","speaking","thinking");
-    startBtn.disabled=false; stopBtn.disabled=true; setStatus("Beklemede"); liveText.textContent="Dinleme durduruldu.";
+    if(recognition){ try{ recognition.stop(); }catch(_){} }
+    if(synth) synth.cancel();
+    body.classList.remove("on-state","speaking","thinking"); jarvis.classList.remove("on");
+    jarvis.setAttribute("aria-label","Jarvis — başlatmak için dokun");
   }
+  function toggle(){ listening ? stopListening() : startListening(); }
 
-  startBtn.addEventListener("click", startListening);
-  stopBtn.addEventListener("click", stopListening);
-  muteBtn.addEventListener("click", ()=>{ muted=!muted; muteBtn.textContent=muted?"🔊 Sesi Aç":"🔇 Sesi Kapat"; if (muted&&synth) synth.cancel(); });
+  jarvis.addEventListener("click", toggle);
+  jarvis.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
+  muteBtn.addEventListener("click", e=>{ e.stopPropagation(); muted=!muted; muteBtn.textContent=muted?"🔇":"🔊"; if(muted&&synth) synth.cancel(); });
 
-  /* ====================== Yazılı giriş ====================== */
-  function submitText(){
-    const v=textInput.value.trim();
-    if (!v) return;
-    primeTTS();
-    textInput.value="";
-    addLog("you","Sen",v);
-    awake=true; resetAwakeTimer();
-    route(v.toLocaleLowerCase("tr-TR").replace(WAKE_WORD,"").trim());
-  }
-  sendBtn.addEventListener("click", submitText);
-  textInput.addEventListener("keydown", e => { if (e.key==="Enter") submitText(); });
-
-  /* ====================== Hızlı komut çipleri ====================== */
-  const QUICK=[
-    ["☀️ Hava durumu","hava nasıl"],["🕐 Saat kaç","saat kaç"],["📅 Bugün ne","bugün günlerden ne"],
-    ["🧠 Yeteneklerin","neler yapabilirsin"],["🌌 Kara delik nedir","kara delik nedir"],
-    ["⚡ Işık hızı","ışık hızı nedir"],["📝 Notlarım","notlarım"],["😄 Şaka yap","şaka yap"]
-  ];
-  QUICK.forEach(([label,cmd])=>{
-    const b=document.createElement("div"); b.className="chip"; b.textContent=label;
-    b.addEventListener("click",()=>{ primeTTS(); addLog("you","Sen",label); awake=true; resetAwakeTimer(); route(cmd); });
-    chipsEl.appendChild(b);
-  });
-
-  if (synth) synth.onvoiceschanged = pickVoice;
+  if(synth) synth.onvoiceschanged = pickVoice;
 })();
 </script>
 </body>
