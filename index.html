@@ -172,6 +172,21 @@
   }
   .mute:active { transform: scale(0.9); }
 
+  /* üst ses dalgası (sesimi ifade eder) */
+  .voicebar {
+    position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 0; right: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 4; pointer-events: none;
+  }
+  #wave { width: min(540px, 88vw); height: 64px; display: block; }
+  .vcap {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.72rem; letter-spacing: 0.06rem; color: #b9a3e6;
+    display: flex; align-items: center; gap: 8px; opacity: 0.85; text-align: center; padding: 0 14px;
+  }
+  .vcap .rec { width: 8px; height: 8px; border-radius: 50%; background: #5a4a78; flex: 0 0 auto; }
+  body.on-state .vcap .rec { background: #ff5a6e; box-shadow: 0 0 10px #ff5a6e; animation: recblink 1.1s ease-in-out infinite; }
+  @keyframes recblink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
   /* aşama / ilerleme göstergesi (alt mor alan) */
   .stage {
     position: fixed; left: 0; right: 0;
@@ -196,6 +211,12 @@
 </style>
 </head>
 <body>
+  <!-- Üst ses dalgası: gerçek mikrofon sesini gösterir -->
+  <div class="voicebar" id="voicebar">
+    <canvas id="wave"></canvas>
+    <div class="vcap" id="vcap"><span class="rec" id="rec"></span><span id="vcapText">Mikrofon kapalı</span></div>
+  </div>
+
   <div class="jarvis" id="jarvis" role="button" aria-label="Jarvis — başlatmak için dokun" tabindex="0">
     <canvas id="net"></canvas>
   </div>
@@ -248,6 +269,8 @@
   const muteBtn = document.getElementById("muteBtn");
   const stageEl = document.getElementById("stage");
   const stageText = document.getElementById("stageText");
+  const waveCanvas = document.getElementById("wave");
+  const vcapText = document.getElementById("vcapText");
 
   let recognition=null, listening=false, awake=false, muted=false;
   let awakeTimer=null, proactiveTimer=null, lastInteraction=Date.now();
@@ -360,24 +383,49 @@
   }
   function userName(){ return localStorage.getItem("jarvis_name") || "Murathan"; }
 
-  /* ====================== Wikipedia beyni ====================== */
+  /* ====================== AÇIK BİLGİ BEYNİ (sınırsız) ======================
+     Veritabanı sadece hızlı/çevrimdışı yanıtlar içindir; gerisini canlı
+     Wikipedia'dan, çok aşamalı arama ile getirir. Bir insan gibi neredeyse
+     her konuda cevap verebilir. tr başarısız olursa İngilizce'ye düşer. */
   function cleanQuery(cmd) {
-    return cmd.replace(/(nedir|kimdir|kim|ne demek|nerededir|nedendir|anlat|hakkında bilgi ver|hakkında|söyle|açıkla|bana)\??/g," ").replace(/\s+/g," ").trim();
+    return cmd.replace(/\b(nedir|kimdir|kim|ne demek|ne demektir|nerededir|nerede|nedendir|neden|nasıl|anlat|anlatır mısın|hakkında bilgi ver|hakkında|bilgi ver|söyle|söyler misin|açıkla|açıklar mısın|bana|kısaca|biraz)\b/gi," ")
+              .replace(/[?¿!.]/g," ").replace(/\s+/g," ").trim();
+  }
+  function wikiSummary(lang, title){
+    return fetch("https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title))
+      .then(r=> r.ok ? r.json() : null);
+  }
+  function wikiSearchTitle(lang, q){
+    // 1) hızlı başlık tamamlama  2) tam metin arama
+    return fetch("https://"+lang+".wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search="+encodeURIComponent(q))
+      .then(r=>r.json()).then(d=> (d && d[1] && d[1][0]) || null)
+      .catch(()=>null)
+      .then(t=> t || fetch("https://"+lang+".wikipedia.org/w/rest.php/v1/search/page?limit=1&q="+encodeURIComponent(q))
+        .then(r=>r.json()).then(d=> (d && d.pages && d.pages[0] && d.pages[0].title) || null).catch(()=>null));
+  }
+  function tryLang(lang, q){
+    return wikiSearchTitle(lang, q).then(title=>{
+      if (!title) return null;
+      return wikiSummary(lang, title).then(s=>{
+        if (s && s.extract && s.type !== "disambiguation" && !/olabilir:|may refer to/i.test(s.extract)) return s.extract;
+        return null;
+      });
+    });
   }
   function askWikipedia(cmd) {
-    const q = cleanQuery(cmd);
+    let q = cleanQuery(cmd);
     if (!q || q.length < 2) { speak("Bunu tam anlayamadım Murathan, biraz daha açar mısın?"); return; }
     body.classList.add("thinking"); setStatus("Araştırıyorum","busy");
-    const searchUrl = "https://tr.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search="+encodeURIComponent(q);
-    fetch(searchUrl).then(r=>r.json()).then(data=>{
-      const title = data && data[1] && data[1][0];
-      if (!title) throw new Error("notfound");
-      return fetch("https://tr.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title));
-    }).then(r=>r.json()).then(s=>{
-      body.classList.remove("thinking");
-      if (s && s.extract && !/olabilir:/.test(s.extract)) speak(firstSentences(s.extract,3));
-      else speak("Bu konuda net bir bilgi bulamadım Murathan, farklı kelimelerle dener misin?");
-    }).catch(()=>{ body.classList.remove("thinking"); speak("Bu konuda bilgiye ulaşamadım Murathan, bağlantını kontrol et."); });
+    const done = (txt)=>{ body.classList.remove("thinking"); speak(txt); };
+    // Türkçe dene -> olmazsa kısalt -> olmazsa İngilizce dene
+    tryLang("tr", q)
+      .then(t=> t || (q.split(" ").length>2 ? tryLang("tr", q.split(" ").slice(0,2).join(" ")) : null))
+      .then(t=> t || tryLang("en", q))
+      .then(t=>{
+        if (t) done(firstSentences(t,3));
+        else done("Bu konuda net bir bilgi bulamadım Murathan; sorunu biraz farklı sorarsan tekrar araştırırım.");
+      })
+      .catch(()=> done("Şu an bilgiye ulaşamadım Murathan, internet bağlantını kontrol et."));
   }
   function firstSentences(text,n){ const p=text.replace(/\s+/g," ").match(/[^.!?]+[.!?]+/g); if(!p) return text; let o=p.slice(0,n).join(" ").trim(); if(o.length>360) o=o.slice(0,357)+"..."; return o; }
 
@@ -553,6 +601,74 @@
     }, 60*1000);
   }
 
+  /* ====================== SES DALGASI (gerçek mikrofon) ======================
+     Web Audio ile mikrofon seviyesini okuyup üstteki çubukları canlandırır.
+     Fotodaki gibi: ortadakiler renkli ve daha hareketli, sesini ifade eder. */
+  let audioCtx=null, analyser=null, micStream=null, waveRAF=null, freqData=null;
+  function startMic(){
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { drawWave(); return; }
+    navigator.mediaDevices.getUserMedia({ audio:true }).then(stream=>{
+      micStream = stream;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AC();
+      const src = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 128; analyser.smoothingTimeConstant = 0.78;
+      src.connect(analyser);
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+      if (vcapText) vcapText.textContent = "Konuş Murathan, gerçek zamanlı dinliyorum…";
+    }).catch(()=>{ if(vcapText) vcapText.textContent="Mikrofon izni gerekli"; });
+    if (!waveRAF) drawWave();
+  }
+  function stopMic(){
+    try { micStream && micStream.getTracks().forEach(t=>t.stop()); } catch(_){}
+    try { audioCtx && audioCtx.close(); } catch(_){}
+    micStream=null; audioCtx=null; analyser=null; freqData=null;
+    if (vcapText) vcapText.textContent="Mikrofon kapalı";
+  }
+  function drawWave(){
+    if (!waveCanvas) return;
+    const ctx = waveCanvas.getContext("2d");
+    const DPR = Math.min(window.devicePixelRatio||1, 2);
+    const rect = waveCanvas.getBoundingClientRect();
+    const W = waveCanvas.width = Math.max(2, rect.width*DPR);
+    const H = waveCanvas.height = Math.max(2, rect.height*DPR);
+    const BARS = 28, gap = W/BARS, cy = H/2;
+    let t = 0;
+    function loop(){
+      t += 0.05;
+      ctx.clearRect(0,0,W,H);
+      // konuşuyorsa altın, dinliyorsa mor, beklemede soluk
+      const cls = document.body.classList;
+      const accent = cls.contains("speaking") ? [255,209,102] : cls.contains("thinking") ? [180,139,255] : [168,120,255];
+      if (analyser && freqData) analyser.getByteFrequencyData(freqData);
+      for (let i=0;i<BARS;i++){
+        const mid = 1 - Math.abs(i-(BARS-1)/2)/((BARS-1)/2);   // 0 kenar .. 1 orta
+        let amp;
+        if (analyser && freqData){
+          const idx = Math.floor((i/BARS)*freqData.length*0.7);
+          amp = (freqData[idx]/255) * (0.45+0.55*mid);
+        } else {
+          amp = (0.06 + 0.05*Math.sin(t+i*0.5)) * (0.5+mid); // boştayken hafif nefes
+        }
+        const h = Math.max(H*0.06, amp*H*0.92);
+        const x = i*gap + gap*0.5;
+        const r = Math.min(gap*0.34, DPR*3);
+        const a = 0.35 + 0.6*mid + amp*0.3;
+        ctx.fillStyle = "rgba("+accent[0]+","+accent[1]+","+accent[2]+","+Math.min(1,a).toFixed(3)+")";
+        roundBar(ctx, x-r, cy-h/2, r*2, h, r);
+      }
+      waveRAF = requestAnimationFrame(loop);
+    }
+    if (waveRAF) cancelAnimationFrame(waveRAF);
+    loop();
+  }
+  function roundBar(ctx,x,y,w,h,r){ r=Math.min(r,w/2,h/2); ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fill(); }
+  window.addEventListener("resize", ()=>{ if(waveRAF){ cancelAnimationFrame(waveRAF); waveRAF=null; drawWave(); } });
+  drawWave(); // başta boş/nefes modunda çalışsın
+
   /* ====================== Başlat / Durdur (sembole dokun) ====================== */
   function startListening(){
     primeTTS();
@@ -560,6 +676,7 @@
     if(!SpeechRecognition){ body.classList.add("on-state"); jarvis.classList.add("on"); speak("Sesli tanıma bu tarayıcıda yok Murathan, fakat sesli yanıt verebilirim."); return; }
     listening=true; recognition=buildRecognition();
     try{ recognition.start(); }catch(_){}
+    startMic();
     body.classList.add("on-state"); jarvis.classList.add("on");
     jarvis.setAttribute("aria-label","Jarvis dinliyor — durdurmak için dokun");
     lastInteraction=Date.now(); startProactive();
@@ -580,6 +697,7 @@
   function stopListening(){
     listening=false; awake=false; clearTimeout(awakeTimer); clearInterval(proactiveTimer);
     if(recognition){ try{ recognition.stop(); }catch(_){} }
+    stopMic();
     if(synth) synth.cancel();
     body.classList.remove("on-state","speaking","thinking"); jarvis.classList.remove("on");
     jarvis.setAttribute("aria-label","Jarvis — başlatmak için dokun");
@@ -707,9 +825,25 @@
   resize(); requestAnimationFrame(frame);
 })();
 
-/* Service worker: çevrimdışı çalışma + kurulabilir uygulama */
+/* Service worker: çevrimdışı çalışma + kurulabilir uygulama
+   Yeni sürüm bulununca otomatik devralıp sayfayı bir kez yeniler -> güncel kalır */
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", ()=> navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  let refreshed = false;
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+    if (refreshed) return; refreshed = true; window.location.reload();
+  });
+  window.addEventListener("load", ()=> {
+    navigator.serviceWorker.register("sw.js").then(reg=>{
+      reg.addEventListener("updatefound", ()=>{
+        const nw = reg.installing;
+        if (nw) nw.addEventListener("statechange", ()=>{
+          if (nw.state === "installed" && navigator.serviceWorker.controller) nw.postMessage("skipWaiting");
+        });
+      });
+      // periyodik güncelleme kontrolü
+      setInterval(()=> reg.update().catch(()=>{}), 60*1000);
+    }).catch(()=>{});
+  });
 }
 </script>
 </body>
