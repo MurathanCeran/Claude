@@ -202,8 +202,8 @@
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isSafari = /^((?!chrome|android|crios|fxios|edg).)*safari/i.test(ua);
 
-  /* ====================== SES TONU (ofis erkeği / butler) ====================== */
-  const VOICE = { rate: 0.96, pitch: 0.72 };   // derin, ağırbaşlı erkek tonu
+  /* ====================== SES TONU (dost canlısı, kalın erkek) ====================== */
+  const VOICE = { rate: 1.0, pitch: 0.85 };    // sıcak, kalın ama robotik olmayan ton
   // erkek/kadın ipucu kelimeleri (tarayıcıya göre ses isimleri değişir)
   const MALE_HINTS   = /(male|erkek|man|mehmet|tolga|baris|barış|emir|deniz|cem|kerem|google türkçe|murat|daniel|arthur|george|rishi)/i;
   const FEMALE_HINTS = /(female|kadın|woman|yelda|filiz|seda|aylin|elif|zeynep|samantha|karen|tessa)/i;
@@ -244,73 +244,104 @@
      Anahtarlar eşleşme anında normalize edilir; Türkçe karakter sorun olmaz. */
   const KNOWLEDGE = [
     // --- Sağlık & günlük yaşam ---
-    { keys:["su iç","ne kadar su","günde kaç bardak su"], a:"Günde yaklaşık 2 ila 2,5 litre, yani 8-10 bardak su önerilir efendim." },
-    { keys:["uyku","kaç saat uyu","ne kadar uyumalı"], a:"Yetişkinler için 7 ila 9 saat uyku idealdir efendim. Her gün aynı saatte yatıp kalkmak kaliteyi artırır." },
-    { keys:["mola","ekran molası","20 20 20","gözlerim yoruldu"], a:"20-20-20 kuralı efendim: her 20 dakikada bir, 20 saniye, 20 metre uzağa bakın." },
-    { keys:["stres","gergin","sakinleş","nefes egzersizi"], a:"4-7-8 nefes tekniği: 4 saniye alın, 7 saniye tutun, 8 saniyede verin efendim." },
-    { keys:["pomodoro","odaklan","verimli çalış","konsantrasyon"], a:"Pomodoro: 25 dakika çalışma, 5 dakika mola. Dört turdan sonra uzun mola efendim." },
-    { keys:["spor","egzersiz","ne kadar hareket"], a:"Haftada en az 150 dakika orta tempolu hareket önerilir efendim." },
-    { keys:["sağlıklı beslen","ne yemeli","beslenme","diyet"], a:"Tabağınızın yarısını sebze-meyveye ayırın, işlenmiş gıdayı azaltın, bol su için efendim." },
-    { keys:["acil","112","acil numara"], a:"Türkiye'de tüm acil durumlar için 112'yi arayın efendim; sağlık, polis, itfaiye ve jandarma tek numarada." },
-    { keys:["ilk yardım","kanama"], a:"Acil durumda önce 112'yi arayın efendim, ciddi kanamada yaraya temiz bezle baskı uygulayın." },
-    { keys:["kalori","günlük kalori"], a:"Ortalama bir yetişkin günde kadınlarda yaklaşık 2000, erkeklerde 2500 kalori tüketir efendim." },
-    { keys:["normal nabız","kalp atışı"], a:"Dinlenme halinde normal nabız dakikada 60 ila 100 atımdır efendim." },
-    { keys:["normal vücut sıcaklığı","ateş kaç derece"], a:"Normal vücut sıcaklığı yaklaşık 36,5 ila 37 derecedir; 38 derece ve üzeri ateş sayılır efendim." },
+    { keys:["su iç","ne kadar su","günde kaç bardak su"], a:"Günde yaklaşık 2 ila 2,5 litre, yani 8-10 bardak su önerilir Murathan." },
+    { keys:["uyku","kaç saat uyu","ne kadar uyumalı"], a:"Yetişkinler için 7 ila 9 saat uyku idealdir Murathan. Her gün aynı saatte yatıp kalkmak kaliteyi artırır." },
+    { keys:["mola","ekran molası","20 20 20","gözlerim yoruldu"], a:"20-20-20 kuralı Murathan: her 20 dakikada bir, 20 saniye, 20 metre uzağa bakın." },
+    { keys:["stres","gergin","sakinleş","nefes egzersizi"], a:"4-7-8 nefes tekniği: 4 saniye alın, 7 saniye tutun, 8 saniyede verin Murathan." },
+    { keys:["pomodoro","odaklan","verimli çalış","konsantrasyon"], a:"Pomodoro: 25 dakika çalışma, 5 dakika mola. Dört turdan sonra uzun mola Murathan." },
+    { keys:["spor","egzersiz","ne kadar hareket"], a:"Haftada en az 150 dakika orta tempolu hareket önerilir Murathan." },
+    { keys:["sağlıklı beslen","ne yemeli","beslenme","diyet"], a:"Tabağınızın yarısını sebze-meyveye ayırın, işlenmiş gıdayı azaltın, bol su için Murathan." },
+    { keys:["acil","112","acil numara"], a:"Türkiye'de tüm acil durumlar için 112'yi arayın Murathan; sağlık, polis, itfaiye ve jandarma tek numarada." },
+    { keys:["ilk yardım","kanama"], a:"Acil durumda önce 112'yi arayın Murathan, ciddi kanamada yaraya temiz bezle baskı uygulayın." },
+    { keys:["kalori","günlük kalori"], a:"Ortalama bir yetişkin günde kadınlarda yaklaşık 2000, erkeklerde 2500 kalori tüketir Murathan." },
+    { keys:["normal nabız","kalp atışı"], a:"Dinlenme halinde normal nabız dakikada 60 ila 100 atımdır Murathan." },
+    { keys:["normal vücut sıcaklığı","ateş kaç derece"], a:"Normal vücut sıcaklığı yaklaşık 36,5 ila 37 derecedir; 38 derece ve üzeri ateş sayılır Murathan." },
 
     // --- Uzay & astronomi ---
-    { keys:["ışık hızı","ışığın hızı"], a:"Işık boşlukta saniyede yaklaşık 299 bin 792 kilometre hızla yol alır efendim." },
-    { keys:["ses hızı","sesin hızı"], a:"Ses, havada saniyede yaklaşık 343 metre hızla ilerler efendim." },
-    { keys:["evrenin yaşı","evren kaç yaşında","big bang"], a:"Evren, Büyük Patlama'dan bu yana yaklaşık 13,8 milyar yaşındadır efendim." },
-    { keys:["dünyanın yaşı","dünya kaç yaşında"], a:"Dünya yaklaşık 4,5 milyar yaşındadır efendim." },
-    { keys:["kaç gezegen"], a:"Güneş sistemimizde sekiz gezegen vardır efendim: Merkür, Venüs, Dünya, Mars, Jüpiter, Satürn, Uranüs ve Neptün." },
-    { keys:["en büyük gezegen"], a:"En büyük gezegen Jüpiter'dir efendim." },
-    { keys:["en küçük gezegen"], a:"En küçük gezegen Merkür'dür efendim." },
-    { keys:["kızıl gezegen","mars hangi"], a:"Kızıl Gezegen olarak bilinen Mars'tır efendim; rengini yüzeyindeki demir oksitten alır." },
-    { keys:["güneşe uzaklık","dünya güneş arası"], a:"Dünya ile Güneş arası ortalama 150 milyon kilometredir efendim." },
-    { keys:["aya uzaklık","ay ne kadar uzak"], a:"Dünya ile Ay arası ortalama 384 bin kilometredir efendim." },
-    { keys:["en yakın yıldız","dünyaya en yakın yıldız"], a:"Bize en yakın yıldız Güneş, ondan sonrası ise Proxima Centauri'dir efendim." },
-    { keys:["kara delik nedir"], a:"Kara delik, çekim kuvveti o kadar güçlü olan bir bölgedir ki ışık bile ondan kaçamaz efendim." },
+    { keys:["ışık hızı","ışığın hızı"], a:"Işık boşlukta saniyede yaklaşık 299 bin 792 kilometre hızla yol alır Murathan." },
+    { keys:["ses hızı","sesin hızı"], a:"Ses, havada saniyede yaklaşık 343 metre hızla ilerler Murathan." },
+    { keys:["evrenin yaşı","evren kaç yaşında","big bang"], a:"Evren, Büyük Patlama'dan bu yana yaklaşık 13,8 milyar yaşındadır Murathan." },
+    { keys:["dünyanın yaşı","dünya kaç yaşında"], a:"Dünya yaklaşık 4,5 milyar yaşındadır Murathan." },
+    { keys:["kaç gezegen"], a:"Güneş sistemimizde sekiz gezegen vardır Murathan: Merkür, Venüs, Dünya, Mars, Jüpiter, Satürn, Uranüs ve Neptün." },
+    { keys:["en büyük gezegen"], a:"En büyük gezegen Jüpiter'dir Murathan." },
+    { keys:["en küçük gezegen"], a:"En küçük gezegen Merkür'dür Murathan." },
+    { keys:["kızıl gezegen","mars hangi"], a:"Kızıl Gezegen olarak bilinen Mars'tır Murathan; rengini yüzeyindeki demir oksitten alır." },
+    { keys:["güneşe uzaklık","dünya güneş arası"], a:"Dünya ile Güneş arası ortalama 150 milyon kilometredir Murathan." },
+    { keys:["aya uzaklık","ay ne kadar uzak"], a:"Dünya ile Ay arası ortalama 384 bin kilometredir Murathan." },
+    { keys:["en yakın yıldız","dünyaya en yakın yıldız"], a:"Bize en yakın yıldız Güneş, ondan sonrası ise Proxima Centauri'dir Murathan." },
+    { keys:["kara delik nedir"], a:"Kara delik, çekim kuvveti o kadar güçlü olan bir bölgedir ki ışık bile ondan kaçamaz Murathan." },
 
     // --- Coğrafya ---
-    { keys:["kaç kıta"], a:"Dünyada yedi kıta vardır efendim: Asya, Afrika, Avrupa, Kuzey Amerika, Güney Amerika, Avustralya ve Antarktika." },
-    { keys:["en yüksek dağ","everest"], a:"Dünyanın en yüksek dağı 8 bin 849 metreyle Everest'tir efendim." },
-    { keys:["en uzun nehir"], a:"Dünyanın en uzun nehri Nil'dir; Amazon ise en büyük su hacmine sahiptir efendim." },
-    { keys:["en büyük okyanus"], a:"En büyük ve en derin okyanus Pasifik Okyanusu'dur efendim." },
-    { keys:["en büyük ülke","yüzölçümü en büyük"], a:"Yüzölçümü en büyük ülke Rusya'dır efendim." },
-    { keys:["en kalabalık ülke"], a:"En kalabalık ülke Hindistan'dır, onu Çin izler efendim." },
-    { keys:["türkiye başkenti","türkiyenin başkenti"], a:"Türkiye'nin başkenti Ankara'dır efendim." },
-    { keys:["türkiye nüfus"], a:"Türkiye'nin nüfusu yaklaşık 85 milyondur efendim." },
-    { keys:["türkiye kaç il","kaç il var"], a:"Türkiye'de 81 il bulunmaktadır efendim." },
-    { keys:["en yüksek dağ türkiye","ağrı dağı"], a:"Türkiye'nin en yüksek dağı 5 bin 137 metreyle Ağrı Dağı'dır efendim." },
-    { keys:["dünya nüfusu"], a:"Dünya nüfusu 8 milyarı aşmıştır efendim." },
+    { keys:["kaç kıta"], a:"Dünyada yedi kıta vardır Murathan: Asya, Afrika, Avrupa, Kuzey Amerika, Güney Amerika, Avustralya ve Antarktika." },
+    { keys:["en yüksek dağ","everest"], a:"Dünyanın en yüksek dağı 8 bin 849 metreyle Everest'tir Murathan." },
+    { keys:["en uzun nehir"], a:"Dünyanın en uzun nehri Nil'dir; Amazon ise en büyük su hacmine sahiptir Murathan." },
+    { keys:["en büyük okyanus"], a:"En büyük ve en derin okyanus Pasifik Okyanusu'dur Murathan." },
+    { keys:["en büyük ülke","yüzölçümü en büyük"], a:"Yüzölçümü en büyük ülke Rusya'dır Murathan." },
+    { keys:["en kalabalık ülke"], a:"En kalabalık ülke Hindistan'dır, onu Çin izler Murathan." },
+    { keys:["türkiye başkenti","türkiyenin başkenti"], a:"Türkiye'nin başkenti Ankara'dır Murathan." },
+    { keys:["türkiye nüfus"], a:"Türkiye'nin nüfusu yaklaşık 85 milyondur Murathan." },
+    { keys:["türkiye kaç il","kaç il var"], a:"Türkiye'de 81 il bulunmaktadır Murathan." },
+    { keys:["en yüksek dağ türkiye","ağrı dağı"], a:"Türkiye'nin en yüksek dağı 5 bin 137 metreyle Ağrı Dağı'dır Murathan." },
+    { keys:["dünya nüfusu"], a:"Dünya nüfusu 8 milyarı aşmıştır Murathan." },
 
     // --- Bilim & matematik ---
-    { keys:["su kaç derecede kaynar","kaynama"], a:"Saf su deniz seviyesinde 100 derecede kaynar, sıfır derecede donar efendim." },
-    { keys:["yerçekimi"], a:"Dünya'nın yerçekimi ivmesi yaklaşık 9,81 metre bölü saniye karedir efendim." },
-    { keys:["pi sayısı"], a:"Pi sayısı yaklaşık 3,14159'dur; bir çemberin çevresinin çapına oranıdır efendim." },
-    { keys:["dna nedir"], a:"DNA, canlıların genetik bilgisini taşıyan çift sarmal yapıda bir moleküldür efendim." },
-    { keys:["fotosentez nedir"], a:"Fotosentez, bitkilerin güneş ışığı, su ve karbondioksiti kullanarak besin ve oksijen üretmesidir efendim." },
-    { keys:["periyodik tablo kaç element","kaç element"], a:"Periyodik tabloda şu an 118 element bulunmaktadır efendim." },
-    { keys:["kalbin görevi","kalp ne işe yarar"], a:"Kalp, kanı tüm vücuda pompalayarak hücrelere oksijen ve besin taşıyan bir kas organıdır efendim." },
-    { keys:["kemik sayısı","kaç kemik"], a:"Yetişkin bir insan vücudunda 206 kemik bulunur efendim." },
+    { keys:["su kaç derecede kaynar","kaynama"], a:"Saf su deniz seviyesinde 100 derecede kaynar, sıfır derecede donar Murathan." },
+    { keys:["yerçekimi"], a:"Dünya'nın yerçekimi ivmesi yaklaşık 9,81 metre bölü saniye karedir Murathan." },
+    { keys:["pi sayısı"], a:"Pi sayısı yaklaşık 3,14159'dur; bir çemberin çevresinin çapına oranıdır Murathan." },
+    { keys:["dna nedir"], a:"DNA, canlıların genetik bilgisini taşıyan çift sarmal yapıda bir moleküldür Murathan." },
+    { keys:["fotosentez nedir"], a:"Fotosentez, bitkilerin güneş ışığı, su ve karbondioksiti kullanarak besin ve oksijen üretmesidir Murathan." },
+    { keys:["periyodik tablo kaç element","kaç element"], a:"Periyodik tabloda şu an 118 element bulunmaktadır Murathan." },
+    { keys:["kalbin görevi","kalp ne işe yarar"], a:"Kalp, kanı tüm vücuda pompalayarak hücrelere oksijen ve besin taşıyan bir kas organıdır Murathan." },
+    { keys:["kemik sayısı","kaç kemik"], a:"Yetişkin bir insan vücudunda 206 kemik bulunur Murathan." },
 
     // --- Teknoloji ---
-    { keys:["yapay zeka nedir"], a:"Yapay zeka, makinelerin öğrenme, akıl yürütme ve problem çözme gibi insana özgü yetenekleri taklit etmesidir efendim." },
-    { keys:["internet nedir"], a:"İnternet, dünya genelindeki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır efendim." },
-    { keys:["byte kaç bit","bayt nedir","bit nedir"], a:"Bir bayt sekiz bittir efendim; bilgisayarda en küçük adreslenebilir veri birimidir." },
-    { keys:["http nedir"], a:"HTTP, web tarayıcıları ile sunucular arasında veri aktarımını sağlayan iletişim protokolüdür efendim." },
+    { keys:["yapay zeka nedir"], a:"Yapay zeka, makinelerin öğrenme, akıl yürütme ve problem çözme gibi insana özgü yetenekleri taklit etmesidir Murathan." },
+    { keys:["internet nedir"], a:"İnternet, dünya genelindeki bilgisayar ağlarını birbirine bağlayan küresel bir ağdır Murathan." },
+    { keys:["byte kaç bit","bayt nedir","bit nedir"], a:"Bir bayt sekiz bittir Murathan; bilgisayarda en küçük adreslenebilir veri birimidir." },
+    { keys:["http nedir"], a:"HTTP, web tarayıcıları ile sunucular arasında veri aktarımını sağlayan iletişim protokolüdür Murathan." },
 
     // --- Tarih ---
-    { keys:["cumhuriyet ne zaman","cumhuriyet kaç","cumhuriyet ilan"], a:"Türkiye Cumhuriyeti 29 Ekim 1923'te ilan edilmiştir efendim." },
-    { keys:["atatürk kaç","atatürk ne zaman doğdu"], a:"Mustafa Kemal Atatürk 1881'de Selanik'te doğmuş, 10 Kasım 1938'de vefat etmiştir efendim." },
-    { keys:["birinci dünya savaşı ne zaman"], a:"Birinci Dünya Savaşı 1914 ile 1918 yılları arasında yaşanmıştır efendim." },
-    { keys:["ikinci dünya savaşı ne zaman"], a:"İkinci Dünya Savaşı 1939 ile 1945 yılları arasında yaşanmıştır efendim." },
+    { keys:["cumhuriyet ne zaman","cumhuriyet kaç","cumhuriyet ilan"], a:"Türkiye Cumhuriyeti 29 Ekim 1923'te ilan edilmiştir Murathan." },
+    { keys:["atatürk kaç","atatürk ne zaman doğdu"], a:"Mustafa Kemal Atatürk 1881'de Selanik'te doğmuş, 10 Kasım 1938'de vefat etmiştir Murathan." },
+    { keys:["birinci dünya savaşı ne zaman"], a:"Birinci Dünya Savaşı 1914 ile 1918 yılları arasında yaşanmıştır Murathan." },
+    { keys:["ikinci dünya savaşı ne zaman"], a:"İkinci Dünya Savaşı 1939 ile 1945 yılları arasında yaşanmıştır Murathan." },
 
     // --- Marvel / Iron Man (tema) ---
-    { keys:["iron man kim","demir adam"], a:"Iron Man, gerçek adıyla Tony Stark, dahi bir mucit ve milyarderdir efendim; benim de yaratıcımdır sayılır." },
-    { keys:["tony stark"], a:"Tony Stark, Stark Industries'in başındaki dahi mucittir efendim. Beni o tasarladı; sizin için elimden gelenin en iyisini yapacağım." },
-    { keys:["avengers","yenilmezler"], a:"Avengers, dünyayı korumak için bir araya gelen süper kahraman takımıdır efendim." },
-    { keys:["jarvis ne demek","jarvis açılımı"], a:"Jarvis, 'Just A Rather Very Intelligent System', yani 'Sadece Oldukça Zeki Bir Sistem' demektir efendim." },
+    { keys:["iron man kim","demir adam"], a:"Iron Man, gerçek adıyla Tony Stark, dahi bir mucit ve milyarderdir Murathan; benim de yaratıcımdır sayılır." },
+    { keys:["tony stark"], a:"Tony Stark, Stark Industries'in başındaki dahi mucittir Murathan. Beni o tasarladı; senin için elimden gelenin en iyisini yapacağım." },
+    { keys:["avengers","yenilmezler"], a:"Avengers, dünyayı korumak için bir araya gelen süper kahraman takımıdır Murathan." },
+    { keys:["jarvis ne demek","jarvis açılımı"], a:"Jarvis, 'Just A Rather Very Intelligent System', yani 'Sadece Oldukça Zeki Bir Sistem' demektir Murathan." },
+
+    // ===================== GÜNLÜK HAYAT =====================
+    { keys:["hafta sonu mu","bugün hafta sonu","tatil mi"], a:"Bunu sana hemen söyleyeyim: bugünün gününü 'bugün günlerden ne' diye sorarsan tam tarihi veririm; cumartesi ve pazar hafta sonudur Murathan." },
+    { keys:["kahvaltıda ne","ne kahvaltı","kahvaltı öner"], a:"Dengeli bir kahvaltı için yumurta, peynir, zeytin, domates, salatalık ve tam tahıllı ekmek iyi gider Murathan. Yanına bol su veya çay ekle." },
+    { keys:["akşam ne yesem","ne pişirsem","yemek öner","ne yemek"], a:"Pratik bir akşam yemeği için fırında tavuk ve sebze, makarna ya da mercimek çorbasıyla salata önerebilirim Murathan." },
+    { keys:["uykum gelmiyor","uyuyamıyorum","nasıl uyurum"], a:"Uyumadan bir saat önce ekranları bırak, odanı serin ve karanlık tut, derin nefes al Murathan. Kafein ve ağır yemekten kaçın." },
+    { keys:["yorgunum","enerjim yok","halsizim"], a:"Kısa bir yürüyüş, bir bardak su ve 10 dakikalık mola enerjini toparlar Murathan. Uzun süre aç kalmadığından da emin ol." },
+    { keys:["sabah erken kalk","erken uyan"], a:"Erken kalkmak için her gün aynı saatte yat, alarmı yataktan uzağa koy ve uyanınca perdeleri açıp gün ışığı al Murathan." },
+    { keys:["leke çıkar","leke nasıl","kıyafetteki leke"], a:"Çoğu lekeye hemen soğuk suyla müdahale et Murathan. Yağlı lekede bulaşık deterjanı, kan lekesinde soğuk su ve tuz işe yarar; sıcak su lekeyi sabitler, ondan kaçın." },
+    { keys:["kravat nasıl bağlanır","kravat bağla"], a:"Basit dört-in-hand düğümü için: geniş ucu ince ucun üzerinden geçir, arkadan dolandır, tekrar öne getir, boyun ilmiğinden yukarı sok ve oluşan halkadan aşağı indirip sıkıştır Murathan." },
+    { keys:["yumurta kaç dakika","yumurta haşla"], a:"Kaynar suda: rafadan için 6, kayısı kıvamı için 8, tam katı için 10 dakika haşla Murathan." },
+    { keys:["pirinç nasıl","pilav nasıl"], a:"Genel oran bir ölçü pirince bir buçuk ölçü sudur Murathan. Tuzu ekle, kaynayınca kısık ateşte suyunu çekene kadar pişir, sonra demlenmeye bırak." },
+    { keys:["nasıl tasarruf","para biriktir","tasarruf"], a:"50-30-20 kuralını dene Murathan: gelirinin yüzde ellisi ihtiyaçlara, otuzu isteklere, yirmisi birikim ve borç ödemeye. Otomatik birikim talimatı çok işe yarar." },
+    { keys:["mülakat ipucu","iş görüşmesi","mülakata nasıl"], a:"Mülakat öncesi şirketi araştır, somut örneklerle konuş, sorulara hazırlıklı git ve sonunda sen de soru sor Murathan. Güçlü ama dürüst ol." },
+    { keys:["nasıl sunum","sunum ipucu"], a:"İyi bir sunum için her slaytta tek fikir tut, az metin çok görsel kullan, prova yap ve göz teması kur Murathan. Güçlü bir açılış ve net bir kapanış belirle." },
+    { keys:["telefon şarjı","pil ömrü","batarya"], a:"Pil sağlığı için telefonu yüzde 20 ile 80 arasında tutmaya çalış, aşırı sıcaktan kaçın ve gece boyu şarjda bırakma Murathan." },
+    { keys:["nasıl motive","erteleme","prokrastinasyon"], a:"Ertelemeyi yenmek için işi iki dakikalık ilk adıma böl Murathan. Sadece başla; harekete geçmek motivasyonu getirir, tersi değil." },
+    { keys:["su baskını","elektrik kesintisi","deprem anında"], a:"Deprem anında çök-kapan-tutun yap, sağlam bir masanın yanına geç ve sarsıntı bitene kadar bekle Murathan. Asansör ve pencere kenarından uzak dur." },
+    { keys:["nasıl özür","özür dile"], a:"İçten bir özür için ne yaptığını net söyle, mazeret üretme, karşının duygusunu kabul et ve telafi için somut bir adım öner Murathan." },
+
+    // ===================== KOMPLİKE KONULAR =====================
+    { keys:["görelilik","izafiyet","einstein teorisi"], a:"Einstein'ın göreliliğine göre zaman ve uzay mutlak değildir Murathan. Hızın arttıkça zaman senin için yavaşlar ve kütle uzay-zamanı bükerek yerçekimini oluşturur." },
+    { keys:["kuantum","kuantum fiziği","süperpozisyon"], a:"Kuantum fiziği atom altı dünyayı anlatır Murathan. Parçacıklar ölçülene kadar aynı anda birden fazla durumda olabilir; buna süperpozisyon denir." },
+    { keys:["bileşik faiz","faiz nasıl işler"], a:"Bileşik faizde kazandığın faiz de faiz getirir Murathan. Yani paran katlanarak büyür; ne kadar erken başlarsan etki o kadar büyük olur." },
+    { keys:["enflasyon nedir"], a:"Enflasyon, fiyatların genel seviyesinin zamanla yükselmesidir Murathan. Aynı parayla daha az mal alırsın, yani paranın alım gücü düşer." },
+    { keys:["blockchain","blok zinciri","bitcoin nasıl"], a:"Blok zinciri, kayıtların birbirine bağlı bloklar halinde, dağıtık ve değiştirilemez biçimde tutulduğu bir defterdir Murathan. Bitcoin gibi kripto paralar bu teknolojiyle çalışır." },
+    { keys:["makine öğrenmesi","machine learning","nasıl öğrenir yapay zeka"], a:"Makine öğrenmesinde bir modele bol veri gösterilir ve model örneklerden örüntüleri kendi çıkarır Murathan. Açıkça programlanmadan tahmin yapmayı öğrenir." },
+    { keys:["nasıl çalışır internet","internet nasıl çalışır"], a:"İnternette verin küçük paketlere bölünür, IP adresleriyle adreslenip yönlendiriciler üzerinden hedefe ulaşır ve orada yeniden birleştirilir Murathan. Hepsi saniyenin altında olur." },
+    { keys:["dna nasıl çalışır","gen nedir"], a:"DNA'daki diziler genleri oluşturur Murathan. Genler, vücudun protein üretmek için kullandığı talimatlardır; bu proteinler de hücrelerinin nasıl çalışacağını belirler." },
+    { keys:["iklim değişikliği","küresel ısınma"], a:"İklim değişikliği, başta fosil yakıtlar olmak üzere insan kaynaklı sera gazlarının atmosferde ısı tutmasıyla gezegenin ısınmasıdır Murathan." },
+    { keys:["fotosentez nasıl"], a:"Bitkiler yapraklarındaki klorofil ile güneş ışığını yakalar, su ve karbondioksiti şekere ve oksijene dönüştürür Murathan. Böylece hem beslenir hem de soluduğumuz oksijeni üretir." },
   ];
   const WEATHER_CODES = {0:"açık",1:"az bulutlu",2:"parçalı bulutlu",3:"kapalı",45:"sisli",48:"kırağılı sis",
     51:"hafif çiseleme",53:"çiseleme",55:"yoğun çiseleme",56:"donan hafif çiseleme",57:"donan çiseleme",
@@ -377,7 +408,7 @@
         wake();
         // "jarvis"ten sonraki kısmı komut olarak al (bulanık eşleşmeleri de kes)
         const after = stripWake(lower);
-        if (after) route(after); else speak("Buyurun efendim.");
+        if (after) route(after); else speak("Buyurun Murathan.");
       }
       return;
     }
@@ -392,7 +423,7 @@
 
   function route(cmd) {
     resetAwakeTimer(); lastInteraction=Date.now();
-    if (!cmd) { speak("Sizi dinliyorum efendim."); return; }
+    if (!cmd) { speak("Seni dinliyorum Murathan."); return; }
     const n = norm(cmd);                              // normalize edilmiş komut
     const has=(...w)=>w.some(x=>n.includes(norm(x))); // esnek, Türkçe-karakter bağımsız
 
@@ -403,14 +434,17 @@
     // --- Konum ---
     if (has("neredeyim","konumum nerede","konumumu söyle","ben neredeyim","neresideyim")) { tellLocation(); return; }
 
+    // --- Ne giymeliyim? (hava + sıcaklığa göre öneri) ---
+    if (has("ne giy","ne giymeli","ne giyeyim","ne giysem","kıyafet öner","kıyafet ne","üzerime ne","mont giy","montumu","şemsiye almalı","şemsiye lazım","şemsiye gerek")) { recommendClothing(cmd); return; }
+
     // --- Hava durumu (konumsal & bölgesel) ---
     if (has("hava")) { handleWeather(cmd); return; }
 
-    if (has("saat kaç","saat ne","saati söyle")) { speak("Saat şu an "+nowTime()+" efendim."); return; }
-    if (has("günlerden ne","bugün ne","tarih","hangi gün","bugün hangi")) { speak("Bugün "+nowDate()+" efendim."); return; }
+    if (has("saat kaç","saat ne","saati söyle")) { speak("Saat şu an "+nowTime()+" Murathan."); return; }
+    if (has("günlerden ne","bugün ne","tarih","hangi gün","bugün hangi")) { speak("Bugün "+nowDate()+" Murathan."); return; }
     if (has("not al","not et","kaydet","sunu yaz","not düş")) { addNote(cmd); return; }
     if (has("notlarım","notları oku","notları söyle","notlarımı")) { readNotes(); return; }
-    if (has("notları sil","notları temizle","notlarımı sil")) { localStorage.removeItem("jarvis_notes"); speak("Tüm notlarınızı sildim efendim."); return; }
+    if (has("notları sil","notları temizle","notlarımı sil")) { localStorage.removeItem("jarvis_notes"); speak("Tüm notlarını sildim Murathan."); return; }
     if (has("hatırlat","alarm kur","zamanlayıcı","süre kur","dakika sonra","saat sonra")) { setReminder(cmd); return; }
     if (has("hesapla","kaç eder","kaç yapar","artı","eksi","kere","bölü","çarpı","topla","çıkar")) { doMath(cmd); return; }
 
@@ -419,12 +453,12 @@
     if (known) { speak(known.a); return; }
 
     if (has("merhaba","selam","hey","günaydın","iyi akşamlar","iyi günler")) { speak(greeting()); return; }
-    if (has("adın ne","kimsin","sen kimsin","sen nesin")) { speak("Ben Jarvis efendim, kişisel yapay zeka asistanınız."); return; }
+    if (has("adın ne","kimsin","sen kimsin","sen nesin")) { speak("Ben Jarvis Murathan, kişisel yapay zeka asistanın."); return; }
     if (has("neler yapabilir","yeteneklerin","ne yapabilirsin","yardım et","komutlar")) { listSkills(); return; }
-    if (has("nasılsın","naber","ne haber")) { speak("Tüm sistemlerim optimal çalışıyor efendim, teşekkür ederim."); return; }
-    if (has("teşekkür","sağol","sağ ol","eyvallah")) { speak("Rica ederim efendim, her zaman buradayım."); return; }
+    if (has("nasılsın","naber","ne haber")) { speak("Tüm sistemlerim optimal çalışıyor Murathan, teşekkür ederim."); return; }
+    if (has("teşekkür","sağol","sağ ol","eyvallah")) { speak("Rica ederim Murathan, her zaman buradayım."); return; }
     if (has("şaka","espri","güldür","komik bir şey")) { speak(randomJoke()); return; }
-    if (has("kapan","uyu","görüşürüz","kendini kapat","dinlemeyi durdur")) { speak("Uykuya geçiyorum efendim. Beni 'Jarvis' diyerek uyandırabilirsiniz."); awake=false; return; }
+    if (has("kapan","uyu","görüşürüz","kendini kapat","dinlemeyi durdur")) { speak("Uykuya geçiyorum Murathan. Beni 'Jarvis' diyerek uyandırabilirsin."); awake=false; return; }
 
     // Açık uçlu her şey -> Wikipedia (canlı medya)
     askWikipedia(cmd);
@@ -434,16 +468,16 @@
   function saveName(cmd){
     let name = cmd.replace(/adımı kaydet|ismimi kaydet|benim adım|benim ismim|bana de ki|olarak kaydet|adımla seslen|seslen|olsun/gi,"").trim();
     name = name.replace(/[^a-zçğıöşüA-ZÇĞİÖŞÜ\s]/g,"").trim().split(/\s+/)[0] || "";
-    if(!name){ speak("Adınızı tam anlayamadım efendim, 'benim adım ...' şeklinde söyler misiniz?"); return; }
+    if(!name){ speak("Adını tam anlayamadım Murathan, 'benim adım ...' şeklinde söyler misin?"); return; }
     name = name.charAt(0).toLocaleUpperCase("tr-TR")+name.slice(1);
     localStorage.setItem("jarvis_name", name);
-    speak("Memnun oldum "+name+" Bey. Adınızı hafızama kaydettim efendim.");
+    speak("Memnun oldum "+name+". Adını hafızama kaydettim.");
   }
   function tellName(){
     const name=localStorage.getItem("jarvis_name");
-    speak(name ? "Adınız "+name+" efendim." : "Henüz adınızı bilmiyorum efendim. 'Benim adım ...' diyerek bana öğretebilirsiniz.");
+    speak(name ? "Adın "+name+" Murathan." : "Henüz adını bilmiyorum Murathan. 'Benim adım ...' diyerek bana öğretebilirsin.");
   }
-  function userName(){ return localStorage.getItem("jarvis_name") || ""; }
+  function userName(){ return localStorage.getItem("jarvis_name") || "Murathan"; }
 
   /* ====================== Wikipedia beyni ====================== */
   function cleanQuery(cmd) {
@@ -451,7 +485,7 @@
   }
   function askWikipedia(cmd) {
     const q = cleanQuery(cmd);
-    if (!q || q.length < 2) { speak("Bunu tam anlayamadım efendim, biraz daha açar mısınız?"); return; }
+    if (!q || q.length < 2) { speak("Bunu tam anlayamadım Murathan, biraz daha açar mısın?"); return; }
     body.classList.add("thinking");
     const searchUrl = "https://tr.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search="+encodeURIComponent(q);
     fetch(searchUrl).then(r=>r.json()).then(data=>{
@@ -461,8 +495,8 @@
     }).then(r=>r.json()).then(s=>{
       body.classList.remove("thinking");
       if (s && s.extract && !/olabilir:/.test(s.extract)) speak(firstSentences(s.extract,3));
-      else speak("Bu konuda net bir bilgi bulamadım efendim, farklı kelimelerle dener misiniz?");
-    }).catch(()=>{ body.classList.remove("thinking"); speak("Bu konuda bilgiye ulaşamadım efendim, bağlantınızı kontrol edin."); });
+      else speak("Bu konuda net bir bilgi bulamadım Murathan, farklı kelimelerle dener misin?");
+    }).catch(()=>{ body.classList.remove("thinking"); speak("Bu konuda bilgiye ulaşamadım Murathan, bağlantını kontrol et."); });
   }
   function firstSentences(text,n){ const p=text.replace(/\s+/g," ").match(/[^.!?]+[.!?]+/g); if(!p) return text; let o=p.slice(0,n).join(" ").trim(); if(o.length>360) o=o.slice(0,357)+"..."; return o; }
 
@@ -494,9 +528,35 @@
   }
   function tellLocation(){
     getLocation(
-      (lat,lon)=>{ reverseGeocode(lat,lon).then(place=> speak(place ? "Şu an "+place+" konumundasınız efendim." : "Konumunuzu aldım fakat yer adını çözemedim efendim.")); },
-      (why)=>{ if(why==="izin") speak("Konum iznini vermemişsiniz efendim. Lütfen tarayıcıdan konum erişimine izin verin."); else speak("Konumunuza ulaşamadım efendim."); }
+      (lat,lon)=>{ reverseGeocode(lat,lon).then(place=> speak(place ? "Şu an "+place+" konumundasın Murathan." : "Konumunu aldım fakat yer adını çözemedim Murathan.")); },
+      (why)=>{ if(why==="izin") speak("Konum iznini vermemişsin Murathan. Lütfen tarayıcıdan konum erişimine izin ver."); else speak("Konumuna ulaşamadım Murathan."); }
     );
+  }
+
+  /* ====================== Ne giymeliyim? ====================== */
+  function recommendClothing(cmd){
+    const city = cmd ? extractCity(cmd) : null;     // "İstanbul'da ne giysem" gibi
+    speak("Hava durumuna bakıp sana uygun kıyafeti söylüyorum.");
+    const give = (lat,lon) => {
+      const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto";
+      fetch(url).then(r=>r.json()).then(d=>{
+        if(!d||!d.current){ speak("Hava verisini alamadığım için öneri veremedim."); return; }
+        const c=d.current, t=Math.round((c.apparent_temperature!=null?c.apparent_temperature:c.temperature_2m)), code=c.weather_code, wind=Math.round(c.wind_speed_10m||0);
+        let s;
+        if(t<=0)        s="Dışarısı dondurucu, "+t+" derece. Kalın bir mont, atkı, bere ve eldiven şart.";
+        else if(t<=8)   s="Hava soğuk, "+t+" derece. Kalın bir mont ve içine kazak giymeni öneririm.";
+        else if(t<=15)  s="Serin, "+t+" derece. Bir ceket ya da hırka tam olur.";
+        else if(t<=22)  s="Ilıman, "+t+" derece. İnce bir sweatshirt veya uzun kollu bir tişört yeterli.";
+        else if(t<=28)  s="Hava güzel ve ılık, "+t+" derece. Rahatça tişört giyebilirsin.";
+        else            s="Hava sıcak, "+t+" derece. İnce, açık renk ve nefes alan kıyafetler tercih et, bol su içmeyi unutma.";
+        if([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99].includes(code)) s+=" Ayrıca yağış var, yanına bir şemsiye ya da su geçirmez mont al.";
+        else if([71,73,75,77,85,86].includes(code)) s+=" Kar yağışı var, su geçirmez bir bot giymeni öneririm.";
+        if(wind>=30) s+=" Rüzgar da kuvvetli, rüzgar kesen bir dış katman iyi olur.";
+        speak(s);
+      }).catch(()=>speak("Hava durumuna ulaşamadığım için öneri veremedim."));
+    };
+    if (city) { geocode(city).then(loc=> loc ? give(loc.latitude,loc.longitude) : speak(city+" diye bir yer bulamadım.")).catch(()=>speak("Hava servisine ulaşamadım.")); return; }
+    getLocation(give, (why)=> why==="izin" ? speak("Kıyafet önerisi için konumuna ihtiyacım var. Konum iznini verir misin, ya da bir şehir söyle.") : speak("Konumuna ulaşamadığım için öneremedim."));
   }
 
   /* ====================== Hava durumu ====================== */
@@ -506,14 +566,14 @@
     const city = wantsMyLocation ? null : extractCity(cmd);
 
     if (city) {
-      speak(city+" için hava durumunu kontrol ediyorum efendim.");
-      geocode(city).then(loc=> loc ? fetchWeather(loc.latitude,loc.longitude,loc.name) : speak(city+" adında bir yer bulamadım efendim.")).catch(()=>speak("Hava durumu servisine ulaşamadım efendim."));
+      speak(city+" için hava durumunu kontrol ediyorum Murathan.");
+      geocode(city).then(loc=> loc ? fetchWeather(loc.latitude,loc.longitude,loc.name) : speak(city+" adında bir yer bulamadım Murathan.")).catch(()=>speak("Hava durumu servisine ulaşamadım Murathan."));
       return;
     }
-    speak("Konumunuza göre hava durumunu kontrol ediyorum efendim.");
+    speak("Konumuna göre hava durumunu kontrol ediyorum Murathan.");
     getLocation(
-      (lat,lon)=>{ reverseGeocode(lat,lon).then(place=> fetchWeather(lat,lon, place||"Konumunuz")); },
-      (why)=>{ if(why==="izin") speak("Konum izni vermediniz efendim. İzin verirseniz konumunuzun havasını söyleyebilirim; ya da bir şehir adı söyleyin, örneğin 'İzmir hava durumu'."); else speak("Konumunuzu alamadım efendim, lütfen bir şehir söyleyin."); }
+      (lat,lon)=>{ reverseGeocode(lat,lon).then(place=> fetchWeather(lat,lon, place||"Konumun")); },
+      (why)=>{ if(why==="izin") speak("Konum izni vermedin Murathan. İzin verirsen konumunun havasını söylerim; ya da bir şehir adı söyle, örneğin 'İzmir hava durumu'."); else speak("Konumunu alamadım Murathan, lütfen bir şehir söyle."); }
     );
   }
   function extractCity(cmd){ let c=cmd.replace(/hava durumu|hava nasıl|hava|nasıl|durumu|tahmin|bugün|yarın|için|de|da|te|ta/g," ").replace(/[^a-zçğıöşü\s]/gi," ").replace(/\s+/g," ").trim(); if(!c||c.length<3) return null; return c.split(" ").filter(w=>w.length>2).slice(-2).join(" ").trim()||null; }
@@ -521,43 +581,43 @@
   function fetchWeather(lat,lon,label){
     const url="https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2";
     fetch(url).then(r=>r.json()).then(d=>{
-      if(!d||!d.current){ speak("Hava durumu verisini alamadım efendim."); return; }
+      if(!d||!d.current){ speak("Hava durumu verisini alamadım Murathan."); return; }
       const c=d.current, desc=WEATHER_CODES[c.weather_code]||"değişken", temp=Math.round(c.temperature_2m), feels=Math.round(c.apparent_temperature), hum=c.relative_humidity_2m, wind=Math.round(c.wind_speed_10m);
       let msg=label+" için şu an hava "+desc+", sıcaklık "+temp+" derece";
       if(Math.abs(feels-temp)>=2) msg+=", hissedilen "+feels+" derece";
-      msg+=" efendim. Nem yüzde "+hum+", rüzgar saatte "+wind+" kilometre.";
+      msg+=" Murathan. Nem yüzde "+hum+", rüzgar saatte "+wind+" kilometre.";
       if(d.daily&&d.daily.time&&d.daily.time.length>1){
         const tmax=Math.round(d.daily.temperature_2m_max[1]),tmin=Math.round(d.daily.temperature_2m_min[1]),tdesc=WEATHER_CODES[d.daily.weather_code[1]]||"değişken",rain=d.daily.precipitation_probability_max?d.daily.precipitation_probability_max[1]:null;
         msg+=" Yarın ise "+tdesc+", "+tmin+" ile "+tmax+" derece arası bekleniyor";
         if(rain!=null&&rain>=40) msg+=", yağış ihtimali yüzde "+rain+", şemsiye almanızı öneririm";
         msg+=".";
       }
-      if(temp<=5) msg+=" Hava soğuk, kalın giyinin efendim.";
-      else if(temp>=30) msg+=" Hava sıcak, bol su için efendim.";
-      if([61,63,65,80,81,82,95,96,99].includes(c.weather_code)) msg+=" Dışarı çıkacaksanız şemsiye alın.";
+      if(temp<=5) msg+=" Hava soğuk, kalın giyin Murathan.";
+      else if(temp>=30) msg+=" Hava sıcak, bol su için Murathan.";
+      if([61,63,65,80,81,82,95,96,99].includes(c.weather_code)) msg+=" Dışarı çıkacaksan şemsiye al.";
       speak(msg);
-    }).catch(()=>speak("Hava durumu servisine ulaşırken sorun oluştu efendim."));
+    }).catch(()=>speak("Hava durumu servisine ulaşırken sorun oluştu Murathan."));
   }
 
   /* ====================== Notlar / Hatırlatıcı / Hesap ====================== */
   function getNotes(){ try { return JSON.parse(localStorage.getItem("jarvis_notes")||"[]"); } catch { return []; } }
   function saveNotes(n){ localStorage.setItem("jarvis_notes", JSON.stringify(n)); }
-  function addNote(cmd){ let note=cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g,"").trim(); if(!note){ speak("Ne not almamı istersiniz efendim?"); return; } const n=getNotes(); n.push({text:note,at:new Date().toLocaleString("tr-TR")}); saveNotes(n); speak("Not alındı efendim: "+note); }
-  function readNotes(){ const n=getNotes(); if(!n.length){ speak("Kayıtlı notunuz yok efendim."); return; } speak(n.length+" notunuz var efendim. "+n.map((x,i)=>(i+1)+". "+x.text).join(". ")); }
+  function addNote(cmd){ let note=cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g,"").trim(); if(!note){ speak("Ne not almamı istersin Murathan?"); return; } const n=getNotes(); n.push({text:note,at:new Date().toLocaleString("tr-TR")}); saveNotes(n); speak("Not alındı Murathan: "+note); }
+  function readNotes(){ const n=getNotes(); if(!n.length){ speak("Kayıtlı notun yok Murathan."); return; } speak(n.length+" notun var Murathan. "+n.map((x,i)=>(i+1)+". "+x.text).join(". ")); }
   function setReminder(cmd){
     const m=cmd.match(/(\d+)\s*(saniye|dakika|dk|saat)/);
-    if(!m){ speak("Ne kadar süre sonra hatırlatayım efendim?"); return; }
+    if(!m){ speak("Ne kadar süre sonra hatırlatayım Murathan?"); return; }
     let amount=parseInt(m[1],10); const unit=m[2]; let ms=amount*1000;
     if(unit.startsWith("dak")||unit==="dk") ms=amount*60000; else if(unit==="saat") ms=amount*3600000;
     let what=cmd.split(/hatırlat|alarm|zamanlayıcı/)[0].replace(/(\d+)\s*(saniye|dakika|dk|saat)\s*(sonra)?/,"").trim()||"hatırlatma";
-    speak(amount+" "+unit+" sonra hatırlatacağım efendim: "+what);
-    setTimeout(()=>{ speak("Hatırlatma zamanı geldi efendim: "+what); try{ navigator.vibrate&&navigator.vibrate([200,100,200]); }catch(_){} }, ms);
+    speak(amount+" "+unit+" sonra hatırlatacağım Murathan: "+what);
+    setTimeout(()=>{ speak("Hatırlatma zamanı geldi Murathan: "+what); try{ navigator.vibrate&&navigator.vibrate([200,100,200]); }catch(_){} }, ms);
   }
   function doMath(cmd){
     let expr=cmd.replace(/hesapla|kaç eder|kaç yapar|kaçtır/g,"").replace(/artı|topla|toplam/g,"+").replace(/eksi|çıkar/g,"-").replace(/çarpı|kere|çarp/g,"*").replace(/bölü|böl/g,"/").replace(/[^0-9+\-*/.,()\s]/g,"").replace(/,/g,".").trim();
-    if(!expr||!/[0-9]/.test(expr)){ speak("Hangi işlemi hesaplamamı istersiniz efendim?"); return; }
-    try { if(!/^[0-9+\-*/.()\s]+$/.test(expr)) throw 0; const res=Function('"use strict";return ('+expr+')')(); if(typeof res!=="number"||!isFinite(res)) throw 0; speak("Sonuç "+(Math.round(res*1000)/1000)+" efendim."); }
-    catch { speak("Bu işlemi hesaplayamadım efendim."); }
+    if(!expr||!/[0-9]/.test(expr)){ speak("Hangi işlemi hesaplamamı istersin Murathan?"); return; }
+    try { if(!/^[0-9+\-*/.()\s]+$/.test(expr)) throw 0; const res=Function('"use strict";return ('+expr+')')(); if(typeof res!=="number"||!isFinite(res)) throw 0; speak("Sonuç "+(Math.round(res*1000)/1000)+" Murathan."); }
+    catch { speak("Bu işlemi hesaplayamadım Murathan."); }
   }
 
   /* ====================== TTS (ofis erkeği / butler tonu) ====================== */
@@ -578,15 +638,18 @@
     return chosenVoice;
   }
   function primeTTS(){ if(ttsPrimed||!synth) return; try{ const u=new SpeechSynthesisUtterance(""); u.volume=0; synth.speak(u); ttsPrimed=true; }catch(_){} }
+  let keepAlive=null;
+  // Chrome, ~15 sn'den uzun konuşmada sesi kesip duraklatır; düzenli resume ile akıcı tut
+  function startKeepAlive(){ clearInterval(keepAlive); keepAlive=setInterval(()=>{ if(synth&&synth.speaking){ try{ synth.pause(); synth.resume(); }catch(_){} } else clearInterval(keepAlive); }, 9000); }
   function speak(text){
     if(muted||!synth){ restartRecognition(); return; }
     synth.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    u.lang=LANG; u.rate=VOICE.rate; u.pitch=VOICE.pitch;   // derin, ağırbaşlı ton
+    u.lang=LANG; u.rate=VOICE.rate; u.pitch=VOICE.pitch; u.volume=1;
     const v=chosenVoice||pickVoice(); if(v) u.voice=v;
-    u.onstart=()=>{ isSpeaking=true; body.classList.add("speaking"); };
-    u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); restartRecognition(); };
-    u.onerror=()=>{ isSpeaking=false; body.classList.remove("speaking"); restartRecognition(); };
+    u.onstart=()=>{ isSpeaking=true; body.classList.add("speaking"); startKeepAlive(); };
+    u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); restartRecognition(); };
+    u.onerror=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); restartRecognition(); };
     if((isIOS||isSafari)&&recognition){ try{ recognition.stop(); }catch(_){} }
     synth.speak(u);
   }
@@ -594,16 +657,16 @@
   /* ====================== Yardımcılar ====================== */
   function nowTime(){ return new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); }
   function nowDate(){ return new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
-  function greeting(){ const h=new Date().getHours(); const p=h<6?"İyi geceler":h<12?"Günaydın":h<18?"İyi günler":"İyi akşamlar"; const nm=userName(); return p+(nm?" "+nm+" Bey":" efendim")+". Size nasıl yardımcı olabilirim?"; }
-  function randomJoke(){ const j=["Bir yapay zeka neden denize gitmiş? Bulutlardan sıkıldığı için efendim.","Bilgisayar neden üşümüş? Pencerelerini açık bırakmış efendim.","Robot neden kahve içmez? Kısa devre yapmaktan korkar efendim."]; return j[Math.floor(Math.random()*j.length)]; }
-  function listSkills(){ speak("Konumunuzun ve istediğiniz şehrin hava durumunu söyleyebilirim, neredeyseniz bulabilirim, adınızı hatırlayabilirim, not alıp okuyabilirim, hatırlatıcı kurabilirim, matematik yapabilir ve bilim, uzay, tarih, coğrafya gibi pek çok konuda bilgi verebilirim efendim. Bilmediğimi de Wikipedia'dan araştırıp özetlerim."); }
+  function greeting(){ const h=new Date().getHours(); const p=h<6?"İyi geceler":h<12?"Günaydın":h<18?"İyi günler":"İyi akşamlar"; return p+" "+userName()+". Sana nasıl yardımcı olabilirim?"; }
+  function randomJoke(){ const j=["Bir yapay zeka neden denize gitmiş? Bulutlardan sıkıldığı için Murathan.","Bilgisayar neden üşümüş? Pencerelerini açık bırakmış Murathan.","Robot neden kahve içmez? Kısa devre yapmaktan korkar Murathan."]; return j[Math.floor(Math.random()*j.length)]; }
+  function listSkills(){ speak("Bayağı bir şey yapabilirim Murathan. Konumunun ya da istediğin şehrin havasını söylerim, ne giymen gerektiğini öneririm, neredeysen bulurum, adını hatırlarım, not alıp okurum, hatırlatıcı kurarım, matematik yaparım ve bilim, uzay, tarih, teknoloji gibi pek çok konuda bilgi veririm. Bilmediğimi de internetten araştırıp özetlerim."); }
 
   /* ====================== Proaktif kontrol ====================== */
   function startProactive(){
     clearInterval(proactiveTimer);
     proactiveTimer=setInterval(()=>{
       if(!listening||muted) return;
-      if(Date.now()-lastInteraction>4*60*1000){ const p=["Efendim, bir şeye ihtiyacınız var mı?","Buradayım efendim, yardımcı olabileceğim bir şey var mı?","Her şey yolunda mı efendim?"]; speak(p[Math.floor(Math.random()*p.length)]); lastInteraction=Date.now(); }
+      if(Date.now()-lastInteraction>4*60*1000){ const p=["Murathan, bir şeye ihtiyacın var mı?","Buradayım Murathan, yardımcı olabileceğim bir şey var mı?","Her şey yolunda mı Murathan?","Bir mola verip su içmenin tam zamanı olabilir Murathan."]; speak(p[Math.floor(Math.random()*p.length)]); lastInteraction=Date.now(); }
     }, 60*1000);
   }
 
@@ -611,20 +674,19 @@
   function startListening(){
     primeTTS();
     if(listening) return;
-    if(!SpeechRecognition){ body.classList.add("on-state"); jarvis.classList.add("on"); speak("Sesli tanıma bu tarayıcıda yok efendim, fakat sesli yanıt verebilirim."); return; }
+    if(!SpeechRecognition){ body.classList.add("on-state"); jarvis.classList.add("on"); speak("Sesli tanıma bu tarayıcıda yok Murathan, fakat sesli yanıt verebilirim."); return; }
     listening=true; recognition=buildRecognition();
     try{ recognition.start(); }catch(_){}
     body.classList.add("on-state"); jarvis.classList.add("on");
     jarvis.setAttribute("aria-label","Jarvis dinliyor — durdurmak için dokun");
     lastInteraction=Date.now(); startProactive();
 
-    const name = userName();
-    const hello = "Sistemler çevrimiçi" + (name ? ", "+name+" Bey" : " efendim") + ". Sizi dinliyorum.";
+    const hello = "Sistemler çevrimiçi, " + userName() + ". Seni dinliyorum.";
 
     // İlk açılışta izinleri iste (mikrofon zaten istendi; şimdi konum)
     if (!localStorage.getItem("jarvis_onboarded")) {
       localStorage.setItem("jarvis_onboarded","1");
-      speak(hello + " Size daha iyi hizmet edebilmem için konumunuza erişmek istiyorum; izin verirseniz bulunduğunuz yerin havasını anında söyleyebilirim.");
+      speak(hello + " Sana daha iyi yardımcı olabilmem için konumuna erişmek istiyorum; izin verirsen bulunduğun yerin havasını ve ne giymen gerektiğini anında söylerim.");
       // izin penceresini tetikle ve konumu önbelleğe al
       getLocation(()=>{}, ()=>{});
     } else {
