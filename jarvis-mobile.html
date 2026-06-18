@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#04070d" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>J.A.R.V.I.S — Mobil Sesli Asistan</title>
+<style>
+  :root {
+    --cyan: #38e0ff;
+    --cyan-dim: #1a7a8c;
+    --gold: #ffd166;
+    --green: #6effa6;
+    --red: #ff6e7f;
+    --bg-deep: #04070d;
+    --bg-panel: rgba(10, 22, 36, 0.78);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 50% 22%, #0a1c2e 0%, var(--bg-deep) 72%);
+    color: #e8f6ff;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(56,224,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,224,255,0.05) 1px, transparent 1px);
+    background-size: 38px 38px;
+    z-index: 0; pointer-events: none;
+  }
+
+  header { text-align: center; margin-top: 18px; z-index: 1; padding: 0 12px; }
+  header h1 {
+    font-size: 2rem; letter-spacing: 0.45rem; font-weight: 300;
+    color: var(--cyan); text-shadow: 0 0 16px rgba(56,224,255,0.6);
+  }
+  header p { margin-top: 4px; font-size: 0.7rem; letter-spacing: 0.18rem; color: #7fb6cc; text-transform: uppercase; }
+
+  /* reactor orb */
+  .reactor-wrap {
+    position: relative; margin: 22px 0 12px;
+    width: 180px; height: 180px;
+    display: flex; align-items: center; justify-content: center; z-index: 1;
+  }
+  .ring { position: absolute; border-radius: 50%; border: 2px solid var(--cyan-dim); }
+  .ring.r1 { width: 180px; height: 180px; border-top-color: var(--cyan); animation: spin 8s linear infinite; }
+  .ring.r2 { width: 142px; height: 142px; border-bottom-color: var(--cyan); animation: spin 6s linear infinite reverse; }
+  .ring.r3 { width: 104px; height: 104px; border-left-color: var(--gold); opacity: 0.5; animation: spin 10s linear infinite; }
+  .core {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: radial-gradient(circle, #bff4ff 0%, var(--cyan) 40%, var(--cyan-dim) 100%);
+    box-shadow: 0 0 36px rgba(56,224,255,0.8), inset 0 0 22px rgba(255,255,255,0.5);
+    transition: transform 0.12s ease;
+  }
+  body.listening .core { animation: pulse 1.4s ease-in-out infinite; }
+  body.speaking .core {
+    background: radial-gradient(circle, #fff0c2 0%, var(--gold) 45%, #b8860b 100%);
+    box-shadow: 0 0 44px rgba(255,209,102,0.9);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.16); } }
+
+  .status {
+    z-index: 1; font-size: 0.8rem; letter-spacing: 0.12rem; text-transform: uppercase;
+    padding: 7px 18px; border-radius: 30px; border: 1px solid var(--cyan-dim);
+    background: var(--bg-panel); color: var(--cyan); transition: all 0.3s; text-align: center;
+  }
+  .status.active { color: var(--green); border-color: #1f7a4d; box-shadow: 0 0 12px rgba(110,255,166,0.4); }
+  .status.error  { color: var(--red); border-color: #7a1f2b; }
+
+  .panel {
+    z-index: 1; width: min(680px, 94vw); margin-top: 16px;
+    background: var(--bg-panel); border: 1px solid var(--cyan-dim);
+    border-radius: 14px; backdrop-filter: blur(6px); overflow: hidden;
+  }
+  .live-line {
+    padding: 12px 16px; min-height: 48px; font-size: 0.98rem; color: var(--gold);
+    border-bottom: 1px solid rgba(56,224,255,0.15); display: flex; align-items: center; gap: 10px;
+  }
+  .log { max-height: 46vh; overflow-y: auto; padding: 10px 16px; -webkit-overflow-scrolling: touch; }
+  .log .msg { margin: 7px 0; line-height: 1.5; font-size: 0.92rem; animation: fadein 0.4s; word-wrap: break-word; }
+  .log .you  { color: #9fd8ff; }
+  .log .you b  { color: var(--cyan); }
+  .log .jarvis { color: #ffe9b3; }
+  .log .jarvis b { color: var(--gold); }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .controls {
+    z-index: 1; margin: 16px 0 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    width: min(680px, 94vw); padding: 0 4px;
+  }
+  button {
+    font-family: inherit; font-size: 0.82rem; letter-spacing: 0.05rem; text-transform: uppercase;
+    color: var(--cyan); background: transparent; border: 1px solid var(--cyan);
+    padding: 12px 18px; border-radius: 9px; cursor: pointer; transition: all 0.2s; flex: 1 1 auto; min-width: 130px;
+  }
+  button:active { transform: scale(0.96); }
+  button:hover { background: var(--cyan); color: var(--bg-deep); }
+  button.primary { border-color: var(--gold); color: var(--gold); }
+  button.primary:hover { background: var(--gold); color: var(--bg-deep); }
+  button:disabled { opacity: 0.35; }
+
+  /* quick skill chips */
+  .chips { z-index: 1; width: min(680px, 94vw); display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 4px 0 10px; padding: 0 6px; }
+  .chip {
+    font-size: 0.74rem; color: #bfeaff; background: rgba(56,224,255,0.08);
+    border: 1px solid var(--cyan-dim); border-radius: 20px; padding: 6px 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .chip:active { background: rgba(56,224,255,0.25); transform: scale(0.95); }
+
+  .hint {
+    z-index: 1; font-size: 0.74rem; color: #6e95a8; text-align: center;
+    max-width: 620px; line-height: 1.6; margin: 8px 0 24px; padding: 0 18px;
+  }
+  .hint code { color: var(--gold); background: rgba(255,209,102,0.1); padding: 1px 6px; border-radius: 4px; }
+
+  .unsupported {
+    color: var(--red); border: 1px solid #7a1f2b; background: rgba(122,31,43,0.15);
+    padding: 12px 18px; border-radius: 10px; margin-top: 16px; max-width: 600px; text-align: center; z-index: 1;
+    width: 94vw; font-size: 0.85rem; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>J.A.R.V.I.S</h1>
+    <p>Just A Rather Very Intelligent System</p>
+  </header>
+
+  <div class="reactor-wrap">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="core" id="core"></div>
+  </div>
+
+  <div class="status" id="status">Beklemede</div>
+
+  <div class="panel">
+    <div class="live-line" id="liveLine"><span>🎙️</span><span id="liveText">Sizi dinlemeye hazırım, efendim.</span></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="startBtn">🎤 Dinlemeyi Başlat</button>
+    <button id="stopBtn" disabled>⏹ Durdur</button>
+    <button id="muteBtn">🔇 Sesi Kapat</button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <p class="hint">
+    Otomatik mod: mikrofon sürekli açık. Uyandırmak için <code>Jarvis</code> de, sonra komutunu söyle.<br>
+    Örnek: <code>Jarvis hava nasıl</code> · <code>Jarvis İstanbul hava durumu</code> ·
+    <code>Jarvis not al ekmek almayı unutma</code> · <code>Jarvis 15 dakika sonra hatırlat</code>
+  </p>
+
+  <div class="unsupported" id="unsupported" style="display:none">
+    ⚠️ Tarayıcın konuşma tanımayı desteklemiyor.<br>
+    Mobilde <b>Android Chrome</b>, masaüstünde <b>Chrome/Edge</b> kullan.
+    iPhone'da Safari ses tanımayı sınırlı destekler — yine de yazılı/sesli yanıt çalışır.
+  </div>
+
+<script>
+/* ============================================================
+   J.A.R.V.I.S — Aşama 2 (Yetenekler + Hava Durumu + Mobil)
+   ------------------------------------------------------------
+   - Sürekli/otomatik dinleme (Web Speech API) + "Jarvis" wake word
+   - Sesli yanıt (TTS)
+   - Konum bazlı & bölgesel GERÇEK hava durumu (Open-Meteo, anahtarsız)
+   - Günlük hayat bilgi/yardım veritabanı (KNOWLEDGE)
+   - Notlar & hatırlatıcılar (localStorage + zamanlayıcı)
+   - Hesaplama, çevirim, proaktif "bir şeye ihtiyacın var mı?" kontrolü
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const WAKE_WORD = "jarvis";
+  const LANG = "tr-TR";
+
+  /* ====================== BİLGİ VERİTABANI ======================
+     Günlük hayatta yardımcı olacak ipuçları, bilgiler ve öneriler.
+     Her giriş: anahtar kelimeler + cevap. Genişletmek çok kolay. */
+  const KNOWLEDGE = [
+    {
+      keys: ["su iç", "su içmeli", "ne kadar su", "günde kaç bardak su"],
+      answer: "Günde yaklaşık 2 ila 2,5 litre, yani 8-10 bardak su içmeniz önerilir efendim. Susamayı beklemeden düzenli aralıklarla için."
+    },
+    {
+      keys: ["uyku", "kaç saat uyu", "ne kadar uyumalı"],
+      answer: "Yetişkinler için günde 7 ila 9 saat uyku idealdir efendim. Her gün aynı saatte yatıp kalkmak uyku kalitenizi belirgin şekilde artırır."
+    },
+    {
+      keys: ["mola", "ekran molası", "gözlerim yoruldu", "20 20 20"],
+      answer: "20-20-20 kuralını öneririm efendim: her 20 dakikada bir, 20 saniye boyunca 20 metre uzağa bakın. Gözlerinizi dinlendirir."
+    },
+    {
+      keys: ["motivasyon", "moralim bozuk", "motive et", "kötü hissediyorum"],
+      answer: "Her büyük başarı küçük bir adımla başlar efendim. Bugün sadece bir tek adım atın, gerisi gelecektir. Size güveniyorum."
+    },
+    {
+      keys: ["pomodoro", "verimli çalış", "odaklan", "konsantrasyon"],
+      answer: "Pomodoro tekniğini deneyin efendim: 25 dakika kesintisiz çalışma, ardından 5 dakika mola. Dört turdan sonra 15-20 dakikalık uzun bir mola verin."
+    },
+    {
+      keys: ["spor", "egzersiz", "hareket et", "ne kadar spor"],
+      answer: "Haftada en az 150 dakika orta tempolu hareket önerilir efendim. Günde 30 dakikalık tempolu bir yürüyüş bile büyük fark yaratır."
+    },
+    {
+      keys: ["kahve", "ne kadar kahve", "kafein"],
+      answer: "Günde 3-4 fincandan fazla kahve önerilmez efendim. Öğleden sonra geç saatlerde kafein, uykunuzu olumsuz etkileyebilir."
+    },
+    {
+      keys: ["stres", "gergin", "sakinleş", "nefes egzersizi"],
+      answer: "Derin nefes egzersizi deneyin efendim: 4 saniye burnunuzdan nefes alın, 7 saniye tutun, 8 saniyede ağzınızdan verin. Birkaç tekrar sizi rahatlatır."
+    },
+    {
+      keys: ["sağlıklı beslen", "ne yemeli", "beslenme"],
+      answer: "Tabağınızın yarısını sebze ve meyveye ayırın efendim. İşlenmiş gıdaları ve şekeri azaltın, bol su için. Düzenli ve dengeli beslenme en iyisidir."
+    },
+    {
+      keys: ["acil", "112", "acil numara", "yangın", "polis numara"],
+      answer: "Türkiye'de tüm acil durumlar için 112'yi arayabilirsiniz efendim: sağlık, polis, itfaiye ve jandarma tek numarada toplanmıştır."
+    }
+  ];
+
+  /* Hava durumu kodlarının Türkçe karşılıkları (Open-Meteo WMO) */
+  const WEATHER_CODES = {
+    0: "açık", 1: "az bulutlu", 2: "parçalı bulutlu", 3: "kapalı",
+    45: "sisli", 48: "kırağılı sis",
+    51: "hafif çiseleme", 53: "çiseleme", 55: "yoğun çiseleme",
+    56: "donan hafif çiseleme", 57: "donan çiseleme",
+    61: "hafif yağmurlu", 63: "yağmurlu", 65: "şiddetli yağmurlu",
+    66: "donan hafif yağmur", 67: "donan yağmur",
+    71: "hafif kar yağışlı", 73: "kar yağışlı", 75: "yoğun kar yağışlı",
+    77: "kar taneli", 80: "hafif sağanak", 81: "sağanak", 82: "şiddetli sağanak",
+    85: "hafif kar sağanağı", 86: "yoğun kar sağanağı",
+    95: "gök gürültülü fırtına", 96: "dolulu fırtına", 99: "şiddetli dolulu fırtına"
+  };
+
+  /* ====================== DOM ====================== */
+  const body        = document.body;
+  const statusEl    = document.getElementById("status");
+  const liveText    = document.getElementById("liveText");
+  const logEl       = document.getElementById("log");
+  const startBtn    = document.getElementById("startBtn");
+  const stopBtn     = document.getElementById("stopBtn");
+  const muteBtn     = document.getElementById("muteBtn");
+  const unsupported = document.getElementById("unsupported");
+  const chipsEl     = document.getElementById("chips");
+
+  /* ====================== State ====================== */
+  let recognition = null;
+  let listening   = false;
+  let awake       = false;
+  let muted       = false;
+  let awakeTimer  = null;
+  let proactiveTimer = null;
+  let lastInteraction = Date.now();
+
+  /* ====================== Speech Recognition ====================== */
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    unsupported.style.display = "block";
+    startBtn.disabled = true;
+    setStatus("Ses tanıma yok", "error");
+  }
+
+  function buildRecognition() {
+    const r = new SpeechRecognition();
+    r.lang = LANG;
+    r.continuous = true;
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+
+    r.onstart = () => {
+      setStatus(awake ? "Komut bekleniyor" : "Dinleniyor — 'Jarvis' de", "active");
+      body.classList.add("listening");
+    };
+    r.onresult = (event) => {
+      let interim = "", finalText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += t; else interim += t;
+      }
+      if (interim) liveText.textContent = interim;
+      if (finalText) handleSpeech(finalText.trim());
+    };
+    r.onerror = (e) => {
+      if (e.error === "no-speech" || e.error === "aborted") return;
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        setStatus("Mikrofon izni reddedildi", "error");
+        stopListening();
+        return;
+      }
+      console.warn("Tanıma hatası:", e.error);
+    };
+    r.onend = () => {
+      body.classList.remove("listening");
+      if (listening) { try { r.start(); } catch (_) {} }
+      else setStatus("Beklemede");
+    };
+    return r;
+  }
+
+  /* ====================== Konuşma yönlendirme ====================== */
+  function handleSpeech(text) {
+    const lower = text.toLocaleLowerCase("tr-TR");
+    addLog("you", "Sen", text);
+    liveText.textContent = "…";
+    lastInteraction = Date.now();
+
+    if (!awake) {
+      if (lower.includes(WAKE_WORD)) {
+        wake();
+        const after = lower.split(WAKE_WORD).slice(1).join(" ").trim();
+        if (after) route(after);
+        else speak("Buyurun efendim.");
+      }
+      return;
+    }
+    route(lower.replace(WAKE_WORD, "").trim());
+  }
+
+  function wake() {
+    awake = true;
+    setStatus("Aktif — komut bekleniyor", "active");
+    resetAwakeTimer();
+  }
+  function resetAwakeTimer() {
+    clearTimeout(awakeTimer);
+    awakeTimer = setTimeout(() => {
+      awake = false;
+      setStatus(listening ? "Dinleniyor — 'Jarvis' de" : "Beklemede", listening ? "active" : "");
+    }, 20000);
+  }
+
+  /* ====================== Komut yönlendirici (router) ====================== */
+  function route(cmd) {
+    resetAwakeTimer();
+    lastInteraction = Date.now();
+    if (!cmd) { speak("Sizi dinliyorum efendim."); return; }
+    const has = (...w) => w.some(x => cmd.includes(x));
+
+    // --- Hava durumu ---
+    if (has("hava")) { handleWeather(cmd); return; }
+
+    // --- Saat / Tarih ---
+    if (has("saat kaç", "saat ne")) {
+      speak("Saat şu an " + nowTime() + " efendim."); return;
+    }
+    if (has("günlerden ne", "bugün ne", "tarih", "hangi gün")) {
+      speak("Bugün " + nowDate() + " efendim."); return;
+    }
+
+    // --- Notlar ---
+    if (has("not al", "not et", "kaydet", "şunu yaz")) { addNote(cmd); return; }
+    if (has("notlarım", "notları oku", "notları söyle", "ne not")) { readNotes(); return; }
+    if (has("notları sil", "notları temizle")) {
+      localStorage.removeItem("jarvis_notes");
+      speak("Tüm notlarınızı sildim efendim."); return;
+    }
+
+    // --- Hatırlatıcı / zamanlayıcı ---
+    if (has("hatırlat", "alarm kur", "zamanlayıcı", "süre kur", "dakika sonra")) { setReminder(cmd); return; }
+
+    // --- Hesaplama ---
+    if (has("hesapla", "kaç eder", "topla", "çıkar", "çarp", "böl", "artı", "eksi", "kere", "bölü")) {
+      doMath(cmd); return;
+    }
+
+    // --- Bilgi veritabanı taraması ---
+    const known = KNOWLEDGE.find(item => item.keys.some(k => cmd.includes(k)));
+    if (known) { speak(known.answer); return; }
+
+    // --- Sohbet / kimlik ---
+    if (has("merhaba", "selam", "hey")) { speak(greeting()); return; }
+    if (has("adın ne", "kimsin", "sen kimsin")) {
+      speak("Ben Jarvis efendim, kişisel yapay zeka asistanınız. Hava durumu, notlar, hatırlatıcılar ve günlük yaşam tavsiyeleri konusunda size yardımcı olabilirim."); return;
+    }
+    if (has("neler yapabilir", "yeteneklerin", "ne yapabilirsin", "yardım")) { listSkills(); return; }
+    if (has("nasılsın", "naber")) { speak("Tüm sistemlerim optimal çalışıyor efendim, teşekkür ederim. Siz nasılsınız?"); return; }
+    if (has("teşekkür", "sağol", "eyvallah")) { speak("Rica ederim efendim, her zaman buradayım."); return; }
+    if (has("şaka", "espri", "güldür")) { speak(randomJoke()); return; }
+    if (has("kapan", "uyu", "görüşürüz", "kendini kapat")) {
+      speak("Uykuya geçiyorum efendim. Beni 'Jarvis' diyerek tekrar uyandırabilirsiniz.");
+      awake = false; return;
+    }
+
+    speak("Bunu henüz tam anlayamadım efendim. 'Jarvis neler yapabilirsin' diyerek yeteneklerimi öğrenebilirsiniz.");
+  }
+
+  /* ====================== HAVA DURUMU ======================
+     Open-Meteo — ücretsiz, API anahtarı GEREKTİRMEZ.
+     1) Cümlede şehir geçiyorsa o şehri geocode eder (bölgesel)
+     2) Geçmiyorsa cihaz konumunu kullanır (konumsal) */
+  function handleWeather(cmd) {
+    const city = extractCity(cmd);
+    if (city) {
+      speak(city + " için hava durumunu kontrol ediyorum efendim.");
+      geocode(city).then(loc => {
+        if (!loc) { speak(city + " adında bir yer bulamadım efendim."); return; }
+        fetchWeather(loc.latitude, loc.longitude, loc.name);
+      }).catch(() => speak("Hava durumu servisine ulaşamadım efendim."));
+      return;
+    }
+
+    // Konum bazlı
+    if (!navigator.geolocation) {
+      speak("Cihazınız konum servisini desteklemiyor efendim. Bir şehir adı söyleyebilirsiniz, örneğin 'Jarvis Ankara hava durumu'."); return;
+    }
+    speak("Konumunuza göre hava durumunu kontrol ediyorum efendim.");
+    navigator.geolocation.getCurrentPosition(
+      pos => fetchWeather(pos.coords.latitude, pos.coords.longitude, "Konumunuz"),
+      err => {
+        if (err.code === 1) speak("Konum izni vermediniz efendim. Bir şehir adıyla deneyebilirsiniz, örneğin 'Jarvis İzmir hava durumu'.");
+        else speak("Konumunuzu alamadım efendim. Lütfen bir şehir adı söyleyin.");
+      },
+      { timeout: 10000, enableHighAccuracy: false }
+    );
+  }
+
+  // Cümleden olası şehir/yer adını çıkar
+  function extractCity(cmd) {
+    // "X hava", "hava X", "X için hava", "X de hava", "X da hava durumu"
+    let c = cmd.replace(/hava durumu|hava nasıl|hava|nasıl|durumu|tahmin|bugün|yarın|için|de|da|te|ta/g, " ");
+    c = c.replace(/[^a-zçğıöşü\s]/gi, " ").replace(/\s+/g, " ").trim();
+    if (!c || c.length < 3) return null;
+    // birden fazla kelime kalırsa son anlamlı kısmı al
+    return c.split(" ").filter(w => w.length > 2).slice(-2).join(" ").trim() || null;
+  }
+
+  function geocode(name) {
+    const url = "https://geocoding-api.open-meteo.com/v1/search?name=" +
+                encodeURIComponent(name) + "&count=1&language=tr&format=json";
+    return fetch(url).then(r => r.json()).then(d => {
+      if (d && d.results && d.results.length) {
+        const r0 = d.results[0];
+        return { latitude: r0.latitude, longitude: r0.longitude, name: r0.name + (r0.admin1 ? ", " + r0.admin1 : "") };
+      }
+      return null;
+    });
+  }
+
+  function fetchWeather(lat, lon, label) {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
+      "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m" +
+      "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+      "&timezone=auto&forecast_days=2";
+    fetch(url).then(r => r.json()).then(d => {
+      if (!d || !d.current) { speak("Hava durumu verisini alamadım efendim."); return; }
+      const c = d.current;
+      const desc = WEATHER_CODES[c.weather_code] || "değişken";
+      const temp = Math.round(c.temperature_2m);
+      const feels = Math.round(c.apparent_temperature);
+      const hum = c.relative_humidity_2m;
+      const wind = Math.round(c.wind_speed_10m);
+
+      let msg = label + " için şu an hava " + desc + ", sıcaklık " + temp + " derece";
+      if (Math.abs(feels - temp) >= 2) msg += ", hissedilen " + feels + " derece";
+      msg += " efendim. Nem yüzde " + hum + ", rüzgar saatte " + wind + " kilometre.";
+
+      // Yarının tahmini
+      if (d.daily && d.daily.time && d.daily.time.length > 1) {
+        const tmax = Math.round(d.daily.temperature_2m_max[1]);
+        const tmin = Math.round(d.daily.temperature_2m_min[1]);
+        const tdesc = WEATHER_CODES[d.daily.weather_code[1]] || "değişken";
+        const rain = d.daily.precipitation_probability_max ? d.daily.precipitation_probability_max[1] : null;
+        msg += " Yarın ise " + tdesc + ", " + tmin + " ile " + tmax + " derece arası bekleniyor";
+        if (rain != null && rain >= 40) msg += ", yağış ihtimali yüzde " + rain + ", yanınıza şemsiye almanızı öneririm";
+        msg += ".";
+      }
+
+      // Akıllı öneri
+      if (temp <= 5) msg += " Hava oldukça soğuk, kalın giyinmenizi tavsiye ederim efendim.";
+      else if (temp >= 30) msg += " Hava sıcak, bol su içmeyi ve güneşten korunmayı unutmayın efendim.";
+      if ([61,63,65,80,81,82,95,96,99].includes(c.weather_code)) msg += " Dışarı çıkacaksanız şemsiye almanızı öneririm.";
+
+      speak(msg);
+    }).catch(() => speak("Hava durumu servisine ulaşırken bir sorun oluştu efendim."));
+  }
+
+  /* ====================== NOTLAR ====================== */
+  function getNotes() { try { return JSON.parse(localStorage.getItem("jarvis_notes") || "[]"); } catch { return []; } }
+  function saveNotes(n) { localStorage.setItem("jarvis_notes", JSON.stringify(n)); }
+
+  function addNote(cmd) {
+    let note = cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g, "").trim();
+    if (!note) { speak("Ne not almamı istersiniz efendim?"); return; }
+    const notes = getNotes();
+    notes.push({ text: note, at: new Date().toLocaleString("tr-TR") });
+    saveNotes(notes);
+    speak("Not alındı efendim: " + note);
+  }
+  function readNotes() {
+    const notes = getNotes();
+    if (!notes.length) { speak("Kayıtlı notunuz yok efendim."); return; }
+    let msg = notes.length + " notunuz var efendim. ";
+    msg += notes.map((n, i) => (i + 1) + ". " + n.text).join(". ");
+    speak(msg);
+  }
+
+  /* ====================== HATIRLATICI / ZAMANLAYICI ====================== */
+  function setReminder(cmd) {
+    // "15 dakika sonra hatırlat", "2 saat sonra ...", "30 saniye"
+    const m = cmd.match(/(\d+)\s*(saniye|dakika|dk|saat)/);
+    if (!m) { speak("Ne kadar süre sonra hatırlatmamı istersiniz efendim? Örneğin '10 dakika sonra hatırlat' diyebilirsiniz."); return; }
+    let amount = parseInt(m[1], 10);
+    const unit = m[2];
+    let ms = amount * 1000;
+    if (unit.startsWith("dak") || unit === "dk") ms = amount * 60000;
+    else if (unit === "saat") ms = amount * 3600000;
+
+    // Hatırlatma metni
+    let what = cmd.split(/hatırlat|alarm|zamanlayıcı/)[0]
+                  .replace(/(\d+)\s*(saniye|dakika|dk|saat)\s*(sonra)?/, "").trim();
+    what = what || "hatırlatma";
+
+    speak(amount + " " + unit + " sonra size hatırlatacağım efendim: " + what);
+    setTimeout(() => {
+      const txt = "Hatırlatma zamanı geldi efendim: " + what;
+      speak(txt);
+      try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (_) {}
+    }, ms);
+  }
+
+  /* ====================== HESAPLAMA ====================== */
+  function doMath(cmd) {
+    let expr = cmd
+      .replace(/hesapla|kaç eder|kaç yapar|kaçtır/g, "")
+      .replace(/artı|topla|toplam/g, "+")
+      .replace(/eksi|çıkar/g, "-")
+      .replace(/çarpı|kere|çarp/g, "*")
+      .replace(/bölü|böl/g, "/")
+      .replace(/[^0-9+\-*/.,()\s]/g, "")
+      .replace(/,/g, ".")
+      .trim();
+    if (!expr || !/[0-9]/.test(expr)) { speak("Hangi işlemi hesaplamamı istersiniz efendim?"); return; }
+    try {
+      // güvenli değerlendirme: yalnızca sayı ve operatör içerir
+      if (!/^[0-9+\-*/.()\s]+$/.test(expr)) throw new Error("geçersiz");
+      const result = Function('"use strict";return (' + expr + ')')();
+      if (typeof result !== "number" || !isFinite(result)) throw new Error("nan");
+      speak("Sonuç " + (Math.round(result * 1000) / 1000) + " efendim.");
+    } catch {
+      speak("Bu işlemi hesaplayamadım efendim, lütfen tekrar dener misiniz?");
+    }
+  }
+
+  /* ====================== Sesli yanıt (TTS) ====================== */
+  const synth = window.speechSynthesis;
+  function pickVoice() {
+    const v = synth ? synth.getVoices() : [];
+    return v.find(x => x.lang === LANG) || v.find(x => x.lang && x.lang.startsWith("tr")) || v[0] || null;
+  }
+  function speak(text) {
+    addLog("jarvis", "Jarvis", text);
+    if (muted || !synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = LANG; u.rate = 1.02; u.pitch = 0.95;
+    const v = pickVoice(); if (v) u.voice = v;
+    u.onstart = () => body.classList.add("speaking");
+    u.onend   = () => body.classList.remove("speaking");
+    synth.speak(u);
+  }
+
+  /* ====================== Yardımcılar ====================== */
+  function nowTime() { return new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }); }
+  function nowDate() { return new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); }
+  function greeting() {
+    const h = new Date().getHours();
+    const part = h < 6 ? "İyi geceler" : h < 12 ? "Günaydın" : h < 18 ? "İyi günler" : "İyi akşamlar";
+    return part + " efendim. Size nasıl yardımcı olabilirim?";
+  }
+  function randomJoke() {
+    const jokes = [
+      "Bir yapay zeka neden denize gitmiş? Bulutlardan sıkıldığı için efendim.",
+      "Bilgisayar neden üşümüş? Çünkü pencerelerini açık bırakmış efendim.",
+      "Robot neden kahve içmez? Kısa devre yapmaktan korkar efendim.",
+      "İki algoritma karşılaşmış, biri diğerine demiş ki: senden iyi sıralanırım."
+    ];
+    return jokes[Math.floor(Math.random() * jokes.length)];
+  }
+  function listSkills() {
+    speak("Şunları yapabilirim efendim: konum bazlı ve şehir bazlı hava durumu söyleyebilirim, " +
+      "saati ve tarihi bildirebilirim, not alabilir ve okuyabilirim, hatırlatıcı kurabilirim, " +
+      "matematik işlemleri yapabilir ve sağlık, uyku, beslenme gibi günlük yaşam konularında tavsiye verebilirim. " +
+      "Ayrıca zaman zaman size bir şeye ihtiyacınız olup olmadığını kendim sorarım.");
+  }
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = "status" + (kind ? " " + kind : "");
+  }
+  function addLog(who, label, text) {
+    const div = document.createElement("div");
+    div.className = "msg " + who;
+    div.innerHTML = "<b>" + label + ":</b> " + escapeHtml(text);
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  }
+
+  /* ====================== PROAKTİF KONTROL ======================
+     Belirli aralıklarla "bir şeye ihtiyacınız var mı?" diye sorar.
+     Sadece dinleme açıkken ve bir süredir sessizlik varsa. */
+  function startProactive() {
+    clearInterval(proactiveTimer);
+    proactiveTimer = setInterval(() => {
+      if (!listening || muted) return;
+      const idle = Date.now() - lastInteraction;
+      if (idle > 4 * 60 * 1000) {   // 4 dakikadır sessizlik
+        const prompts = [
+          "Efendim, bir şeye ihtiyacınız var mı?",
+          "Buradayım efendim, yardımcı olabileceğim bir şey var mı?",
+          "Her şey yolunda mı efendim? Bir isteğiniz olursa beni 'Jarvis' diyerek çağırın.",
+          "Bir mola verip su içmenin tam zamanı olabilir efendim."
+        ];
+        speak(prompts[Math.floor(Math.random() * prompts.length)]);
+        lastInteraction = Date.now();
+      }
+    }, 60 * 1000);
+  }
+
+  /* ====================== Başlat / Durdur ====================== */
+  function startListening() {
+    if (listening || !SpeechRecognition) return;
+    listening = true;
+    recognition = buildRecognition();
+    try { recognition.start(); } catch (_) {}
+    startBtn.disabled = true; stopBtn.disabled = false;
+    lastInteraction = Date.now();
+    startProactive();
+    speak("Sistemler çevrimiçi efendim. Sizi dinliyorum.");
+  }
+  function stopListening() {
+    listening = false; awake = false;
+    clearTimeout(awakeTimer); clearInterval(proactiveTimer);
+    if (recognition) { try { recognition.stop(); } catch (_) {} }
+    body.classList.remove("listening", "speaking");
+    startBtn.disabled = false; stopBtn.disabled = true;
+    setStatus("Beklemede");
+    liveText.textContent = "Dinleme durduruldu.";
+  }
+
+  startBtn.addEventListener("click", startListening);
+  stopBtn.addEventListener("click", stopListening);
+  muteBtn.addEventListener("click", () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? "🔊 Sesi Aç" : "🔇 Sesi Kapat";
+    if (muted && synth) synth.cancel();
+  });
+
+  /* ====================== Hızlı erişim çipleri ======================
+     Mobilde ses tanıma çalışmazsa dokunarak da komut çalıştırılır. */
+  const QUICK = [
+    ["☀️ Hava durumu", "hava nasıl"],
+    ["🕐 Saat kaç", "saat kaç"],
+    ["📅 Bugün ne", "bugün günlerden ne"],
+    ["🧠 Yeteneklerin", "neler yapabilirsin"],
+    ["💧 Su tavsiyesi", "ne kadar su içmeliyim"],
+    ["😴 Uyku tavsiyesi", "kaç saat uyumalıyım"],
+    ["📝 Notlarım", "notlarım neler"],
+    ["😄 Şaka yap", "şaka yap"]
+  ];
+  QUICK.forEach(([label, cmd]) => {
+    const b = document.createElement("div");
+    b.className = "chip"; b.textContent = label;
+    b.addEventListener("click", () => {
+      addLog("you", "Sen", label);
+      awake = true; resetAwakeTimer();
+      route(cmd);
+    });
+    chipsEl.appendChild(b);
+  });
+
+  if (synth) synth.onvoiceschanged = pickVoice;
+})();
+</script>
+</body>
+</html>
