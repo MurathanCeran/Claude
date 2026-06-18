@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>J.A.R.V.I.S — Sesli AI Asistan</title>
+<style>
+  :root {
+    --jarvis-cyan: #38e0ff;
+    --jarvis-cyan-dim: #1a7a8c;
+    --jarvis-gold: #ffd166;
+    --bg-deep: #04070d;
+    --bg-panel: rgba(10, 22, 36, 0.72);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif;
+    background:
+      radial-gradient(circle at 50% 30%, #0a1c2e 0%, var(--bg-deep) 70%);
+    color: #e8f6ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* animated grid background */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56, 224, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56, 224, 255, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  header {
+    text-align: center;
+    margin-top: 28px;
+    z-index: 1;
+  }
+
+  header h1 {
+    font-size: 2.6rem;
+    letter-spacing: 0.5rem;
+    font-weight: 300;
+    color: var(--jarvis-cyan);
+    text-shadow: 0 0 18px rgba(56, 224, 255, 0.6);
+  }
+
+  header p {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    letter-spacing: 0.2rem;
+    color: #7fb6cc;
+    text-transform: uppercase;
+  }
+
+  /* central reactor / orb */
+  .reactor-wrap {
+    position: relative;
+    margin: 36px 0 18px;
+    width: 240px;
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--jarvis-cyan-dim);
+  }
+  .ring.r1 { width: 240px; height: 240px; border-top-color: var(--jarvis-cyan); animation: spin 8s linear infinite; }
+  .ring.r2 { width: 190px; height: 190px; border-bottom-color: var(--jarvis-cyan); animation: spin 6s linear infinite reverse; }
+  .ring.r3 { width: 140px; height: 140px; border-left-color: var(--jarvis-gold); opacity: 0.5; animation: spin 10s linear infinite; }
+
+  .core {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #bff4ff 0%, var(--jarvis-cyan) 40%, var(--jarvis-cyan-dim) 100%);
+    box-shadow: 0 0 40px rgba(56, 224, 255, 0.8), inset 0 0 30px rgba(255,255,255,0.5);
+    transition: transform 0.12s ease;
+  }
+
+  body.listening .core { animation: pulse 1.4s ease-in-out infinite; }
+  body.speaking .core { background: radial-gradient(circle, #fff0c2 0%, var(--jarvis-gold) 45%, #b8860b 100%);
+                        box-shadow: 0 0 50px rgba(255, 209, 102, 0.9); }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+  }
+
+  /* status badge */
+  .status {
+    z-index: 1;
+    font-size: 0.95rem;
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+    padding: 8px 22px;
+    border-radius: 30px;
+    border: 1px solid var(--jarvis-cyan-dim);
+    background: var(--bg-panel);
+    color: var(--jarvis-cyan);
+    transition: all 0.3s;
+  }
+  .status.active { color: #6effa6; border-color: #1f7a4d; box-shadow: 0 0 14px rgba(110,255,166,0.4); }
+  .status.error  { color: #ff6e7f; border-color: #7a1f2b; }
+
+  /* transcript + log */
+  .panel {
+    z-index: 1;
+    width: min(680px, 92vw);
+    margin-top: 22px;
+    background: var(--bg-panel);
+    border: 1px solid var(--jarvis-cyan-dim);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+  }
+
+  .live-line {
+    padding: 14px 18px;
+    min-height: 52px;
+    font-size: 1.05rem;
+    color: var(--jarvis-gold);
+    border-bottom: 1px solid rgba(56, 224, 255, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .live-line .mic { font-size: 1.2rem; }
+
+  .log {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 12px 18px;
+  }
+  .log .msg { margin: 8px 0; line-height: 1.5; font-size: 0.95rem; animation: fadein 0.4s; }
+  .log .you  { color: #9fd8ff; }
+  .log .you b  { color: var(--jarvis-cyan); }
+  .log .jarvis { color: #ffe9b3; }
+  .log .jarvis b { color: var(--jarvis-gold); }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* controls */
+  .controls {
+    z-index: 1;
+    margin: 22px 0 40px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    font-family: inherit;
+    font-size: 0.9rem;
+    letter-spacing: 0.08rem;
+    text-transform: uppercase;
+    color: var(--jarvis-cyan);
+    background: transparent;
+    border: 1px solid var(--jarvis-cyan);
+    padding: 11px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  button:hover { background: var(--jarvis-cyan); color: var(--bg-deep); box-shadow: 0 0 16px rgba(56,224,255,0.6); }
+  button.primary { border-color: var(--jarvis-gold); color: var(--jarvis-gold); }
+  button.primary:hover { background: var(--jarvis-gold); color: var(--bg-deep); }
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .hint {
+    z-index: 1;
+    font-size: 0.8rem;
+    color: #6e95a8;
+    text-align: center;
+    max-width: 620px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    padding: 0 16px;
+  }
+  .hint code {
+    color: var(--jarvis-gold);
+    background: rgba(255,209,102,0.1);
+    padding: 1px 7px;
+    border-radius: 4px;
+  }
+  .unsupported {
+    color: #ff6e7f;
+    border: 1px solid #7a1f2b;
+    background: rgba(122,31,43,0.15);
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-top: 20px;
+    max-width: 600px;
+    text-align: center;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>J.A.R.V.I.S</h1>
+    <p>Just A Rather Very Intelligent System</p>
+  </header>
+
+  <div class="reactor-wrap">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="core" id="core"></div>
+  </div>
+
+  <div class="status" id="status">Beklemede</div>
+
+  <div class="panel">
+    <div class="live-line" id="liveLine"><span class="mic">🎙️</span><span id="liveText">Sizi dinlemeye hazırım, efendim.</span></div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="startBtn">🎤 Dinlemeyi Başlat</button>
+    <button id="stopBtn" disabled>⏹ Durdur</button>
+    <button id="muteBtn">🔇 Sesi Kapat</button>
+  </div>
+
+  <p class="hint">
+    Otomatik mod: mikrofon sürekli açık kalır. Beni uyandırmak için
+    <code>Jarvis</code> de, ardından komutunu söyle.<br>
+    Örnekler: <code>Jarvis saat kaç</code> · <code>Jarvis merhaba</code> ·
+    <code>Jarvis bugün günlerden ne</code> · <code>Jarvis teşekkürler</code>
+  </p>
+
+  <div class="unsupported" id="unsupported" style="display:none">
+    ⚠️ Tarayıcın konuşma tanımayı desteklemiyor. Lütfen <b>Google Chrome</b>
+    veya <b>Microsoft Edge</b> kullan (HTTPS ya da localhost üzerinden).
+  </div>
+
+<script>
+/* ============================================================
+   J.A.R.V.I.S — Aşama 1
+   Web Speech API tabanlı sesli asistan.
+   - SpeechRecognition: sürekli/otomatik dinleme + wake word
+   - SpeechSynthesis : sesli yanıt (voice over)
+   ============================================================ */
+
+(function () {
+  "use strict";
+
+  const WAKE_WORD = "jarvis";
+  const LANG = "tr-TR";
+
+  // ---- DOM ----
+  const body       = document.body;
+  const statusEl   = document.getElementById("status");
+  const liveText   = document.getElementById("liveText");
+  const logEl      = document.getElementById("log");
+  const startBtn   = document.getElementById("startBtn");
+  const stopBtn    = document.getElementById("stopBtn");
+  const muteBtn    = document.getElementById("muteBtn");
+  const unsupported= document.getElementById("unsupported");
+
+  // ---- State ----
+  let recognition = null;
+  let listening   = false;   // kullanıcı dinlemeyi açtı mı
+  let awake       = false;   // wake word ile uyandı mı
+  let muted       = false;
+  let awakeTimer  = null;    // uyanık kalma süresi
+
+  // ---- Speech Recognition kurulumu ----
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    unsupported.style.display = "block";
+    startBtn.disabled = true;
+    setStatus("Desteklenmiyor", "error");
+    return;
+  }
+
+  function buildRecognition() {
+    const r = new SpeechRecognition();
+    r.lang = LANG;
+    r.continuous = true;        // sürekli dinle
+    r.interimResults = true;    // anlık (geçici) sonuçları da göster
+    r.maxAlternatives = 1;
+
+    r.onstart = () => {
+      setStatus(awake ? "Komut bekleniyor" : "Dinleniyor — 'Jarvis' de", "active");
+      body.classList.add("listening");
+    };
+
+    r.onresult = (event) => {
+      let interim = "";
+      let finalText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += t;
+        else interim += t;
+      }
+      if (interim) liveText.textContent = interim;
+      if (finalText) handleSpeech(finalText.trim());
+    };
+
+    r.onerror = (e) => {
+      if (e.error === "no-speech" || e.error === "aborted") return; // sessizlik normal
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        setStatus("Mikrofon izni reddedildi", "error");
+        stopListening();
+        return;
+      }
+      console.warn("Tanıma hatası:", e.error);
+    };
+
+    // continuous mod bazı tarayıcılarda kendiliğinden durur -> yeniden başlat
+    r.onend = () => {
+      body.classList.remove("listening");
+      if (listening) {
+        try { r.start(); } catch (_) { /* zaten başlamış olabilir */ }
+      } else {
+        setStatus("Beklemede");
+      }
+    };
+
+    return r;
+  }
+
+  // ---- Konuşma işleme ----
+  function handleSpeech(text) {
+    const lower = text.toLocaleLowerCase("tr-TR");
+    addLog("you", "Sen", text);
+    liveText.textContent = "…";
+
+    if (!awake) {
+      // Wake word var mı?
+      if (lower.includes(WAKE_WORD)) {
+        wake();
+        // Aynı cümlede komut da varsa hemen işle
+        const after = lower.split(WAKE_WORD).slice(1).join(" ").trim();
+        if (after) respondTo(after);
+        else speak("Buyurun efendim.");
+      }
+      // wake word yoksa sessizce yok say
+      return;
+    }
+
+    // Uyanıkken her cümle komut sayılır
+    respondTo(lower.replace(WAKE_WORD, "").trim());
+  }
+
+  function wake() {
+    awake = true;
+    setStatus("Aktif — komut bekleniyor", "active");
+    resetAwakeTimer();
+  }
+
+  function resetAwakeTimer() {
+    clearTimeout(awakeTimer);
+    // 15 sn komut gelmezse tekrar uykuya geç (wake word gerekir)
+    awakeTimer = setTimeout(() => {
+      awake = false;
+      setStatus("Dinleniyor — 'Jarvis' de", "active");
+    }, 15000);
+  }
+
+  // ---- Basit komut "modeli" (Aşama 1) ----
+  function respondTo(cmd) {
+    resetAwakeTimer();
+    if (!cmd) { speak("Sizi dinliyorum efendim."); return; }
+
+    let reply;
+    const has = (...words) => words.some(w => cmd.includes(w));
+
+    if (has("merhaba", "selam", "hey")) {
+      reply = "Merhaba efendim. Bugün size nasıl yardımcı olabilirim?";
+    } else if (has("saat kaç", "saat ne")) {
+      reply = "Saat şu an " + new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) + ".";
+    } else if (has("günlerden ne", "bugün ne", "tarih", "hangi gün")) {
+      reply = "Bugün " + new Date().toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + ".";
+    } else if (has("adın ne", "kimsin", "sen kimsin")) {
+      reply = "Ben Jarvis. Sizin kişisel yapay zeka asistanınızım.";
+    } else if (has("nasılsın", "naber")) {
+      reply = "Tüm sistemler optimal çalışıyor efendim. Teşekkür ederim.";
+    } else if (has("teşekkür", "sağol", "eyvallah")) {
+      reply = "Rica ederim efendim. Her zaman buradayım.";
+    } else if (has("kapan", "uyu", "kapat kendini", "görüşürüz")) {
+      reply = "Uykuya geçiyorum efendim. Beni 'Jarvis' diyerek uyandırabilirsiniz.";
+      awake = false;
+    } else if (has("şaka yap", "espri")) {
+      reply = "Bir yapay zeka neden denize gitmiş? Çünkü bulutlardan sıkılmış efendim.";
+    } else {
+      reply = "Bunu henüz öğrenmedim efendim, fakat zamanla daha yetenekli olacağım.";
+    }
+
+    speak(reply);
+  }
+
+  // ---- Sesli yanıt (TTS / voice over) ----
+  const synth = window.speechSynthesis;
+
+  function pickVoice() {
+    const voices = synth.getVoices();
+    // Türkçe bir ses tercih et, yoksa varsayılan
+    return voices.find(v => v.lang === LANG) ||
+           voices.find(v => v.lang && v.lang.startsWith("tr")) ||
+           voices[0] || null;
+  }
+
+  function speak(text) {
+    addLog("jarvis", "Jarvis", text);
+    if (muted || !synth) return;
+
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = LANG;
+    u.rate = 1.02;
+    u.pitch = 0.95;
+    const v = pickVoice();
+    if (v) u.voice = v;
+
+    u.onstart = () => { body.classList.add("speaking"); };
+    u.onend   = () => { body.classList.remove("speaking"); };
+
+    synth.speak(u);
+  }
+
+  // ---- UI yardımcıları ----
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = "status" + (kind ? " " + kind : "");
+  }
+
+  function addLog(who, label, text) {
+    const div = document.createElement("div");
+    div.className = "msg " + who;
+    div.innerHTML = "<b>" + label + ":</b> " + escapeHtml(text);
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+  }
+
+  // ---- Başlat / Durdur ----
+  function startListening() {
+    if (listening) return;
+    listening = true;
+    recognition = buildRecognition();
+    try { recognition.start(); } catch (_) {}
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    speak("Sistemler çevrimiçi efendim. Sizi dinliyorum.");
+  }
+
+  function stopListening() {
+    listening = false;
+    awake = false;
+    clearTimeout(awakeTimer);
+    if (recognition) { try { recognition.stop(); } catch (_) {} }
+    body.classList.remove("listening", "speaking");
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    setStatus("Beklemede");
+    liveText.textContent = "Dinleme durduruldu.";
+  }
+
+  startBtn.addEventListener("click", startListening);
+  stopBtn.addEventListener("click", stopListening);
+  muteBtn.addEventListener("click", () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? "🔊 Sesi Aç" : "🔇 Sesi Kapat";
+    if (muted && synth) synth.cancel();
+  });
+
+  // bazı tarayıcılar sesleri geç yükler
+  if (synth) synth.onvoiceschanged = pickVoice;
+})();
+</script>
+</body>
+</html>
