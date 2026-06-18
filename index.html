@@ -231,6 +231,25 @@
   body.on-state .vcap .rec { background: #ff5a6e; box-shadow: 0 0 10px #ff5a6e; animation: recblink 1.1s ease-in-out infinite; }
   @keyframes recblink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
 
+  /* yazılı komut kutusu (her cihazda çalışır) */
+  .askrow {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    display: flex; gap: 8px; width: min(440px, 86vw); z-index: 6;
+  }
+  .askrow input {
+    flex: 1; background: rgba(20,15,46,0.85); border: 1px solid rgba(180,139,255,0.4);
+    color: #eee6ff; padding: 12px 16px; border-radius: 24px; font-family: inherit; font-size: 0.92rem;
+    backdrop-filter: blur(6px); outline: none;
+  }
+  .askrow input::placeholder { color: #8f7ab8; }
+  .askrow input:focus { border-color: var(--purple); box-shadow: 0 0 14px rgba(180,139,255,0.3); }
+  .askrow button {
+    flex: 0 0 auto; width: 46px; border-radius: 50%; border: 1px solid var(--purple);
+    background: rgba(180,139,255,0.15); color: var(--purple); font-size: 1rem; cursor: pointer; transition: all 0.15s;
+  }
+  .askrow button:active { transform: scale(0.92); }
+
   /* aşama / ilerleme göstergesi (alt mor alan) */
   .stage {
     position: fixed; left: 0; right: 0;
@@ -277,6 +296,12 @@
       <button class="mclose" id="modelClose">Kapat</button>
     </div>
   </div>
+
+  <!-- Yazılı komut: her cihazda çalışır (özellikle iPhone'da güvenilir) -->
+  <form class="askrow" id="askRow" autocomplete="off">
+    <input id="askInput" type="text" placeholder="Yaz ya da konuş…" enterkeyhint="send" />
+    <button type="submit" id="askSend" aria-label="Gönder">➤</button>
+  </form>
 
   <!-- Aşama / ilerleme göstergesi -->
   <div class="stage" id="stage"><span class="dot-led" id="led"></span><span id="stageText">Beklemede</span></div>
@@ -349,7 +374,7 @@
     r.continuous = !(isIOS || isSafari);
     r.interimResults = true;
     r.maxAlternatives = 5;   // daha fazla aday -> daha hassas yakalama
-    r.onstart = () => { if(!isSpeaking) setStatus(awake?"Komut bekleniyor":"Dinleniyor"); };
+    r.onstart = () => { if(!isSpeaking) setStatus("Dinleniyor"); };
     r.onresult = (event) => {
       if (isSpeaking) return;
       let finalText="", interim="";
@@ -361,8 +386,6 @@
         if (res.isFinal) finalText += best + " ";
         else interim += best + " ";
       }
-      // Uyumadan önce: anlık (interim) sonuçta bile "Jarvis" geçerse hemen uyan
-      if (!awake && interim && matchesWake(interim)) wake();
       if (finalText.trim()) handleSpeech(finalText.trim());
     };
     r.onerror = (e) => {
@@ -378,19 +401,13 @@
   function handleSpeech(text) {
     const lower = text.toLocaleLowerCase("tr-TR");
     lastInteraction = Date.now();
-    if (!awake) {
-      if (matchesWake(lower)) {
-        wake();
-        // "jarvis"ten sonraki kısmı komut olarak al (bulanık eşleşmeleri de kes)
-        const after = stripWake(lower);
-        if (after) route(after); else speak("Buyurun Murathan.");
-      }
-      return;
-    }
-    route(stripWake(lower));
+    // Artık "Jarvis" demek gerekmiyor: her cümle doğrudan komut sayılır.
+    // (yine de yanlışlıkla "jarvis" geçerse temizleriz)
+    const cmd = stripWake(lower);
+    if (cmd) route(cmd);
   }
-  function wake() { awake=true; setStatus("Komut bekleniyor"); resetAwakeTimer(); }
-  function resetAwakeTimer() { clearTimeout(awakeTimer); awakeTimer=setTimeout(()=>{ awake=false; if(listening && !isSpeaking) setStatus("Dinleniyor"); }, 20000); }
+  function wake() { awake=true; resetAwakeTimer(); }
+  function resetAwakeTimer() { clearTimeout(awakeTimer); awakeTimer=setTimeout(()=>{ awake=false; }, 20000); }
 
   /* Yönlendirici: niyeti ortak beyinden al, ona göre yeteneği çalıştır */
   function route(cmd) {
@@ -731,7 +748,8 @@
     if(!SpeechRecognition){ body.classList.add("on-state"); jarvis.classList.add("on"); speak("Sesli tanıma bu tarayıcıda yok Murathan, fakat sesli yanıt verebilirim."); return; }
     listening=true; recognition=buildRecognition();
     try{ recognition.start(); }catch(_){}
-    startMic();
+    // Dalga mikrofonunu, tanıma mikrofonu yerleştikten sonra aç (çakışmayı azaltır)
+    setTimeout(()=>{ if(listening) startMic(); }, 700);
     body.classList.add("on-state"); jarvis.classList.add("on");
     jarvis.setAttribute("aria-label","Jarvis dinliyor — durdurmak için dokun");
     lastInteraction=Date.now(); startProactive();
@@ -813,6 +831,19 @@
   modelClose.addEventListener("click", e=>{ e.stopPropagation(); closeModal(); });
   modelModal.addEventListener("click", e=>{ if(e.target===modelModal) closeModal(); });
   refreshModelLabel();
+
+  /* ====================== YAZILI KOMUT (her cihazda) ====================== */
+  const askRow = document.getElementById("askRow");
+  const askInput = document.getElementById("askInput");
+  askRow.addEventListener("submit", e=>{
+    e.preventDefault();
+    const v = askInput.value.trim();
+    if (!v) return;
+    primeTTS();                 // iOS'ta sesi bu dokunuşta uyandır
+    askInput.value = "";
+    lastInteraction = Date.now();
+    route(stripWake(v.toLocaleLowerCase("tr-TR")));
+  });
 
   /* ====================== BEDAVA AI (Pollinations, anahtarsız) ====================== */
   function trimReply(t){
