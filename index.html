@@ -216,6 +216,15 @@
   .mitem.sel .chk { border-color: var(--purple); background: radial-gradient(circle, var(--purple) 45%, transparent 50%); }
   .vault { margin-top: 18px; padding-top: 16px; border-top: 1px solid #2e2350; }
   .vault h3 { font-size: 0.82rem; }
+  /* bas-konuş düğmesi (yerel ses açıkken) */
+  .pttbtn {
+    position: fixed; bottom: calc(74px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+    z-index: 7; display: none; min-width: 0; padding: 12px 22px; border-radius: 26px;
+    border: 1px solid var(--gold); color: var(--gold); background: rgba(255,209,102,0.1); font-size: 0.85rem;
+  }
+  .pttbtn.show { display: block; }
+  .pttbtn.rec { background: #ff5a6e; color: #1a0a0e; border-color: #ff5a6e; box-shadow: 0 0 18px rgba(255,90,110,0.6); }
+
   .vbtn { width: 100%; margin-top: 8px; border-color: #3a2d6e; color: #cdb6ff; padding: 11px; }
   .vbtn:hover { background: rgba(180,139,255,0.15); color: #fff; }
   .mclose { margin-top: 18px; width: 100%; border-color: var(--purple); color: var(--purple); }
@@ -327,6 +336,8 @@
 
   <div class="mute" id="muteBtn" role="button" aria-label="Sesi aç/kapat">🔊</div>
   <div class="modelbtn" id="modelBtn" role="button" aria-label="Model seç"><span class="mico">🧠</span><span id="modelName">Jarvis</span></div>
+  <!-- Bas-konuş: yalnızca yerel ses sunucusu bağlıyken görünür -->
+  <button class="pttbtn" id="pttBtn" aria-label="Bas konuş">🎤 Bas-konuş</button>
 
   <!-- Model seçim paneli -->
   <div class="modal" id="modelModal" aria-hidden="true">
@@ -432,6 +443,8 @@
   let recognition=null, listening=false, awake=false, muted=false;
   let awakeTimer=null, proactiveTimer=null, lastInteraction=Date.now();
   let isSpeaking=false, ttsPrimed=false;
+  let localVoiceOn=false;                                                   // yerel ses sunucusu bulundu mu
+  let localVoiceUrl=localStorage.getItem("jarvis_voice_url")||"http://localhost:8008";
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const synth = window.speechSynthesis;
@@ -721,17 +734,33 @@
   let keepAlive=null;
   // Chrome, ~15 sn'den uzun konuşmada sesi kesip duraklatır; düzenli resume ile akıcı tut
   function startKeepAlive(){ clearInterval(keepAlive); keepAlive=setInterval(()=>{ if(synth&&synth.speaking){ try{ synth.pause(); synth.resume(); }catch(_){} } else clearInterval(keepAlive); }, 9000); }
+  // speak: yerel ses (Kokoro) açıksa onu kullan; değilse tarayıcı sesi
   function speak(text){
-    if(muted||!synth){ restartRecognition(); return; }
+    if(muted){ restartRecognition(); return; }
+    if(localVoiceOn && localVoiceUrl){ localSpeak(text); return; }
+    browserSpeak(text);
+  }
+  function browserSpeak(text){
+    if(!synth){ restartRecognition(); return; }
     synth.cancel();
     const u=new SpeechSynthesisUtterance(text);
     u.lang=LANG; u.rate=VOICE.rate; u.pitch=VOICE.pitch; u.volume=1;
     const v=chosenVoice||pickVoice(); if(v) u.voice=v;
     u.onstart=()=>{ isSpeaking=true; body.classList.add("speaking"); setStatus("Yanıtlıyor"); startKeepAlive(); };
-    u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); setStatus(listening?(awake?"Komut bekleniyor":"Dinleniyor"):"Beklemede"); restartRecognition(); };
+    u.onend=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); setStatus(listening?"Dinleniyor":"Beklemede"); restartRecognition(); };
     u.onerror=()=>{ isSpeaking=false; body.classList.remove("speaking"); clearInterval(keepAlive); restartRecognition(); };
     if((isIOS||isSafari)&&recognition){ try{ recognition.stop(); }catch(_){} }
     synth.speak(u);
+  }
+  // Yerel TTS (Kokoro) — sunucudan ses dosyası alıp çalar; hata olursa tarayıcıya düşer
+  function localSpeak(text){
+    isSpeaking=true; body.classList.add("speaking"); setStatus("Yanıtlıyor (yerel)");
+    if((isIOS||isSafari)&&recognition){ try{ recognition.stop(); }catch(_){} }
+    const done=()=>{ isSpeaking=false; body.classList.remove("speaking"); setStatus(listening?"Dinleniyor":"Beklemede"); restartRecognition(); };
+    fetch(localVoiceUrl+"/tts",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text}) })
+      .then(r=> r.ok ? r.blob() : Promise.reject())
+      .then(b=>{ const a=new Audio(URL.createObjectURL(b)); a.onended=()=>{ URL.revokeObjectURL(a.src); done(); }; a.onerror=()=>done(); a.play().catch(()=>done()); })
+      .catch(()=>{ isSpeaking=false; body.classList.remove("speaking"); browserSpeak(text); });  // yerel ses gitmezse tarayıcı sesi
   }
 
   /* ====================== Yardımcılar ====================== */
@@ -1005,6 +1034,43 @@
   function tickClock(){ const c=document.getElementById("clock"); if(c) c.textContent=new Date().toLocaleTimeString("tr-TR",{hour12:false}); refreshHud(); }
   setInterval(tickClock, 1000); tickClock();
   document.getElementById("hudToggle").addEventListener("click", e=>{ e.stopPropagation(); document.body.classList.toggle("hud-open"); });
+
+  /* ====================== YEREL SES (faster-whisper + Kokoro) ======================
+     local-voice/server.py bir bilgisayarda çalışıyorsa otomatik bağlanır:
+     - TTS yerelden (Kokoro) gelir (localSpeak)
+     - Bas-konuş düğmesiyle ses kaydedilip /stt ile yerel whisper çözer */
+  const pttBtn = document.getElementById("pttBtn");
+  let mediaRec=null, recChunks=[], recStream=null, recording=false;
+
+  function detectLocalVoice(){
+    const ctrl=new AbortController(); const to=setTimeout(()=>{ try{ctrl.abort();}catch(_){} }, 2500);
+    fetch(localVoiceUrl+"/health",{signal:ctrl.signal})
+      .then(r=> r.ok ? r.json() : Promise.reject())
+      .then(d=>{ clearTimeout(to); if(d&&d.ok){ localVoiceOn=true; pttBtn.classList.add("show"); refreshHud(); } })
+      .catch(()=>{ clearTimeout(to); localVoiceOn=false; });
+  }
+  function startPtt(){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+      recStream=stream; recChunks=[];
+      mediaRec=new MediaRecorder(stream);
+      mediaRec.ondataavailable=e=>{ if(e.data&&e.data.size) recChunks.push(e.data); };
+      mediaRec.onstop=()=>{ try{recStream.getTracks().forEach(t=>t.stop());}catch(_){} sendStt(new Blob(recChunks,{type:mediaRec.mimeType||"audio/webm"})); };
+      mediaRec.start();
+      pttBtn.classList.add("rec"); pttBtn.textContent="● Bırak"; setStatus("Kaydediliyor","busy");
+    }).catch(()=>{ recording=false; speak("Mikrofona ulaşamadım Murathan."); });
+  }
+  function stopPtt(){ if(mediaRec&&mediaRec.state!=="inactive"){ try{mediaRec.stop();}catch(_){} } pttBtn.classList.remove("rec"); pttBtn.textContent="🎤 Bas-konuş"; }
+  function sendStt(blob){
+    setStatus("Çözümleniyor (yerel)","busy");
+    const fd=new FormData(); fd.append("audio", blob, "rec.webm");
+    fetch(localVoiceUrl+"/stt",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{
+      const t=((d&&d.text)||"").trim();
+      if(t){ lastInteraction=Date.now(); route(stripWake(t.toLocaleLowerCase("tr-TR"))); }
+      else { setStatus("Beklemede"); speak("Seni anlayamadım Murathan, tekrar dener misin?"); }
+    }).catch(()=>{ setStatus("Beklemede"); speak("Yerel ses sunucusuna ulaşamadım Murathan."); });
+  }
+  pttBtn.addEventListener("click", e=>{ e.stopPropagation(); primeTTS(); if(recording){ recording=false; stopPtt(); } else { recording=true; startPtt(); } });
+  detectLocalVoice();
 
   /* ====================== BEDAVA AI (Pollinations, anahtarsız) ====================== */
   function trimReply(t){
