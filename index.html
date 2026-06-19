@@ -254,6 +254,43 @@
   }
   .askrow button:active { transform: scale(0.92); }
 
+  /* ====== V.A.U.L.T HUD ====== */
+  .clock {
+    position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 16px; z-index: 5;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem;
+    letter-spacing: 0.12rem; color: #b9a3e6; opacity: 0.85; pointer-events: none;
+  }
+  .hudToggle {
+    position: fixed; top: calc(12px + env(safe-area-inset-top)); left: 16px; z-index: 7;
+    width: 38px; height: 38px; min-width: 0; padding: 0; border-radius: 10px;
+    border: 1px solid rgba(180,139,255,0.35); background: rgba(255,255,255,0.05);
+    color: #cdb6ff; font-size: 1.1rem; display: none;
+  }
+  .hud {
+    position: fixed; top: 50%; transform: translateY(-50%); z-index: 4; pointer-events: none;
+    width: 168px; font-size: 0.7rem; color: #b9a3e6;
+    background: rgba(20,15,46,0.42); border: 1px solid rgba(120,95,175,0.28);
+    border-radius: 12px; padding: 12px 13px; backdrop-filter: blur(4px);
+  }
+  .hud-left { left: 14px; }
+  .hud-right { right: 14px; }
+  .hud-h { font-size: 0.62rem; letter-spacing: 0.16rem; color: #8f7ab8; text-transform: uppercase; margin-bottom: 9px; border-bottom: 1px solid rgba(120,95,175,0.25); padding-bottom: 6px; }
+  .metric { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; }
+  .metric span { color: #8f7ab8; }
+  .metric b { color: #e6dcff; font-weight: 600; font-family: ui-monospace, Menlo, monospace; }
+  .skill { padding: 4px 0 4px 14px; position: relative; color: #c9b8e8; }
+  .skill::before { content: ""; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: #a878ff; box-shadow: 0 0 6px #a878ff; }
+  body.speaking .skill::before { background: #ffd166; box-shadow: 0 0 6px #ffd166; }
+
+  /* dar ekranlarda HUD'u gizle, düğmeyle aç */
+  @media (max-width: 720px) {
+    .hudToggle { display: block; }
+    .hud { display: none; width: 150px; }
+    body.hud-open .hud { display: block; }
+    body.hud-open .hud-left  { top: calc(60px + env(safe-area-inset-top)); transform: none; }
+    body.hud-open .hud-right { top: calc(60px + env(safe-area-inset-top)); transform: none; }
+  }
+
   /* aşama / ilerleme göstergesi (alt mor alan) */
   .stage {
     position: fixed; left: 0; right: 0;
@@ -314,6 +351,34 @@
     <input id="askInput" type="text" placeholder="Yaz ya da konuş…" enterkeyhint="send" />
     <button type="submit" id="askSend" aria-label="Gönder">➤</button>
   </form>
+
+  <!-- V.A.U.L.T HUD: sol metrikler / sağ yetenekler / üst saat -->
+  <div class="clock" id="clock">--:--:--</div>
+  <button class="hudToggle" id="hudToggle" aria-label="HUD aç/kapat">⊞</button>
+
+  <div class="hud hud-left" id="hudLeft">
+    <div class="hud-h">V.A.U.L.T · METRİKLER</div>
+    <div class="metric"><span>Komut</span><b id="mCmd">0</b></div>
+    <div class="metric"><span>Bilgi tabanı</span><b id="mKnow">0</b></div>
+    <div class="metric"><span>Notlar</span><b id="mNotes">0</b></div>
+    <div class="metric"><span>Model</span><b id="mModel">Jarvis</b></div>
+    <div class="metric"><span>Kasa</span><b id="mVault">—</b></div>
+    <div class="metric"><span>Oturum</span><b id="mUptime">0:00</b></div>
+    <div class="metric"><span>Ses</span><b id="mVoice">Tarayıcı</b></div>
+  </div>
+
+  <div class="hud hud-right" id="hudRight">
+    <div class="hud-h">YETENEKLER</div>
+    <div class="skill">Hava durumu</div>
+    <div class="skill">Ne giymeliyim</div>
+    <div class="skill">Saat &amp; tarih</div>
+    <div class="skill">Notlar &amp; hatırlatıcı</div>
+    <div class="skill">Hesaplama</div>
+    <div class="skill">Konum</div>
+    <div class="skill">Bilgi &amp; Wikipedia</div>
+    <div class="skill">AI sohbet</div>
+    <div class="skill">Obsidian hafıza</div>
+  </div>
 
   <!-- Aşama / ilerleme göstergesi -->
   <div class="stage" id="stage"><span class="dot-led" id="led"></span><span id="stageText">Beklemede</span></div>
@@ -423,7 +488,7 @@
 
   /* Yönlendirici: niyeti ortak beyinden al, ona göre yeteneği çalıştır */
   function route(cmd) {
-    resetAwakeTimer(); lastInteraction=Date.now();
+    resetAwakeTimer(); lastInteraction=Date.now(); bumpCmd();
     const intent = classifyIntent(cmd);
     switch (intent) {
       case "empty":      speak("Seni dinliyorum Murathan."); return;
@@ -922,6 +987,24 @@
   vaultConnect.addEventListener("click", e=>{ e.stopPropagation(); connectVault(); });
   vaultExport.addEventListener("click", e=>{ e.stopPropagation(); exportNotesMd(); });
   restoreVault();
+
+  /* ====================== V.A.U.L.T HUD (metrikler + saat) ====================== */
+  const SESSION_START = Date.now();
+  function bumpCmd(){ try{ localStorage.setItem("jarvis_cmd_count", String((+localStorage.getItem("jarvis_cmd_count")||0)+1)); }catch(_){} }
+  function refreshHud(){
+    const $=id=>document.getElementById(id); if(!$("mCmd")) return;
+    $("mCmd").textContent  = (+localStorage.getItem("jarvis_cmd_count")||0);
+    $("mKnow").textContent = (KNOWLEDGE ? KNOWLEDGE.length : 0);
+    $("mNotes").textContent= getNotes().length;
+    $("mModel").textContent= modelInfo(currentModel()).name.replace(/ \(.*\)/,"");
+    $("mVault").textContent= vaultDir ? "Bağlı" : "—";
+    $("mVoice").textContent= (typeof localVoiceOn!=="undefined" && localVoiceOn) ? "Yerel" : "Tarayıcı";
+    const s=Math.floor((Date.now()-SESSION_START)/1000);
+    $("mUptime").textContent = Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+  }
+  function tickClock(){ const c=document.getElementById("clock"); if(c) c.textContent=new Date().toLocaleTimeString("tr-TR",{hour12:false}); refreshHud(); }
+  setInterval(tickClock, 1000); tickClock();
+  document.getElementById("hudToggle").addEventListener("click", e=>{ e.stopPropagation(); document.body.classList.toggle("hud-open"); });
 
   /* ====================== BEDAVA AI (Pollinations, anahtarsız) ====================== */
   function trimReply(t){
