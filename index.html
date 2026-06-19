@@ -466,7 +466,7 @@
 
   let recognition=null, listening=false, awake=false, muted=false;
   let awakeTimer=null, proactiveTimer=null, lastInteraction=Date.now();
-  let isSpeaking=false, ttsPrimed=false;
+  let isSpeaking=false, ttsPrimed=false, recRunning=false, watchdog=null;
   let localVoiceOn=false;                                                   // yerel ses sunucusu bulundu mu
   let localVoiceUrl=localStorage.getItem("jarvis_voice_url")||"http://localhost:8008";
 
@@ -488,28 +488,36 @@
     r.continuous = !(isIOS || isSafari);
     r.interimResults = true;
     r.maxAlternatives = 5;   // daha fazla aday -> daha hassas yakalama
-    r.onstart = () => { if(!isSpeaking) setStatus("Dinleniyor"); };
+    r.onstart = () => { recRunning=true; if(!isSpeaking) setStatus("Dinleniyor"); };
     r.onresult = (event) => {
       if (isSpeaking) return;
       let finalText="", interim="";
       for (let i=event.resultIndex; i<event.results.length; i++) {
         const res = event.results[i];
-        // tüm alternatifleri topla; en uzun/dolu olanı kullan, wake için hepsine bak
         let best = "";
         for (let k=0; k<res.length; k++) if (res[k].transcript.length > best.length) best = res[k].transcript;
-        if (res.isFinal) finalText += best + " ";
-        else interim += best + " ";
+        if (res.isFinal) finalText += best + " "; else interim += best + " ";
       }
+      if (interim.trim() || finalText.trim()) bumpVoice();   // konuşunca üst bar oynasın
       if (finalText.trim()) handleSpeech(finalText.trim());
     };
     r.onerror = (e) => {
       if (e.error==="no-speech"||e.error==="aborted") return;
       if (e.error==="not-allowed"||e.error==="service-not-allowed") { stopListening(); return; }
+      // audio-capture / network gibi hatalarda watchdog yeniden başlatır
     };
-    r.onend = () => { if (listening && !isSpeaking) { try { r.start(); } catch(_){} } };
+    r.onend = () => { recRunning=false; if (listening && !isSpeaking) { try { r.start(); } catch(_){} } };
     return r;
   }
   function restartRecognition(){ if (listening && recognition) { try { recognition.start(); } catch(_){} } }
+  // Bekçi: tanıma sessizce ölürse (iOS sık yapar) birkaç saniyede bir dirilt
+  function startWatchdog(){
+    clearInterval(watchdog);
+    watchdog = setInterval(()=>{
+      if (listening && !isSpeaking && !recRunning && recognition){ try { recognition.start(); } catch(_){} }
+    }, 3500);
+  }
+  function stopWatchdog(){ clearInterval(watchdog); }
 
   /* ====================== Yönlendirme ====================== */
   function handleSpeech(text) {
@@ -805,73 +813,58 @@
     }, 60*1000);
   }
 
-  /* ====================== SES DALGASI (gerçek mikrofon) ======================
-     Web Audio ile mikrofon seviyesini okuyup üstteki çubukları canlandırır.
-     Fotodaki gibi: ortadakiler renkli ve daha hareketli, sesini ifade eder. */
-  let audioCtx=null, analyser=null, micStream=null, waveRAF=null, freqData=null;
-  function startMic(){
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { drawWave(); return; }
-    navigator.mediaDevices.getUserMedia({ audio:true }).then(stream=>{
-      micStream = stream;
-      const AC = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AC();
-      const src = audioCtx.createMediaStreamSource(stream);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128; analyser.smoothingTimeConstant = 0.78;
-      src.connect(analyser);
-      freqData = new Uint8Array(analyser.frequencyBinCount);
-      if (vcapText) vcapText.textContent = "Konuş Murathan, gerçek zamanlı dinliyorum…";
-    }).catch(()=>{ if(vcapText) vcapText.textContent="Mikrofon izni gerekli"; });
-    if (!waveRAF) drawWave();
-  }
-  function stopMic(){
-    try { micStream && micStream.getTracks().forEach(t=>t.stop()); } catch(_){}
-    try { audioCtx && audioCtx.close(); } catch(_){}
-    micStream=null; audioCtx=null; analyser=null; freqData=null;
-    if (vcapText) vcapText.textContent="Mikrofon kapalı";
-  }
+  /* ====================== SES DALGASI (durum tabanlı) ======================
+     ÖNEMLİ: Önceden ayrı bir getUserMedia ile mikrofon yakalıyordu; bu, ses
+     tanımayla aynı anda mikrofona erişmeye çalışıp (özellikle iOS'ta) tanımayı
+     öldürüyor ve bir süre sonra hem barı donduruyordu. Artık ayrı mikrofon yok:
+     bar; dinleme/algılama/konuşma durumuna göre canlanır. Tanımayla çakışmaz. */
+  let waveRAF=null, voiceLevel=0;   // voiceLevel: konuşunca yükselir, söner
+  function startMic(){ if (vcapText) vcapText.textContent="Konuş Murathan, dinliyorum…"; }   // mikrofon çakışması yok
+  function stopMic(){ if (vcapText) vcapText.textContent="Mikrofon kapalı"; voiceLevel=0; }
+  function bumpVoice(){ voiceLevel = 1; }   // tanıma sonucu gelince barı oynat
   function drawWave(){
     if (!waveCanvas) return;
     const ctx = waveCanvas.getContext("2d");
-    const DPR = Math.min(window.devicePixelRatio||1, 2);
-    const rect = waveCanvas.getBoundingClientRect();
-    const W = waveCanvas.width = Math.max(2, rect.width*DPR);
-    const H = waveCanvas.height = Math.max(2, rect.height*DPR);
-    const BARS = 28, gap = W/BARS, cy = H/2;
-    let t = 0;
+    let t = 0, W=0, H=0, gap=0, cy=0; const BARS=28;
+    function size(){
+      const DPR = Math.min(window.devicePixelRatio||1, 2);
+      const rect = waveCanvas.getBoundingClientRect();
+      W = waveCanvas.width = Math.max(2, rect.width*DPR);
+      H = waveCanvas.height= Math.max(2, rect.height*DPR);
+      gap = W/BARS; cy = H/2; return DPR;
+    }
+    let DPR = size();
     function loop(){
-      t += 0.05;
+      t += 0.08;
+      voiceLevel *= 0.92;                       // yavaşça sön
       ctx.clearRect(0,0,W,H);
-      // konuşuyorsa altın, dinliyorsa mor, beklemede soluk
       const cls = document.body.classList;
-      const accent = cls.contains("speaking") ? [255,209,102] : cls.contains("thinking") ? [180,139,255] : [168,120,255];
-      if (analyser && freqData) analyser.getByteFrequencyData(freqData);
+      const speaking = cls.contains("speaking");
+      const listening = cls.contains("on-state");
+      const accent = speaking ? [255,209,102] : cls.contains("thinking") ? [180,139,255] : [168,120,255];
+      // taban hareketlilik: konuşurken canlı, dinlerken orta, beklemede hafif
+      const energy = speaking ? 0.7 : listening ? (0.18 + voiceLevel*0.8) : 0.05;
       for (let i=0;i<BARS;i++){
-        const mid = 1 - Math.abs(i-(BARS-1)/2)/((BARS-1)/2);   // 0 kenar .. 1 orta
-        let amp;
-        if (analyser && freqData){
-          const idx = Math.floor((i/BARS)*freqData.length*0.7);
-          amp = (freqData[idx]/255) * (0.45+0.55*mid);
-        } else {
-          amp = (0.06 + 0.05*Math.sin(t+i*0.5)) * (0.5+mid); // boştayken hafif nefes
-        }
+        const mid = 1 - Math.abs(i-(BARS-1)/2)/((BARS-1)/2);
+        const wave = 0.5 + 0.5*Math.sin(t*2 + i*0.6) * Math.sin(t*0.7 + i);
+        const amp = energy * (0.35 + 0.65*mid) * (0.45 + 0.55*wave);
         const h = Math.max(H*0.06, amp*H*0.92);
         const x = i*gap + gap*0.5;
         const r = Math.min(gap*0.34, DPR*3);
-        const a = 0.35 + 0.6*mid + amp*0.3;
+        const a = 0.3 + 0.6*mid + amp*0.4;
         ctx.fillStyle = "rgba("+accent[0]+","+accent[1]+","+accent[2]+","+Math.min(1,a).toFixed(3)+")";
         roundBar(ctx, x-r, cy-h/2, r*2, h, r);
       }
       waveRAF = requestAnimationFrame(loop);
     }
+    window.addEventListener("resize", ()=>{ DPR=size(); });
     if (waveRAF) cancelAnimationFrame(waveRAF);
     loop();
   }
   function roundBar(ctx,x,y,w,h,r){ r=Math.min(r,w/2,h/2); ctx.beginPath();
     ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
     ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fill(); }
-  window.addEventListener("resize", ()=>{ if(waveRAF){ cancelAnimationFrame(waveRAF); waveRAF=null; drawWave(); } });
-  drawWave(); // başta boş/nefes modunda çalışsın
+  drawWave(); // tek sefer başlat; resize'ı kendi içinde yönetir
 
   /* ====================== Başlat / Durdur (sembole dokun) ====================== */
   function startListening(){
@@ -880,8 +873,8 @@
     if(!SpeechRecognition){ body.classList.add("on-state"); jarvis.classList.add("on"); speak("Sesli tanıma bu tarayıcıda yok Murathan, fakat sesli yanıt verebilirim."); return; }
     listening=true; recognition=buildRecognition();
     try{ recognition.start(); }catch(_){}
-    // Dalga mikrofonunu, tanıma mikrofonu yerleştikten sonra aç (çakışmayı azaltır)
-    setTimeout(()=>{ if(listening) startMic(); }, 700);
+    startMic();
+    startWatchdog();   // tanıma sessizce ölürse otomatik dirilt
     body.classList.add("on-state"); jarvis.classList.add("on");
     jarvis.setAttribute("aria-label","Jarvis dinliyor — durdurmak için dokun");
     lastInteraction=Date.now(); startProactive();
@@ -900,7 +893,7 @@
     }
   }
   function stopListening(){
-    listening=false; awake=false; clearTimeout(awakeTimer); clearInterval(proactiveTimer);
+    listening=false; awake=false; clearTimeout(awakeTimer); clearInterval(proactiveTimer); stopWatchdog();
     if(recognition){ try{ recognition.stop(); }catch(_){} }
     stopMic();
     if(synth) synth.cancel();
