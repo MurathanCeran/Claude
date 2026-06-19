@@ -263,6 +263,18 @@
   }
   .askrow button:active { transform: scale(0.92); }
 
+  /* Jarvis cevap kutusu (fotodaki gibi) */
+  .reply {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(120px + env(safe-area-inset-bottom)); z-index: 6;
+    width: min(560px, 90vw); max-height: 34vh; overflow-y: auto;
+    background: rgba(20,15,46,0.82); border: 1px solid rgba(180,139,255,0.4);
+    border-radius: 16px; padding: 14px 18px; backdrop-filter: blur(6px);
+    color: #efe8ff; font-size: 0.98rem; line-height: 1.5; text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.35s; box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  }
+  .reply.show { opacity: 1; pointer-events: auto; }
+
   /* ====== V.A.U.L.T HUD ====== */
   .clock {
     position: fixed; top: calc(14px + env(safe-area-inset-top)); right: 16px; z-index: 5;
@@ -391,6 +403,9 @@
     <div class="skill">Obsidian hafıza</div>
   </div>
 
+  <!-- Jarvis'in cevabı (ses çalmasa bile burada okunur — özellikle iPhone için) -->
+  <div class="reply" id="reply"></div>
+
   <!-- Aşama / ilerleme göstergesi -->
   <div class="stage" id="stage"><span class="dot-led" id="led"></span><span id="stageText">Beklemede</span></div>
 
@@ -439,6 +454,15 @@
   const stageText = document.getElementById("stageText");
   const waveCanvas = document.getElementById("wave");
   const vcapText = document.getElementById("vcapText");
+  const replyEl = document.getElementById("reply");
+  let replyTimer = null;
+  function showReply(text){
+    if(!replyEl) return;
+    replyEl.textContent = text;
+    replyEl.classList.add("show");
+    clearTimeout(replyTimer);
+    replyTimer = setTimeout(()=> replyEl.classList.remove("show"), Math.max(7000, text.length*70));
+  }
 
   let recognition=null, listening=false, awake=false, muted=false;
   let awakeTimer=null, proactiveTimer=null, lastInteraction=Date.now();
@@ -734,8 +758,10 @@
   let keepAlive=null;
   // Chrome, ~15 sn'den uzun konuşmada sesi kesip duraklatır; düzenli resume ile akıcı tut
   function startKeepAlive(){ clearInterval(keepAlive); keepAlive=setInterval(()=>{ if(synth&&synth.speaking){ try{ synth.pause(); synth.resume(); }catch(_){} } else clearInterval(keepAlive); }, 9000); }
-  // speak: yerel ses (Kokoro) açıksa onu kullan; değilse tarayıcı sesi
+  // speak: cevabı her zaman ekranda göster (iOS'ta ses çalmasa bile okunur),
+  // sonra yerel ses (Kokoro) açıksa ondan, değilse tarayıcıdan seslendir
   function speak(text){
+    showReply(text);
     if(muted){ restartRecognition(); return; }
     if(localVoiceOn && localVoiceUrl){ localSpeak(text); return; }
     browserSpeak(text);
@@ -1094,32 +1120,39 @@
     if (s.length > 600) { const cut = s.slice(0,600); const p = cut.lastIndexOf("."); s = (p>200? cut.slice(0,p+1) : cut)+"…"; }
     return s;
   }
+  // Garanti cevap: bilgi tabanı -> Wikipedia (her zaman bir şey söyler)
+  function answerLocalOpen(cmd){ const k = findKnowledge(cmd); if (k){ speak(k.a); return; } askWikipedia(cmd); }
+
   function askAI(cmd){
     const model = currentModel();
-    if (model === "jarvis") { askWikipedia(cmd); return; }
-    body.classList.add("thinking"); setStatus(modelInfo(model).name.replace(/ \(.*\)/,"")+" düşünüyor","busy");
+    if (model === "jarvis") { answerLocalOpen(cmd); return; }
+    const label = modelInfo(model).name.replace(/ \(.*\)/,"");
+    body.classList.add("thinking"); setStatus(label+" düşünüyor","busy");
     const sys = "Sen Jarvis adinda, Murathan'in kisisel yapay zeka asistanisin. Iron Man'deki Jarvis gibi kibar, sakin, kendinden emin ve yardimseversin. Daima Turkce, kisa (2-4 cumle), dogal ve dostca konus. Kullaniciya 'Murathan' diye hitap et, asla 'efendim' deme. Soruyu dogrudan yanitla.";
-    const prompt = sys + "\n\nMurathan: " + cmd + "\nJarvis:";
-    const url = "https://text.pollinations.ai/" + encodeURIComponent(prompt) +
-                "?model=" + encodeURIComponent(model) + "&referrer=jarvis-os&private=true";
-    const ctrl = new AbortController(); const to = setTimeout(()=>{ try{ctrl.abort();}catch(_){} }, 15000);
+    // system'i ayrı parametre yap (URL daha kısa/temiz) + tek seferlik fallback garantisi
+    const url = "https://text.pollinations.ai/" + encodeURIComponent(cmd) +
+                "?model=" + encodeURIComponent(model) +
+                "&system=" + encodeURIComponent(sys) +
+                "&referrer=jarvis-os&private=true";
+    let settled = false;
+    const giveUp = (note)=>{ if(settled) return; settled=true; clearTimeout(to);
+      body.classList.remove("thinking"); if(note) setStatus(note);
+      answerLocalOpen(cmd);                       // ASLA sessiz kalma
+    };
+    const ctrl = new AbortController();
+    const to = setTimeout(()=>{ try{ctrl.abort();}catch(_){} giveUp("AI yavaş, yerleşik bilgi"); }, 12000);
     fetch(url, { signal: ctrl.signal })
       .then(r=> r.ok ? r.text() : Promise.reject(r.status))
       .then(t=>{
-        clearTimeout(to); body.classList.remove("thinking");
+        if(settled) return;
         const out = trimReply(t);
-        if (!out || out.length < 2 || /\b(error|not found|unauthorized|forbidden|rate limit)\b/i.test(out)) throw 0;
-        speak(out);
+        if (!out || out.length < 2 || /(<html|<!doctype|forbidden|unauthorized|not found|rate limit|allowlist|error)/i.test(out)) return giveUp("AI'a ulaşılamadı, yerleşik bilgi");
+        settled = true; clearTimeout(to); body.classList.remove("thinking"); speak(out);
       })
-      .catch(()=>{
-        clearTimeout(to); body.classList.remove("thinking");
-        // AI'a ulaşılamadı -> kullanıcıya açıkça bildir, sonra yerleşik bilgiyle yanıtla
-        setStatus("AI'a ulaşılamadı, yerleşik bilgi","");
-        askWikipedia(cmd);
-      });
+      .catch(()=> giveUp("AI'a ulaşılamadı, yerleşik bilgi"));
   }
   // route bu fonksiyonla açık uçlu soruları yönlendirir
-  function answerOpen(cmd){ aiActive() ? askAI(cmd) : askWikipedia(cmd); }
+  function answerOpen(cmd){ aiActive() ? askAI(cmd) : answerLocalOpen(cmd); }
 
   if(synth) synth.onvoiceschanged = pickVoice;
 
