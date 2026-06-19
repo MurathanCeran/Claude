@@ -226,6 +226,9 @@
   .pttbtn.rec { background: #ff5a6e; color: #1a0a0e; border-color: #ff5a6e; box-shadow: 0 0 18px rgba(255,90,110,0.6); }
 
   .vbtn { width: 100%; margin-top: 8px; border-color: #3a2d6e; color: #cdb6ff; padding: 11px; }
+  .vinput { width: 100%; margin-top: 8px; background: rgba(20,15,46,0.85); border: 1px solid rgba(180,139,255,0.4);
+    color: #eee6ff; padding: 11px 14px; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; }
+  .vinput:focus { border-color: var(--purple); }
   .vbtn:hover { background: rgba(180,139,255,0.15); color: #fff; }
   .mclose { margin-top: 18px; width: 100%; border-color: var(--purple); color: var(--purple); }
 
@@ -361,7 +364,9 @@
       <div class="vault">
         <h3>Hafıza · Obsidian Kasası</h3>
         <p class="msub" id="vaultStatus">Bağlı değil</p>
-        <button class="vbtn" id="vaultConnect">📓 Obsidian kasası bağla</button>
+        <input id="vaultName" class="vinput" placeholder="Obsidian kasa adı (telefon için)" />
+        <button class="vbtn" id="vaultConnect">📓 Obsidian klasörü bağla</button>
+        <button class="vbtn" id="vaultSend">📲 Obsidian'a gönder</button>
         <button class="vbtn" id="vaultExport">⬇️ Notları .md olarak indir</button>
       </div>
 
@@ -977,8 +982,11 @@
   const vaultConnect = document.getElementById("vaultConnect");
   const vaultExport  = document.getElementById("vaultExport");
   const vaultStatus  = document.getElementById("vaultStatus");
+  const vaultName    = document.getElementById("vaultName");
+  const vaultSend    = document.getElementById("vaultSend");
   let vaultDir = null;
   const fsSupported = !!window.showDirectoryPicker;
+  if (vaultName) vaultName.value = localStorage.getItem("jarvis_vault_name") || "";
 
   // küçük IndexedDB yardımcıları (klasör handle'ını saklamak için)
   function idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open("jarvis-db",1); r.onupgradeneeded=()=>r.result.createObjectStore("kv"); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
@@ -986,9 +994,38 @@
   function idbGet(k){ return idb().then(db=>new Promise((res)=>{ const t=db.transaction("kv","readonly"); const q=t.objectStore("kv").get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null); })); }
 
   function setVaultStatus(){
-    if (!fsSupported){ vaultStatus.textContent="Bu cihaz klasör bağlamayı desteklemiyor — .md indir kullan"; vaultConnect.style.display="none"; return; }
+    if (!fsSupported){
+      // iPhone/Safari: klasör API yok -> Obsidian URI (kasa adı) + .md indir
+      vaultConnect.style.display = "none";
+      vaultName.style.display = "block";
+      vaultSend.style.display = "block";
+      vaultStatus.textContent = (localStorage.getItem("jarvis_vault_name")
+        ? "📲 Telefon modu: '"+localStorage.getItem("jarvis_vault_name")+"' kasasına gönderir"
+        : "Telefon: kasa adını yaz, sonra 'Obsidian'a gönder'");
+      return;
+    }
+    // Masaüstü: doğrudan klasör yazımı (URI'ye gerek yok)
+    vaultName.style.display = "none";
+    vaultSend.style.display = "none";
     vaultStatus.textContent = vaultDir ? ("✅ Bağlı: "+vaultDir.name+" → Jarvis.md") : "Bağlı değil";
-    vaultConnect.textContent = vaultDir ? "📓 Kasayı değiştir" : "📓 Obsidian kasası bağla";
+    vaultConnect.textContent = vaultDir ? "📓 Kasayı değiştir" : "📓 Obsidian klasörü bağla";
+  }
+  // iPhone/URI: notları Obsidian uygulamasına deep-link ile gönder
+  function sendToObsidian(){
+    const name = (vaultName.value || localStorage.getItem("jarvis_vault_name") || "").trim();
+    if (!name){ speak("Önce Obsidian kasanın adını yaz Murathan."); try{vaultName.focus();}catch(_){}; return; }
+    localStorage.setItem("jarvis_vault_name", name);
+    const notes = getNotes();
+    let content = "# 🧠 Jarvis Hafıza\n\n#jarvis\n\n";
+    if (!notes.length) content += "_Henüz not yok. Bana 'not al ...' de._\n";
+    else notes.forEach(n=> content += "- "+n.text+"  \n  ("+n.at+")\n");
+    const uri = "obsidian://new?vault="+encodeURIComponent(name)
+              + "&file="+encodeURIComponent("Jarvis/Notlar")
+              + "&content="+encodeURIComponent(content)
+              + "&overwrite=true";
+    setVaultStatus();
+    speak("Notlarını Obsidian'a gönderiyorum Murathan. Açılan pencerede kasana izin ver.");
+    window.location.href = uri;   // Obsidian uygulamasını açar ve notu oluşturur
   }
   async function connectVault(){
     if (!fsSupported){ speak("Bu cihaz klasör bağlamayı desteklemiyor Murathan; bilgisayarda Chrome kullan ya da notları indir."); return; }
@@ -1050,6 +1087,8 @@
   }
   vaultConnect.addEventListener("click", e=>{ e.stopPropagation(); connectVault(); });
   vaultExport.addEventListener("click", e=>{ e.stopPropagation(); exportNotesMd(); });
+  vaultSend.addEventListener("click", e=>{ e.stopPropagation(); sendToObsidian(); });
+  if (vaultName) vaultName.addEventListener("change", ()=>{ localStorage.setItem("jarvis_vault_name", vaultName.value.trim()); });
   restoreVault();
 
   /* ====================== V.A.U.L.T HUD (metrikler + saat) ====================== */
