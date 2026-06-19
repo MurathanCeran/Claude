@@ -2,7 +2,7 @@
    Strateji: uygulama kabuğu için ÖNCE AĞ (network-first) -> her açılışta
    en güncel sürüm gelir; ağ yoksa önbellekten açılır (çevrimdışı çalışır).
    Canlı API'ler (hava durumu, Wikipedia, konum) hiç önbeklenmez. */
-const CACHE = "jarvis-v3";
+const CACHE = "jarvis-v4";
 const SHELL = ["./", "./index.html", "./jarvis-brain.js", "./manifest.json"];
 
 self.addEventListener("install", (e) => {

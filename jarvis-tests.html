@@ -96,6 +96,12 @@
     ok(got===exp, "Niyet sınıflandırma", '"'+q+'"', "→ "+got+(got===exp?"":" (beklenen "+exp+")"));
   });
 
+  /* ---------- 3b) Şehir tanıma (yanlış "şehir" tahmini olmamalı) ---------- */
+  [["üstüme ne giymeliyim",null],["ne giymeliyim",null],["saat kaç",null],
+   ["istanbul","istanbul"],["ankarada hava nasıl","ankara"],["izmirde hava nasıl","izmir"],
+   ["adana sıcak mı","adana"],["niğde hava durumu","nigde"],["vanda hava nasıl","van"]
+  ].forEach(([q,exp])=>{ const got=J.extractCity(q); ok(got===exp, "Şehir tanıma", '"'+q+'"', "→ "+(got===null?"yok":got)+(got===exp?"":" (beklenen "+exp+")")); });
+
   /* ---------- 4) Bilgi veritabanı eşleşmeleri ---------- */
   const know = [
     "kara delik nedir","ışık hızı nedir","kaç gezegen var","everest ne kadar yüksek",

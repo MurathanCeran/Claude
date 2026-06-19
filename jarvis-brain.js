@@ -260,6 +260,55 @@
   }
 
   /* ============================================================
+     ŞEHİR TANIMA — yalnızca gerçek şehir adlarını yakalar.
+     Eskiden cümleden rastgele kelime "şehir" sanılıp hataya yol açıyordu
+     (ör. "ne giymeliyim" -> "giymeliyim" şehri aranıyordu). Artık beyaz
+     liste: 81 il + büyük dünya şehirleri.
+     ============================================================ */
+  const CITY_LIST = [
+    // Türkiye 81 il (normalize)
+    "adana","adiyaman","afyonkarahisar","agri","amasya","ankara","antalya","artvin","aydin","balikesir",
+    "bilecik","bingol","bitlis","bolu","burdur","bursa","canakkale","cankiri","corum","denizli",
+    "diyarbakir","edirne","elazig","erzincan","erzurum","eskisehir","gaziantep","giresun","gumushane","hakkari",
+    "hatay","isparta","mersin","istanbul","izmir","kars","kastamonu","kayseri","kirklareli","kirsehir",
+    "kocaeli","konya","kutahya","malatya","manisa","kahramanmaras","mardin","mugla","mus","nevsehir",
+    "nigde","ordu","rize","sakarya","samsun","siirt","sinop","sivas","tekirdag","tokat",
+    "trabzon","tunceli","sanliurfa","usak","van","yozgat","zonguldak","aksaray","bayburt","karaman",
+    "kirikkale","batman","sirnak","bartin","ardahan","igdir","yalova","karabuk","kilis","osmaniye","duzce",
+    // büyük dünya şehirleri
+    "london","paris","berlin","rome","madrid","amsterdam","vienna","moscow","new york","tokyo",
+    "beijing","dubai","cairo","athens","washington","los angeles","barcelona","munich","brussels"
+  ];
+  const CITY_ALIAS = {
+    "afyon":"afyonkarahisar","maras":"kahramanmaras","antep":"gaziantep","urfa":"sanliurfa","icel":"mersin",
+    "londra":"london","roma":"rome","viyana":"vienna","moskova":"moscow","pekin":"beijing","atina":"athens",
+    "kahire":"cairo","munih":"munich","brüksel":"brussels","newyork":"new york"
+  };
+  const CITY_SET = new Set(CITY_LIST);
+  // Türkçe yer eki ayıkla (ankarada -> ankara, izmirde -> izmir) — tam ad bulunmazsa
+  function deSuffix(w){
+    const sfx = ["dan","den","tan","ten","da","de","ta","te"];
+    for (const s of sfx) if (w.length > s.length+2 && w.endsWith(s)) return w.slice(0, -s.length);
+    return w;
+  }
+  function matchCity(w){
+    if (CITY_ALIAS[w]) return CITY_ALIAS[w];
+    if (CITY_SET.has(w)) return w;
+    const d = deSuffix(w);
+    if (d !== w){ if (CITY_ALIAS[d]) return CITY_ALIAS[d]; if (CITY_SET.has(d)) return d; }
+    return null;
+  }
+  function extractCity(cmd){
+    const words = norm(cmd).split(" ");
+    for (let i=0;i<words.length;i++){
+      if (i+1 < words.length && CITY_SET.has(words[i]+" "+words[i+1])) return words[i]+" "+words[i+1];
+      const m = matchCity(words[i]);
+      if (m) return m;
+    }
+    return null;
+  }
+
+  /* ============================================================
      NİYET SINIFLANDIRICI — komutun hangi yeteneğe ait olduğunu döndürür.
      route() bunu kullanır; testler de bunu sınar (tek doğruluk kaynağı).
      ============================================================ */
@@ -267,7 +316,7 @@
     ["name_set",  ["adımı kaydet","ismimi kaydet","benim adım","benim ismim","bana de ki","bana adımla"]],
     ["name_get",  ["adımı biliyor musun","adım ne","ismim ne","ben kimim"]],
     ["location",  ["neredeyim","konumum nerede","konumumu söyle","ben neredeyim","neresideyim"]],
-    ["clothing",  ["ne giy","ne giymeli","ne giyeyim","ne giysem","kıyafet öner","kıyafet ne","üzerime ne","mont giy","montumu","şemsiye almalı","şemsiye lazım","şemsiye gerek"]],
+    ["clothing",  ["ne giy","ne giymeli","ne giyeyim","ne giysem","ne giysem","üstüme ne","üzerime ne","kıyafet öner","kıyafet ne","kıyafet seç","mont giy","montumu","şemsiye almalı","şemsiye lazım","şemsiye gerek","dışarı ne"]],
     ["weather",   ["hava"]],
     ["time",      ["saat kaç","saat ne","saati söyle"]],
     ["date",      ["günlerden ne","bugün ne","tarih","hangi gün","bugün hangi"]],
@@ -297,7 +346,7 @@
     return "wikipedia";
   }
 
-  root.JARVIS = { norm, lev, matchesWake, stripWake, KNOWLEDGE, WEATHER_CODES, findKnowledge, classifyIntent };
+  root.JARVIS = { norm, lev, matchesWake, stripWake, KNOWLEDGE, WEATHER_CODES, findKnowledge, classifyIntent, extractCity };
   if (typeof module !== "undefined" && module.exports) module.exports = root.JARVIS;
 
 })(typeof window !== "undefined" ? window : globalThis);
