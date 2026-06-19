@@ -695,7 +695,7 @@
   /* ====================== Notlar / Hatırlatıcı / Hesap ====================== */
   function getNotes(){ try { return JSON.parse(localStorage.getItem("jarvis_notes")||"[]"); } catch { return []; } }
   function saveNotes(n){ localStorage.setItem("jarvis_notes", JSON.stringify(n)); }
-  function addNote(cmd){ let note=cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g,"").trim(); if(!note){ speak("Ne not almamı istersin Murathan?"); return; } const at=new Date().toLocaleString("tr-TR"); const n=getNotes(); n.push({text:note,at}); saveNotes(n); if(typeof vaultAppend==="function") vaultAppend("- "+note+"  \n  <sub>"+at+"</sub>"); speak("Not alındı Murathan: "+note); }
+  function addNote(cmd){ let note=cmd.replace(/not al|not et|kaydet|şunu yaz|ki|diye/g,"").trim(); if(!note){ speak("Ne not almamı istersin Murathan?"); return; } const at=new Date().toLocaleString("tr-TR"); const n=getNotes(); n.push({text:note,at}); saveNotes(n); if(typeof vaultSaveNote==="function") vaultSaveNote(note, at); speak("Not alındı Murathan: "+note); }
   function readNotes(){ const n=getNotes(); if(!n.length){ speak("Kayıtlı notun yok Murathan."); return; } speak(n.length+" notun var Murathan. "+n.map((x,i)=>(i+1)+". "+x.text).join(". ")); }
   function setReminder(cmd){
     const m=cmd.match(/(\d+)\s*(saniye|dakika|dk|saat)/);
@@ -977,7 +977,7 @@
       const dir = await window.showDirectoryPicker({ id:"jarvis-vault", mode:"readwrite" });
       vaultDir = dir; await idbSet("vaultDir", dir);
       setVaultStatus();
-      speak("Obsidian kasanı bağladım Murathan. Aldığım notları kasandaki Jarvis dosyasına da yazacağım.");
+      speak("Obsidian kasanı bağladım Murathan. Her notu ayrı bir dosya olarak yazıp Jarvis notuna bağlayacağım; böylece grafik görünümünde birbirine bağlı çıkarlar.");
     } catch(_){ /* kullanıcı vazgeçti */ }
   }
   async function restoreVault(){
@@ -988,18 +988,34 @@
     } catch(_){}
     setVaultStatus();
   }
-  async function vaultAppend(line){
+  async function vaultPerm(){
     if (!vaultDir) return false;
+    if ((await vaultDir.queryPermission({mode:"readwrite"})) === "granted") return true;
+    return (await vaultDir.requestPermission({mode:"readwrite"})) === "granted";
+  }
+  async function writeFile(dirHandle, name, content){
+    const fh = await dirHandle.getFileHandle(name, { create:true });
+    const w = await fh.createWritable(); await w.write(content); await w.close();
+  }
+  async function readFile(dirHandle, name){
+    try { const fh = await dirHandle.getFileHandle(name); return await (await fh.getFile()).text(); } catch(_){ return ""; }
+  }
+  // Graph-dostu kayıt: her not ayrı dosya, [[Jarvis]] hub'ına bağlı -> grafik görünümünde düğüm
+  async function vaultSaveNote(text, at){
+    if (!(await vaultPerm())) return false;
     try {
-      if ((await vaultDir.queryPermission({mode:"readwrite"})) !== "granted"){
-        if ((await vaultDir.requestPermission({mode:"readwrite"})) !== "granted") return false;
-      }
-      const fh = await vaultDir.getFileHandle("Jarvis.md", { create:true });
-      let old = ""; try { old = await (await fh.getFile()).text(); } catch(_){}
-      if (!old) old = "# Jarvis Notları\n\n";
-      const w = await fh.createWritable();
-      await w.write(old + line + "\n");
-      await w.close();
+      // 1) Jarvis/ klasörü + ayrı not dosyası
+      const sub = await vaultDir.getDirectoryHandle("Jarvis", { create:true });
+      const d = new Date();
+      const stamp = d.toISOString().slice(0,16).replace("T"," ").replace(/:/g,"-");
+      const title = (text.slice(0,40).replace(/[\\/:*?"<>|#\[\]]/g,"").trim() || "Not") + " " + stamp;
+      const body = "---\ntags: [jarvis, not]\ndate: "+at+"\n---\n\n"+text+"\n\n[[Jarvis]]\n";
+      await writeFile(sub, title + ".md", body);
+      // 2) Hub notu (Jarvis.md) — her nota wikilink ekle (graph kenarları)
+      let hub = await readFile(vaultDir, "Jarvis.md");
+      if (!hub) hub = "# 🧠 Jarvis Hafıza\n\n#jarvis\n\nJarvis'in aldığı notlar:\n\n";
+      hub += "- [[Jarvis/"+title+"]] — <sub>"+at+"</sub>\n";
+      await writeFile(vaultDir, "Jarvis.md", hub);
       return true;
     } catch(_){ return false; }
   }
