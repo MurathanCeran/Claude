@@ -114,6 +114,49 @@ def print_stats(stats: dict, tag_stats: list[dict]) -> None:
         console.print(tag_table)
 
 
+def print_digest(today_notes: list[Note], memory: list[tuple[Note, int]]) -> None:
+    """Render daily digest: today's notes + past memories."""
+    today_str = __import__("datetime").datetime.utcnow().strftime("%d %B %Y")
+    console.rule(f"[bold cyan]Cortex Günlük Özeti — {today_str}[/bold cyan]")
+
+    # Today's notes
+    console.print(f"\n[bold]Bugün Eklenen Notlar[/bold] ({len(today_notes)})\n")
+    if today_notes:
+        table = Table(show_header=False, box=None, padding=(0, 2))
+        table.add_column("ID", style="dim", width=5)
+        table.add_column("Başlık", style="bold white")
+        table.add_column("Etiketler", style="green")
+        for note in today_notes:
+            tags_str = ", ".join(note.tag_names) or "—"
+            table.add_row(f"#{note.id}", note.title, tags_str)
+        console.print(table)
+    else:
+        console.print("[dim]  Bugün henüz not eklenmedi.[/dim]")
+
+    # Memory section
+    console.print(f"\n[bold]Geçmişten Hatırlatmalar[/bold]\n")
+    if not memory:
+        console.print("[dim]  Hatırlatılacak eski not bulunamadı.[/dim]")
+    else:
+        for note, days_ago in memory:
+            panel_title = f"[dim]{days_ago} gün önce[/dim]"
+            snippet = note.short_content or "—"
+            tags_str = "  " + " ".join(f"[green]#{t}[/green]" for t in note.tag_names)
+            console.print(
+                Panel(
+                    f"[bold white]{note.title}[/bold white]\n"
+                    f"[dim]{snippet}[/dim]\n"
+                    f"{tags_str}",
+                    title=panel_title,
+                    title_align="right",
+                    border_style="dim",
+                    expand=False,
+                )
+            )
+
+    console.rule(style="dim")
+
+
 def print_error(message: str) -> None:
     console.print(f"[bold red]Hata:[/bold red] {message}")
 

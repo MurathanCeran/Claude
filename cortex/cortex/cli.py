@@ -8,9 +8,10 @@ from typing import Annotated, Optional
 import typer
 from rich.prompt import Confirm, Prompt
 
-from cortex import db, importer, search
+from cortex import clipper, db, digest, importer, search
 from cortex.display import (
     console,
+    print_digest,
     print_error,
     print_note_detail,
     print_note_table,
@@ -158,6 +159,36 @@ def cmd_stats() -> None:
     stats = db.db_stats()
     tags = db.tag_stats()
     print_stats(stats, tags)
+
+
+@app.command("clip")
+def cmd_clip(
+    url: Annotated[str, typer.Argument(help="Kaydedilecek web sayfası URL'i")],
+    tags: Annotated[Optional[str], typer.Option("--tags", "-t", help="Virgülle ayrılmış etiketler")] = None,
+) -> None:
+    """Web sayfasını markdown olarak kaydet."""
+    console.print(f"[cyan]Çekiliyor:[/cyan] {url}")
+    tag_list = [t.strip() for t in tags.split(",")] if tags else []
+    note_id = clipper.clip(url, tags=tag_list)
+    if note_id is None:
+        raise typer.Exit(1)
+    note = db.get_note(note_id)
+    if note:
+        print_success(
+            f"Kaydedildi. ID: [bold]{note_id}[/bold]  Başlık: [cyan]{note.title}[/cyan]"
+        )
+        console.print(f"[dim]Etiketler: {', '.join(note.tag_names)}[/dim]")
+
+
+@app.command("digest")
+def cmd_digest(
+    memory_days: Annotated[int, typer.Option("--days", "-d", help="Kaç gün öncesinden hatırlat")] = 7,
+    memory_count: Annotated[int, typer.Option("--count", "-n", help="Kaç not hatırlatılsın")] = 3,
+) -> None:
+    """Günlük özet: bugünün notları + geçmişten hatırlatmalar."""
+    today_notes = digest.get_today_notes()
+    memory = digest.get_memory_notes(min_days=memory_days, count=memory_count)
+    print_digest(today_notes, memory)
 
 
 def main() -> None:
