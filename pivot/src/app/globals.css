@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #3c3c3c;
+  --duo-green: #58CC02;
+  --duo-green-dark: #58A700;
+  --duo-blue: #1CB0F6;
+  --duo-blue-dark: #0099D6;
+  --duo-purple: #CE82FF;
+  --duo-yellow: #FFCC00;
+  --duo-red: #FF4B4B;
+  --duo-orange: #FF9600;
+  --duo-gray: #AFAFAF;
+  --duo-border: #E5E5E5;
+  --font-nunito: 'Nunito', sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-nunito);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
+  font-weight: 800;
+}
+
+.btn-green {
+  background-color: var(--duo-green);
+  color: white;
+  box-shadow: 0 4px 0 var(--duo-green-dark);
+  transition: box-shadow 0.1s, transform 0.1s;
+}
+.btn-green:active {
+  box-shadow: none;
+  transform: translateY(4px);
+}
+
+.btn-blue {
+  background-color: var(--duo-blue);
+  color: white;
+  box-shadow: 0 4px 0 var(--duo-blue-dark);
+  transition: box-shadow 0.1s, transform 0.1s;
+}
+.btn-blue:active {
+  box-shadow: none;
+  transform: translateY(4px);
+}
+
+.btn-disabled {
+  background-color: #e5e5e5;
+  color: #afafaf;
+  cursor: not-allowed;
+}
+
+.btn-red {
+  background-color: #FF4B4B;
+  color: white;
+  box-shadow: 0 4px 0 #CC0000;
+  transition: box-shadow 0.1s, transform 0.1s;
+}
+.btn-red:active {
+  box-shadow: none;
+  transform: translateY(4px);
+}
+
+.progress-bar {
+  background-color: #58CC02;
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease-out;
+}
+
+.bubble-tail-outer {
+  position: absolute;
+  bottom: -16px;
+  left: 40px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 16px solid #58CC02;
+}
+
+.bubble-tail-inner {
+  position: absolute;
+  bottom: -13px;
+  left: 42px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 14px solid #F0FFF0;
+}
