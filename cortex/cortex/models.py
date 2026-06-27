@@ -36,3 +36,10 @@ class SearchResult:
     note: Note
     score: float
     snippet: str
+
+
+@dataclass
+class NoteSummary:
+    note_id: int
+    summary: str
+    created_at: datetime

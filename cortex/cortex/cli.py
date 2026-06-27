@@ -8,9 +8,10 @@ from typing import Annotated, Optional
 import typer
 from rich.prompt import Confirm, Prompt
 
-from cortex import clipper, db, digest, importer, search
+from cortex import clipper, db, digest, importer, search, semantic
 from cortex.display import (
     console,
+    print_ask_result,
     print_digest,
     print_error,
     print_note_detail,
@@ -189,6 +190,47 @@ def cmd_digest(
     today_notes = digest.get_today_notes()
     memory = digest.get_memory_notes(min_days=memory_days, count=memory_count)
     print_digest(today_notes, memory)
+
+
+@app.command("ask")
+def cmd_ask(
+    query: Annotated[str, typer.Argument(help="Doğal dil sorusu")],
+) -> None:
+    """Semantik arama yap ve Claude'dan yanıt al."""
+    if semantic.get_client() is None:
+        print_warning("ANTHROPIC_API_KEY bulunamadı. FTS5 aramasına geçiliyor...")
+        results = search.search(query, limit=10)
+        print_search_results(results, query)
+        return
+
+    console.print(f"[cyan]Semantik arama çalışıyor...[/cyan]")
+    notes, answer = semantic.ask(query)
+    print_ask_result(query, notes, answer)
+
+
+@app.command("reindex")
+def cmd_reindex(
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Var olan özetleri de yenile")
+    ] = False,
+) -> None:
+    """Tüm notlar için Claude özetleri oluştur."""
+    if semantic.get_client() is None:
+        print_warning("ANTHROPIC_API_KEY bulunamadı. Yeniden indeksleme yapılamıyor.")
+        raise typer.Exit(1)
+
+    if force:
+        db.delete_all_summaries()
+        console.print("[dim]Mevcut özetler silindi.[/dim]")
+
+    notes = db.get_notes_without_summaries()
+    if not notes:
+        print_success("Tüm notların özeti zaten mevcut.")
+        return
+
+    console.print(f"[cyan]{len(notes)} not için özet oluşturuluyor...[/cyan]")
+    created, failed = semantic.reindex_all()
+    print_success(f"Tamamlandı: [bold]{created}[/bold] özet oluşturuldu, {failed} başarısız.")
 
 
 def main() -> None:

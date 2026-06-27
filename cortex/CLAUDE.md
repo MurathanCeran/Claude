@@ -24,7 +24,7 @@
 - [x] Faz 1: DB + CRUD
 - [x] Faz 2: Search (FTS5 + TF-IDF)
 - [x] Faz 3: Import sistemi
-- [ ] Faz 4: Claude API entegrasyonu (semantic search)  ← sıradaki
+- [x] Faz 4: Claude API entegrasyonu (semantic search)
 - [x] Faz 5: Web clipper (URL'den içerik çekme)
 - [x] Bonus: Günlük özet (digest) komutu
 
@@ -46,3 +46,5 @@
 | `cortex stats` | İstatistikler |
 | `cortex clip <url>` | Web sayfasını markdown olarak kaydet |
 | `cortex digest` | Günlük özet: bugünün notları + geçmişten hatırlatmalar |
+| `cortex ask "soru"` | Semantik arama + Claude'dan bağlamsal yanıt |
+| `cortex reindex` | Tüm notlar için Claude özetleri oluştur |

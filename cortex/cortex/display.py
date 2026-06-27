@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.text import Text
 
 from cortex.models import Note, SearchResult
+from typing import Optional
 
 console = Console()
 
@@ -155,6 +156,40 @@ def print_digest(today_notes: list[Note], memory: list[tuple[Note, int]]) -> Non
             )
 
     console.rule(style="dim")
+
+
+def print_ask_result(
+    query: str,
+    notes: list[tuple[Note, str]],
+    answer: Optional[str],
+) -> None:
+    """Render semantic search result and synthesized answer."""
+    console.print(f"\n[cyan]Soru:[/cyan] {query}\n")
+
+    if answer:
+        console.print(
+            Panel(
+                Markdown(answer),
+                title="[bold cyan]Claude'un Yanıtı[/bold cyan]",
+                border_style="cyan",
+            )
+        )
+    else:
+        console.print("[yellow]Yanıt oluşturulamadı.[/yellow]")
+
+    if notes:
+        console.print("\n[bold]İlgili Notlar:[/bold]\n")
+        table = Table(show_header=True, header_style="bold cyan", show_lines=True)
+        table.add_column("ID", width=5, justify="right")
+        table.add_column("Başlık", min_width=20)
+        table.add_column("Özet", min_width=40)
+        table.add_column("Etiketler", min_width=12)
+        for note, summary in notes:
+            tags_str = ", ".join(note.tag_names) or "—"
+            table.add_row(str(note.id), note.title, summary or note.short_content, tags_str)
+        console.print(table)
+    else:
+        console.print("[yellow]İlgili not bulunamadı.[/yellow]")
 
 
 def print_error(message: str) -> None:

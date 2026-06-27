@@ -11,6 +11,12 @@ from cortex.models import Note, Tag
 DB_PATH = Path(__file__).parent.parent / "data" / "cortex.db"
 
 DDL = """
+CREATE TABLE IF NOT EXISTS note_summaries (
+    note_id    INTEGER PRIMARY KEY REFERENCES notes(id) ON DELETE CASCADE,
+    summary    TEXT    NOT NULL,
+    created_at TEXT    NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS notes (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     title      TEXT    NOT NULL,
@@ -223,6 +229,55 @@ def db_stats() -> dict:
             "tags": tag_count,
             "sources": sources,
         }
+
+
+# ── Note Summaries ───────────────────────────────────────────────────────────
+
+def create_summary(note_id: int, summary: str) -> None:
+    """Insert or replace a summary for a note."""
+    now = _now()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO note_summaries (note_id, summary, created_at) "
+            "VALUES (?, ?, ?)",
+            (note_id, summary, now),
+        )
+
+
+def get_summary(note_id: int) -> Optional[str]:
+    """Return the summary text for a note, or None if not found."""
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT summary FROM note_summaries WHERE note_id = ?", (note_id,)
+        ).fetchone()
+        return row["summary"] if row else None
+
+
+def get_all_summaries() -> dict[int, str]:
+    """Return all summaries as {note_id: summary} dict."""
+    with get_conn() as conn:
+        rows = conn.execute("SELECT note_id, summary FROM note_summaries").fetchall()
+        return {r["note_id"]: r["summary"] for r in rows}
+
+
+def get_notes_without_summaries() -> list[Note]:
+    """Return all notes that have no entry in note_summaries."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT n.* FROM notes n
+            LEFT JOIN note_summaries s ON s.note_id = n.id
+            WHERE s.note_id IS NULL
+            ORDER BY n.id
+            """
+        ).fetchall()
+        return [_row_to_note(r) for r in rows]
+
+
+def delete_all_summaries() -> None:
+    """Remove all entries from note_summaries (used by reindex --force)."""
+    with get_conn() as conn:
+        conn.execute("DELETE FROM note_summaries")
 
 
 # ── FTS5 search ──────────────────────────────────────────────────────────────
