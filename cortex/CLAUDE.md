@@ -22,10 +22,11 @@
 
 ## Yapılacaklar (sırayla)
 - [x] Faz 1: DB + CRUD
-- [ ] Faz 2: Search (FTS5 + TF-IDF)
-- [ ] Faz 3: Import sistemi
-- [ ] Faz 4: Claude API entegrasyonu (semantic search)
-- [ ] Faz 5: Web clipper (URL'den içerik çekme)
+- [x] Faz 2: Search (FTS5 + TF-IDF)
+- [x] Faz 3: Import sistemi
+- [ ] Faz 4: Claude API entegrasyonu (semantic search)  ← sıradaki
+- [x] Faz 5: Web clipper (URL'den içerik çekme)
+- [x] Bonus: Günlük özet (digest) komutu
 
 ## Veritabanı
 - Parameterized queries zorunlu (SQL injection yok)
@@ -43,3 +44,5 @@
 | `cortex import <yol>` | .md dosyaları import et |
 | `cortex delete <id>` | Not sil |
 | `cortex stats` | İstatistikler |
+| `cortex clip <url>` | Web sayfasını markdown olarak kaydet |
+| `cortex digest` | Günlük özet: bugünün notları + geçmişten hatırlatmalar |
