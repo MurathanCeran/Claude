@@ -19,6 +19,7 @@ class Note:
     source: str  # "manual" | "import" | "web"
     created_at: datetime
     updated_at: datetime
+    source_url: Optional[str] = None
     tags: list[Tag] = field(default_factory=list)
 
     @property

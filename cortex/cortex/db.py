@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS notes (
     title      TEXT    NOT NULL,
     content    TEXT    NOT NULL DEFAULT '',
     source     TEXT    NOT NULL DEFAULT 'manual',
+    source_url TEXT,
     created_at TEXT    NOT NULL,
     updated_at TEXT    NOT NULL
 );
@@ -87,6 +88,14 @@ def init_db() -> None:
     """Create all tables and triggers if they don't exist."""
     with get_conn() as conn:
         conn.executescript(DDL)
+        _migrate(conn)
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Apply incremental schema migrations for existing databases."""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(notes)").fetchall()}
+    if "source_url" not in cols:
+        conn.execute("ALTER TABLE notes ADD COLUMN source_url TEXT")
 
 
 # ── Note CRUD ────────────────────────────────────────────────────────────────
@@ -95,14 +104,19 @@ def _now() -> str:
     return datetime.utcnow().isoformat()
 
 
-def create_note(title: str, content: str, source: str = "manual") -> int:
+def create_note(
+    title: str,
+    content: str,
+    source: str = "manual",
+    source_url: Optional[str] = None,
+) -> int:
     """Insert a note and return its new id."""
     now = _now()
     with get_conn() as conn:
         cur = conn.execute(
-            "INSERT INTO notes (title, content, source, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (title, content, source, now, now),
+            "INSERT INTO notes (title, content, source, source_url, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (title, content, source, source_url, now, now),
         )
         return cur.lastrowid  # type: ignore[return-value]
 
@@ -324,6 +338,7 @@ def _row_to_note(row: sqlite3.Row) -> Note:
         title=row["title"],
         content=row["content"],
         source=row["source"],
+        source_url=row["source_url"],
         created_at=datetime.fromisoformat(row["created_at"]),
         updated_at=datetime.fromisoformat(row["updated_at"]),
     )

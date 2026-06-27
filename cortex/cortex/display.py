@@ -49,6 +49,8 @@ def print_note_detail(note: Note) -> None:
         f"[dim]Oluşturulma:[/dim] {note.created_at.strftime('%d.%m.%Y %H:%M')}  "
         f"[dim]Güncelleme:[/dim] {note.updated_at.strftime('%d.%m.%Y %H:%M')}"
     )
+    if note.source_url:
+        meta += f"\n[dim]URL:[/dim] [link={note.source_url}]{note.source_url}[/link]"
     header = Text.assemble(("● ", "cyan"), (note.title, "bold white"))
 
     console.print()

@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from urllib.parse import urlparse
 
-import requests
+import httpx
 from bs4 import BeautifulSoup
 from markdownify import markdownify
 
@@ -32,7 +32,8 @@ _CONTENT_SELECTORS = [
 ]
 
 _TIMEOUT = 10  # seconds
-_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
+_MAX_BYTES = 5 * 1024 * 1024  # 5 MB raw HTML cap
+_MAX_CONTENT_CHARS = 10_000   # markdown output character limit
 
 
 def clip(url: str, tags: list[str] | None = None) -> int | None:
@@ -45,7 +46,12 @@ def clip(url: str, tags: list[str] | None = None) -> int | None:
         return None
 
     title, markdown_content = _parse(html, url)
-    note_id = db.create_note(title=title, content=markdown_content, source="web")
+    note_id = db.create_note(
+        title=title,
+        content=markdown_content,
+        source="web",
+        source_url=url,
+    )
 
     all_tags = list(tags or []) + [_domain_tag(url)]
     db.attach_tags(note_id, [t for t in all_tags if t])
@@ -54,29 +60,41 @@ def clip(url: str, tags: list[str] | None = None) -> int | None:
 
 
 def _fetch(url: str) -> str | None:
-    """Download URL and return raw HTML string."""
+    """Download URL and return raw HTML string (capped at _MAX_BYTES)."""
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (compatible; Cortex-Clipper/1.0; +https://github.com)"
         )
     }
     try:
-        resp = requests.get(url, headers=headers, timeout=_TIMEOUT, stream=True)
-        resp.raise_for_status()
-        content = b""
-        for chunk in resp.iter_content(chunk_size=8192):
-            content += chunk
-            if len(content) > _MAX_BYTES:
-                break
-        return content.decode(resp.apparent_encoding or "utf-8", errors="replace")
-    except requests.exceptions.ConnectionError:
+        with httpx.stream(
+            "GET", url, headers=headers, timeout=_TIMEOUT, follow_redirects=True
+        ) as resp:
+            resp.raise_for_status()
+            chunks: list[bytes] = []
+            total = 0
+            for chunk in resp.iter_bytes(chunk_size=8192):
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > _MAX_BYTES:
+                    break
+            raw = b"".join(chunks)
+            encoding = resp.charset_encoding or "utf-8"
+        return raw.decode(encoding, errors="replace")
+    except httpx.ConnectError:
         print_error(f"Bağlantı kurulamadı: {url}")
-    except requests.exceptions.Timeout:
-        print_error(f"Bağlantı zaman aşımına uğradı: {url}")
-    except requests.exceptions.HTTPError as exc:
-        print_error(f"HTTP hatası: {exc.response.status_code} — {url}")
-    except Exception as exc:  # noqa: BLE001
-        print_error(f"Bilinmeyen hata: {exc}")
+    except httpx.TimeoutException:
+        print_error(f"Bağlantı zaman aşımına uğradı ({_TIMEOUT}s): {url}")
+    except httpx.HTTPStatusError as exc:
+        status = exc.response.status_code
+        if status == 403:
+            print_error(f"Erişim reddedildi (403 Forbidden): {url}")
+        elif status == 429:
+            print_error(f"İstek limiti aşıldı, lütfen bekleyin (429 Too Many Requests): {url}")
+        else:
+            print_error(f"HTTP hatası {status}: {url}")
+    except httpx.RequestError as exc:
+        print_error(f"İstek hatası: {exc}")
     return None
 
 
@@ -84,7 +102,6 @@ def _parse(html: str, url: str) -> tuple[str, str]:
     """Return (title, markdown) from raw HTML."""
     soup = BeautifulSoup(html, "html.parser")
 
-    # Extract <title>
     title_tag = soup.find("title")
     og_title = soup.find("meta", property="og:title")
     h1_tag = soup.find("h1")
@@ -98,12 +115,10 @@ def _parse(html: str, url: str) -> tuple[str, str]:
     else:
         title = urlparse(url).netloc
 
-    # Remove noise elements
     for tag in _NOISE_TAGS:
         for el in soup.find_all(tag):
             el.decompose()
 
-    # Find main content block
     content_el = None
     for selector in _CONTENT_SELECTORS:
         content_el = soup.select_one(selector)
@@ -120,7 +135,9 @@ def _parse(html: str, url: str) -> tuple[str, str]:
     )
     md = _clean_markdown(md)
 
-    # Prepend source URL as reference
+    if len(md) > _MAX_CONTENT_CHARS:
+        md = md[:_MAX_CONTENT_CHARS] + "\n\n[İçerik kesildi — tam metin için kaynağa bakın]"
+
     md = f"> Kaynak: {url}\n\n" + md
 
     return title, md

@@ -166,6 +166,7 @@ def cmd_stats() -> None:
 def cmd_clip(
     url: Annotated[str, typer.Argument(help="Kaydedilecek web sayfası URL'i")],
     tags: Annotated[Optional[str], typer.Option("--tags", "-t", help="Virgülle ayrılmış etiketler")] = None,
+    make_summary: Annotated[bool, typer.Option("--summary", "-s", help="Claude API ile özet oluştur")] = False,
 ) -> None:
     """Web sayfasını markdown olarak kaydet."""
     console.print(f"[cyan]Çekiliyor:[/cyan] {url}")
@@ -179,6 +180,15 @@ def cmd_clip(
             f"Kaydedildi. ID: [bold]{note_id}[/bold]  Başlık: [cyan]{note.title}[/cyan]"
         )
         console.print(f"[dim]Etiketler: {', '.join(note.tag_names)}[/dim]")
+    if make_summary and note:
+        if semantic.get_client() is None:
+            print_warning("ANTHROPIC_API_KEY bulunamadı; özet atlandı.")
+        else:
+            console.print("[dim]Özet oluşturuluyor...[/dim]")
+            summ = semantic.summarize_note(note)
+            if summ:
+                db.create_summary(note_id, summ)
+                console.print(f"[dim]Özet: {summ}[/dim]")
 
 
 @app.command("digest")
