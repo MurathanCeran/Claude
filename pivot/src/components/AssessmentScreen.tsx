@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Image from 'next/image';
 import { ClipboardCheck, CheckCircle2, XCircle } from 'lucide-react';
+import { playCorrect, playWrong, playClick } from '@/lib/sounds';
 
 type Mode = 'pre' | 'post';
 
@@ -32,10 +33,16 @@ export const AssessmentScreen = ({ mode }: { mode: Mode }) => {
     const handleSelect = (index: number) => {
         if (selected !== null) return;
         setSelected(index);
-        if (index === q.correctIndex) setCorrectCount((c) => c + 1);
+        const isCorrect = index === q.correctIndex;
+        if (isCorrect) setCorrectCount((c) => c + 1);
+
         if (!isPre) {
             // Son-testte cevabı ve açıklamayı göster
             setRevealed(true);
+            if (isCorrect) playCorrect();
+            else playWrong();
+        } else {
+            playClick();
         }
     };
 

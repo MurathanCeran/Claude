@@ -3,12 +3,15 @@
 import { useGame } from '@/context/GameContext';
 import { CertificatePreview } from '@/components/CertificatePreview';
 import { downloadCertificatePdf } from '@/lib/downloadCertificate';
+import { Confetti } from '@/components/Confetti';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Download, RotateCcw, CheckCircle2, TrendingUp, Trophy } from 'lucide-react';
-import { toPercent, normalizedGain, gainLevel } from '@/data/assessment';
-import { saveRun, topRuns, GameRun } from '@/lib/storage';
+import { toPercent, normalizedGain, gainLevel, ASSESSMENT_COUNT } from '@/data/assessment';
+import { saveRun, topRuns, GameRun, loadUnlockedBadges, unlockBadges } from '@/lib/storage';
+import { BADGES, computeEarnedBadgeIds } from '@/data/badges';
+import { playFanfare } from '@/lib/sounds';
 
 function ScoreGauge({ score, maxScore }: { score: number; maxScore: number }) {
     const pct = Math.min(100, Math.round((score / maxScore) * 100));
@@ -39,8 +42,11 @@ function getSuccessLevel(score: number, budget: number, equity: number) {
 }
 
 export const ResultScreen = () => {
-    const { companyName, ceoName, budget, equity, score, history, resetGame, preTestCorrect, postTestCorrect } = useGame();
+    const { companyName, ceoName, budget, equity, score, history, resetGame, preTestCorrect, postTestCorrect, hasUsedFinance, eventCount } = useGame();
     const [downloading, setDownloading] = useState(false);
+    const [confettiTrigger, setConfettiTrigger] = useState(0);
+    const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
+    const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
 
     const prePercent = preTestCorrect !== null ? toPercent(preTestCorrect) : null;
     const postPercent = postTestCorrect !== null ? toPercent(postTestCorrect) : null;
@@ -48,14 +54,15 @@ export const ResultScreen = () => {
         prePercent !== null && postPercent !== null
             ? normalizedGain(prePercent, postPercent)
             : null;
+    const success = useMemo(() => getSuccessLevel(score, budget, equity), [score, budget, equity]);
 
-    // Oyunu kalıcı kayda yaz (bir kez) ve skor tablosunu hazırla.
+    // Oyunu kalıcı kayda yaz (bir kez), skor tablosunu ve rozetleri hazırla.
     const savedRef = useRef(false);
     const [leaderboard, setLeaderboard] = useState<GameRun[]>([]);
     useEffect(() => {
         if (savedRef.current) return;
         savedRef.current = true;
-        saveRun({
+        const runs = saveRun({
             ceoName,
             companyName,
             score,
@@ -69,11 +76,28 @@ export const ResultScreen = () => {
             date: new Date().toISOString(),
         });
         setLeaderboard(topRuns(5));
+
+        const earnedIds = computeEarnedBadgeIds({
+            outcome: 'FINISHED',
+            successLabel: success.label,
+            budget,
+            hasUsedFinance,
+            postTestCorrect,
+            postTestTotal: ASSESSMENT_COUNT,
+            learningGain: gain,
+            hadMarketEvent: eventCount > 0,
+            totalPlays: runs.length,
+        });
+        const fresh = unlockBadges(earnedIds);
+        setNewlyUnlocked(fresh);
+        setUnlockedIds(loadUnlockedBadges());
+
+        setConfettiTrigger(Date.now());
+        playFanfare();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const maxScore = useMemo(() => Math.max(5000, Math.ceil(score / 500) * 500), [score]);
-    const success = useMemo(() => getSuccessLevel(score, budget, equity), [score, budget, equity]);
     const completedAt = useMemo(
         () => new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
         []
@@ -95,6 +119,7 @@ export const ResultScreen = () => {
 
     return (
         <div className="min-h-screen bg-[#F7F7F7] py-8 px-4">
+            <Confetti trigger={confettiTrigger} />
             <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -187,6 +212,42 @@ export const ResultScreen = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Rozetler */}
+                <div className="bg-white rounded-2xl border-2 border-[#E5E5E5] p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="text-lg">🏅</span>
+                        <p className="text-xs font-black uppercase tracking-widest text-[#AFAFAF]">Rozet Koleksiyonu</p>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {BADGES.map((badge) => {
+                            const earned = unlockedIds.includes(badge.id);
+                            const isNew = newlyUnlocked.includes(badge.id);
+                            return (
+                                <motion.div
+                                    key={badge.id}
+                                    initial={isNew ? { scale: 0.7, opacity: 0 } : false}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+                                    title={badge.desc}
+                                    className={`relative text-center rounded-xl border-2 py-4 px-2 ${
+                                        earned
+                                            ? 'bg-[#FFF8E7] border-[#FFCC00]'
+                                            : 'bg-[#FAFAFA] border-[#E5E5E5] opacity-40 grayscale'
+                                    }`}
+                                >
+                                    {isNew && (
+                                        <span className="absolute -top-2 -right-2 bg-[#FF4B4B] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">
+                                            Yeni
+                                        </span>
+                                    )}
+                                    <div className="text-2xl mb-1">{badge.emoji}</div>
+                                    <p className="text-xs font-black text-[#3c3c3c] leading-tight">{badge.title}</p>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+                </div>
 
                 {/* Skor Tablosu */}
                 {leaderboard.length > 0 && (

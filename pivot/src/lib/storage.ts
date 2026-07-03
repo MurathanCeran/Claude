@@ -7,6 +7,7 @@
 // kontrolü yapılır.
 
 const STORAGE_KEY = 'pivot:runs:v1';
+const BADGES_KEY = 'pivot:badges:v1';
 
 export type GameRun = {
   ceoName: string;
@@ -114,4 +115,33 @@ export function aggregateStats(): {
         .map((r) => r.learningGain as number),
     ),
   };
+}
+
+/** Kalıcı olarak açılmış rozet id'lerini döndürür. */
+export function loadUnlockedBadges(): string[] {
+  if (!isBrowser()) return [];
+  try {
+    const raw = window.localStorage.getItem(BADGES_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Verilen rozet id'lerini kalıcı listeye ekler ve bu çağrıda YENİ açılanları
+ * döndürür (kutlama animasyonu tetiklemek için kullanışlı).
+ */
+export function unlockBadges(ids: string[]): string[] {
+  if (!isBrowser()) return [];
+  const existing = new Set(loadUnlockedBadges());
+  const fresh = ids.filter((id) => !existing.has(id));
+  ids.forEach((id) => existing.add(id));
+  try {
+    window.localStorage.setItem(BADGES_KEY, JSON.stringify(Array.from(existing)));
+  } catch {
+    // kota dolduysa sessizce geç
+  }
+  return fresh;
 }

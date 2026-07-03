@@ -5,7 +5,9 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import { toPercent } from '@/data/assessment';
-import { saveRun } from '@/lib/storage';
+import { saveRun, unlockBadges } from '@/lib/storage';
+import { computeEarnedBadgeIds } from '@/data/badges';
+import { playWrong } from '@/lib/sounds';
 
 export const BankruptScreen = () => {
     const { companyName, ceoName, history, resetGame, budget, equity, score, preTestCorrect } = useGame();
@@ -15,7 +17,7 @@ export const BankruptScreen = () => {
     useEffect(() => {
         if (savedRef.current) return;
         savedRef.current = true;
-        saveRun({
+        const runs = saveRun({
             ceoName,
             companyName,
             score,
@@ -28,6 +30,20 @@ export const BankruptScreen = () => {
             learningGain: null,
             date: new Date().toISOString(),
         });
+        unlockBadges(
+            computeEarnedBadgeIds({
+                outcome: 'BANKRUPT',
+                successLabel: null,
+                budget,
+                hasUsedFinance: false,
+                postTestCorrect: null,
+                postTestTotal: 0,
+                learningGain: null,
+                hadMarketEvent: false,
+                totalPlays: runs.length,
+            })
+        );
+        playWrong();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -55,9 +71,9 @@ export const BankruptScreen = () => {
                         />
                     </motion.div>
 
-                    <h2 className="text-2xl font-black text-white mb-1">İFLAS!</h2>
+                    <h2 className="text-2xl font-black text-white mb-1">İFLAS! 💸</h2>
                     <p className="text-red-100 font-bold text-sm">
-                        {ceoName ? `${ceoName}, ` : ''}{companyName} sermayesiz kaldı.
+                        {ceoName ? `${ceoName}, ` : ''}{companyName} kasası eridi. Silikon Vadisi&apos;nde bile olur bu — ünlü girişimcilerin çoğu da ilk denemesinde battı!
                     </p>
                     <div className="mt-4 inline-block bg-white/20 rounded-2xl px-6 py-3">
                         <div className="text-3xl font-black text-white">$0</div>
@@ -69,7 +85,7 @@ export const BankruptScreen = () => {
                 <div className="px-6 pt-6 pb-2">
                     <div className="bg-[#FFF3F3] border-2 border-[#FF4B4B] rounded-2xl p-4 mb-4">
                         <p className="text-[#3c3c3c] font-bold text-sm leading-relaxed">
-                            <span className="font-black">Ne öğrendik?</span> Her başarısızlık bir ders. Burn rate'i kontrol etmek, tasarruflu kararlar almak ve sermayeni korumak girişimciliğin temelidir. Tekrar dene!
+                            <span className="font-black">Ne öğrendik?</span> Burn rate&apos;i kontrol etmek, tasarruflu kararlar almak ve sermayeni korumak girişimciliğin temelidir. Şimdi bunu biliyorsun — bu bilgiyle bir daha dene, seni durduramayız! 🚀
                         </p>
                     </div>
 

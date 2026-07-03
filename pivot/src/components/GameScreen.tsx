@@ -4,9 +4,10 @@ import { useGame } from '@/context/GameContext';
 import { scenarios, getAllDefinitions, ScenarioOption } from '@/data/scenarios';
 import { FINANCE_THRESHOLD } from '@/data/finance';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Rocket, Lightbulb, Target, Gem, TrendingUp, Book, Plus, Minus, Landmark, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { playClick, playCoin } from '@/lib/sounds';
 
 const DICTIONARY_TERMS = getAllDefinitions().map((d) => ({ term: d.term, def: d.description }));
 
@@ -31,11 +32,22 @@ export const GameScreen = () => {
         isFinanceAvailable,
         hasUsedFinance,
         score,
+        lastPointsEarned,
+        scoreEventId,
     } = useGame();
 
     const [showDictionary, setShowDictionary] = useState(false);
     const [pendingOption, setPendingOption] = useState<ScenarioOption | null>(null);
     const [insufficientOption, setInsufficientOption] = useState<ScenarioOption | null>(null);
+    const [scorePopup, setScorePopup] = useState<{ id: number; points: number } | null>(null);
+
+    useEffect(() => {
+        if (scoreEventId === 0) return;
+        setScorePopup({ id: scoreEventId, points: lastPointsEarned });
+        const timer = setTimeout(() => setScorePopup(null), 1400);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scoreEventId]);
 
     const scenario = scenarios.find((s) => s.id === currentScenarioId);
     const LogoIcon = LOGO_ICONS[logo] || Rocket;
@@ -75,11 +87,13 @@ export const GameScreen = () => {
             setInsufficientOption(option);
             return;
         }
+        playClick();
         setPendingOption(option);
     };
 
     const confirmDecision = () => {
         if (pendingOption && canAfford(pendingOption.cost)) {
+            playCoin();
             makeDecision(pendingOption.cost, pendingOption.nextScenarioId, pendingOption.feedback);
             setPendingOption(null);
         }
@@ -116,8 +130,22 @@ export const GameScreen = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 relative">
                         <span className="font-black text-[#FFCC00] text-sm">Puan: {score}</span>
+                        <AnimatePresence>
+                            {scorePopup && (
+                                <motion.span
+                                    key={scorePopup.id}
+                                    initial={{ opacity: 0, y: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: -18, scale: 1 }}
+                                    exit={{ opacity: 0, y: -32 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="absolute -top-1 left-0 text-sm font-black text-[#58CC02] pointer-events-none"
+                                >
+                                    +{scorePopup.points} 🎉
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
                         {isFinanceAvailable && (
                             <button
                                 type="button"

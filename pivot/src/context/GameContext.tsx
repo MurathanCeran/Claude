@@ -35,8 +35,11 @@ type GameState = {
     canAfford: (cost: number) => boolean;
     isFinanceAvailable: boolean;
     pendingEvent: MarketEvent | null;
+    eventCount: number;
     preTestCorrect: number | null;
     postTestCorrect: number | null;
+    lastPointsEarned: number;
+    scoreEventId: number;
     setCompanyName: (name: string) => void;
     setCeoName: (name: string) => void;
     setLogo: (logo: string) => void;
@@ -75,8 +78,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const [pendingNextId, setPendingNextId] = useState<number | null>(null);
     const [isLastScenario, setIsLastScenario] = useState(false);
     const [pendingEvent, setPendingEvent] = useState<MarketEvent | null>(null);
+    const [eventCount, setEventCount] = useState(0);
     const [preTestCorrect, setPreTestCorrect] = useState<number | null>(null);
     const [postTestCorrect, setPostTestCorrect] = useState<number | null>(null);
+    const [lastPointsEarned, setLastPointsEarned] = useState(0);
+    const [scoreEventId, setScoreEventId] = useState(0);
 
     const canAfford = (cost: number) => budget + cost >= 0;
 
@@ -129,9 +135,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             setHistory((prev) => [...prev, feedback]);
         }
 
+        const pointsEarned = 100 + (effectiveCost > 0 ? 500 : 0);
         setBudget(newBudget);
         setDecisionCount(newDecisionCount);
-        setScore((prev) => prev + 100 + (effectiveCost > 0 ? 500 : 0));
+        setScore((prev) => prev + pointsEarned);
+        setLastPointsEarned(pointsEarned);
+        setScoreEventId((id) => id + 1);
         setQuizScenarioId(currentScenarioId);
 
         newBudget = applyLongTermCosts(newDecisionCount, newBudget);
@@ -209,6 +218,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         const delta = eventDelta(pendingEvent, budget);
         const newBudget = budget + delta;
         setBudget(newBudget);
+        setEventCount((c) => c + 1);
         setHistory((prev) => [
             ...prev,
             `Piyasa olayı — ${pendingEvent.title}: ${formatMoney(delta)}`,
@@ -249,8 +259,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         setPendingNextId(null);
         setIsLastScenario(false);
         setPendingEvent(null);
+        setEventCount(0);
         setPreTestCorrect(null);
         setPostTestCorrect(null);
+        setLastPointsEarned(0);
+        setScoreEventId(0);
         setGameStatus('LANDING');
     };
 
@@ -272,8 +285,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                 canAfford,
                 isFinanceAvailable,
                 pendingEvent,
+                eventCount,
                 preTestCorrect,
                 postTestCorrect,
+                lastPointsEarned,
+                scoreEventId,
                 setCompanyName: (name) => {
                     setCompanyName(name);
                     // Oyundan ÖNCE ön-test (baseline ölçüm).

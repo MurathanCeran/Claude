@@ -13,10 +13,20 @@ import { FinanceIntroScreen } from '@/components/FinanceIntroScreen';
 import { FinanceScreen } from '@/components/FinanceScreen';
 import { AssessmentScreen } from '@/components/AssessmentScreen';
 import { EventScreen } from '@/components/EventScreen';
+import { SoundToggle } from '@/components/SoundToggle';
 
 export default function Home() {
   const { gameStatus } = useGame();
 
+  return (
+    <>
+      <SoundToggle />
+      {renderScreen(gameStatus)}
+    </>
+  );
+}
+
+function renderScreen(gameStatus: string) {
   switch (gameStatus) {
     case 'LANDING':
       return <LandingPage />;

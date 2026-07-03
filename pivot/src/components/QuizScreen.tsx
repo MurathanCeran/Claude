@@ -5,6 +5,7 @@ import { scenarios, getAllDefinitions, Definition } from '@/data/scenarios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
+import { playCorrect, playWrong, playStreak, playFanfare } from '@/lib/sounds';
 
 function shuffle<T>(arr: T[]): T[] {
     return [...arr].sort(() => Math.random() - 0.5);
@@ -42,6 +43,8 @@ export const QuizScreen = () => {
     const [answerState, setAnswerState] = useState<AnswerState>('idle');
     const [correctCount, setCorrectCount] = useState(0);
     const [done, setDone] = useState(false);
+    const [streak, setStreak] = useState(0);
+    const [shake, setShake] = useState(false);
 
     useEffect(() => {
         setCurrent(0);
@@ -49,7 +52,14 @@ export const QuizScreen = () => {
         setAnswerState('idle');
         setCorrectCount(0);
         setDone(false);
+        setStreak(0);
+        setShake(false);
     }, [quizScenarioId]);
+
+    useEffect(() => {
+        if (done && correctCount === questions.length) playFanfare();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [done]);
 
     if (!scenario || questions.length === 0) {
         return (
@@ -70,7 +80,20 @@ export const QuizScreen = () => {
         setSelected(option);
         const isCorrect = option === questions[current].correct;
         setAnswerState(isCorrect ? 'correct' : 'wrong');
-        if (isCorrect) setCorrectCount((c) => c + 1);
+        if (isCorrect) {
+            setCorrectCount((c) => c + 1);
+            setStreak((s) => {
+                const next = s + 1;
+                if (next >= 2) playStreak();
+                else playCorrect();
+                return next;
+            });
+        } else {
+            setStreak(0);
+            setShake(true);
+            playWrong();
+            setTimeout(() => setShake(false), 500);
+        }
 
         setTimeout(() => {
             if (current + 1 >= questions.length) {
@@ -150,12 +173,28 @@ export const QuizScreen = () => {
 
             <main className="flex-1 flex flex-col px-4 py-6 max-w-lg mx-auto w-full">
                 <div className="flex items-end gap-3 mb-8">
-                    <Image src="/unicorn.png" alt="Pivot" width={80} height={80} className="drop-shadow-md shrink-0" />
+                    <motion.div
+                        animate={shake ? { rotate: [0, -12, 12, -8, 8, 0] } : {}}
+                        transition={{ duration: 0.5 }}
+                        className="shrink-0"
+                    >
+                        <Image src="/unicorn.png" alt="Pivot" width={80} height={80} className="drop-shadow-md" />
+                    </motion.div>
                     <div className="bg-white border-2 border-[#E5E5E5] rounded-2xl rounded-bl-sm p-4 flex-1">
                         <p className="text-xs font-black text-[#AFAFAF] uppercase tracking-wide mb-1">Doğru tanımı seç</p>
                         <p className="text-xl font-black text-[#3c3c3c]">{q.term}</p>
                     </div>
                 </div>
+
+                {streak >= 2 && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="self-center -mt-4 mb-4 bg-[#FFF3E0] border-2 border-[#FF9600] rounded-full px-4 py-1.5 text-xs font-black text-[#FF9600] uppercase tracking-wide"
+                    >
+                        🔥 {streak} Doğru Üst Üste!
+                    </motion.div>
+                )}
 
                 <AnimatePresence mode="wait">
                     <motion.div
