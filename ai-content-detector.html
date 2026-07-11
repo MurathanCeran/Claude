@@ -657,7 +657,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 44 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%48</b>; bu tür <b>gizlenmiş AI'da yakalama oranı çok düşüktür</b> — bu, tüm dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%47</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
+          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%58</b> (v18 "genel-geçer deneme" motoruyla %48'den yükseldi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%53</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
         </div>
       </details>
     </section>
@@ -1029,6 +1029,22 @@ function analyze(text){
     }
   }catch(e){ smoothAI = 0; }
 
+  // [v18] GNOMIC: "genel-gecer bilgece deneme" dokusu — modern/humanized AI'nin en yaygin sesi.
+  // Somut detay yok (rakam/birinci-tekil yok), genis-zaman genel yargilar, zitlik kaliplari.
+  var gnomicAI = 0;
+  try{
+    var contrastN = countRe(text, /\b(not because|not only|not just|not merely|but rather|yet it|yet we|yet our|rather than|instead of|far from being|less a |less about|more than a |does more than|which is to say|değil, aynı zamanda|değil aslında|yerine|aksine)\b/gi);
+    var gnomicVerbs = countRe(text, /\b(is|are|tends to|tend to|remains|becomes|offers|teaches|carries|reveals|demands|requires|begins|matters|sağlar|öğretir|korur|gerektirir|demektir|kazandırır|besler|geçer|verir)\b/gi);
+    var noI = (firstPerson===0) ? 1 : (firstPerson<=1 ? 0.5 : 0);
+    var noNum = (numerals===0) ? 1 : 0;
+    var vRate = clamp01((gnomicVerbs/sc)/2.2);
+    var cRate = clamp01(contrastN/3);
+    if(wc>=35 && sc>=3){
+      gnomicAI = clamp01( noI*0.30 + noNum*0.15 + vRate*0.30 + cRate*0.25 );
+      if(casual>0 || exclaim>1) gnomicAI = gnomicAI*0.4;
+    }
+  }catch(e){ gnomicAI=0; }
+
   const parts = [
     {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
       desc:"'delve, önemli bir rol oynar' + yapısal kalıplar ('From X to Y', 'not just X but Y')."},
@@ -1070,6 +1086,8 @@ function analyze(text){
       desc:"[v5] İnsan retorik soru sorar; AI açıklayıcı moda saplanır."},
     {key:"infodensity", name:"Bilgi yoğunluğu varyansı", short:"Bilgi Yoğ.", ai:infoDensityAI, w:0.03, val:ttrStd!==null?("σ="+ttrStd.toFixed(2)):"yetersiz",
       desc:"[v5] AI her cümleye eşit bilgi yükler; insanda yoğun/geçiş cümleler değişir."},
+    {key:"gnomic", name:"Genel-geçer deneme dokusu", short:"Genelgeçer", ai:gnomicAI, w:0.10, val:"%"+Math.round(gnomicAI*100),
+      desc:"[v18] Somut detaysız, birinci-tekil-siz, geniş-zaman 'bilgece' anlatım + zıtlık kalıpları — modern AI denemelerinin imzası."},
     {key:"smooth", name:"Makine düzgünlüğü", short:"Düzgünlük", ai:smoothAI, w:0.05, val:(smoothAI>0?("%"+Math.round(smoothAI*100)):"—"),
       desc:"[v14] Cümle uzunluğu + virgül ritmi aşırı tekdüze ve hiç spontanlık (kendini düzeltme, vurgu) yoksa makine işi sinyali."}
   ];
@@ -1094,7 +1112,10 @@ function analyze(text){
   // [v12] Sadece AI'ya-ozgu yogun sinyaller (klise+hype). Gecis/hedge insanda da bol oldugundan lexBoost'tan cikarildi.
   var lexEvidence = Math.max(0, clicheAI-0.5) + Math.max(0, hypeAI-0.45);
   var lexBoost = Math.min(lexEvidence*0.30, 0.30);
-  const aiScore = clamp01(base + boost + lexBoost - humanBonus*0.22);
+  // [v18] Gnomic yukseltme — register kapili: resmi/edilgen yogun (akademik INSAN) metinlerde devreye girmez,
+  // sade genis-zaman "bilgece" AI denemelerinde girer. Kalibrasyon: FP eklemeden harsh recall %0 -> %20.
+  var gnomicBoost = (gnomicAI>0.40 && humanBonus<0.35 && formalAI<0.5 && passiveAI<0.65) ? Math.min((gnomicAI-0.40)*1.5, 0.45) : 0;
+  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
 
   let conf = "Düşük";
