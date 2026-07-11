@@ -9,7 +9,7 @@ from cortex import db
 from cortex.display import console, print_error, print_success
 
 
-def import_path(path_str: str) -> tuple[int, int]:
+def import_path(path_str: str, source: str = "import") -> tuple[int, int]:
     """
     Import .md files from a file or directory.
     Returns (imported_count, skipped_count).
@@ -31,7 +31,7 @@ def import_path(path_str: str) -> tuple[int, int]:
     imported = 0
     skipped = 0
     for md_file in files:
-        ok = _import_file(md_file)
+        ok = _import_file(md_file, source=source)
         if ok:
             imported += 1
         else:
@@ -40,7 +40,7 @@ def import_path(path_str: str) -> tuple[int, int]:
     return imported, skipped
 
 
-def _import_file(path: Path) -> bool:
+def _import_file(path: Path, source: str = "import") -> bool:
     """Parse and insert a single markdown file. Returns True on success."""
     try:
         raw = path.read_text(encoding="utf-8")
@@ -49,7 +49,7 @@ def _import_file(path: Path) -> bool:
         return False
 
     title, content, tags = _parse_markdown(raw, path.stem)
-    note_id = db.create_note(title=title, content=content, source="import")
+    note_id = db.create_note(title=title, content=content, source=source)
 
     if tags:
         db.attach_tags(note_id, tags)
@@ -70,7 +70,7 @@ def _parse_markdown(raw: str, fallback_title: str) -> tuple[str, str, list[str]]
     fm_match = re.match(r"^---\s*\n(.*?)\n---\s*\n", raw, re.DOTALL)
     if fm_match:
         fm_block = fm_match.group(1)
-        content = raw[fm_match.end():]
+        content = raw[fm_match.end() :]
         tags = _extract_frontmatter_tags(fm_block)
 
     # Title from first H1
@@ -95,7 +95,7 @@ def _extract_frontmatter_tags(fm_block: str) -> list[str]:
     #   - a
     block_start = re.search(r"^tags:\s*$", fm_block, re.MULTILINE)
     if block_start:
-        rest = fm_block[block_start.end():]
+        rest = fm_block[block_start.end() :]
         items = re.findall(r"^\s+-\s+(.+)$", rest, re.MULTILINE)
         return [i.strip() for i in items]
 

@@ -1,6 +1,8 @@
 """Rich-powered terminal output formatters."""
 
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 from rich.columns import Columns
@@ -294,6 +296,23 @@ def print_review_stats(stats: dict) -> None:
         console.print(table)
     else:
         console.print("[dim]Henüz tekrar yapılmadı.[/dim]")
+
+
+def print_backup_list(backups: list[Path]) -> None:
+    """Render the list of available DB backups."""
+    if not backups:
+        console.print("[yellow]Henüz yedek alınmamış.[/yellow]")
+        return
+
+    table = Table(title="Yedekler", header_style="bold cyan")
+    table.add_column("Dosya", style="bold white")
+    table.add_column("Boyut", justify="right", style="dim")
+    table.add_column("Tarih", style="dim")
+    for path in backups:
+        size_kb = path.stat().st_size / 1024
+        mtime = datetime.fromtimestamp(path.stat().st_mtime).strftime("%d.%m.%Y %H:%M")
+        table.add_row(path.name, f"{size_kb:.1f} KB", mtime)
+    console.print(table)
 
 
 def print_error(message: str) -> None:

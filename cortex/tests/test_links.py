@@ -24,6 +24,20 @@ def test_link_resolves_to_existing_note() -> None:
     assert links[0].is_broken is False
 
 
+def test_link_with_obsidian_alias_and_heading() -> None:
+    target_id = db.create_note("Evrim Teorisi", "içerik")
+    source_id = db.create_note(
+        "Notlarım", "Bkz: [[Evrim Teorisi|evrim üzerine]] okudum."
+    )
+    other_id = db.create_note("Notlarım 2", "Bkz: [[Evrim Teorisi#Giriş]] bölümü.")
+
+    for sid in (source_id, other_id):
+        links = db.get_outgoing_links(sid)
+        assert len(links) == 1
+        assert links[0].target_id == target_id
+        assert links[0].is_broken is False
+
+
 def test_link_case_insensitive() -> None:
     target_id = db.create_note("Python Rehberi", "içerik")
     source_id = db.create_note("Notlarım", "[[python rehberi]] güzeldi.")

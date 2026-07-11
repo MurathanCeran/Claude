@@ -70,3 +70,26 @@ def test_import_nonexistent_path() -> None:
     imported, skipped = import_path("/nonexistent/path/doesnt/exist")
     assert imported == 0
     assert skipped == 0
+
+
+def test_import_path_custom_source_tag(tmp_path: Path) -> None:
+    md = tmp_path / "note.md"
+    md.write_text("# Vault Notu\n\nİçerik.", encoding="utf-8")
+
+    imported, _ = import_path(str(md), source="obsidian")
+    assert imported == 1
+    assert db.list_notes()[0].source == "obsidian"
+
+
+def test_import_obsidian_vault_resolves_wikilinks(tmp_path: Path) -> None:
+    (tmp_path / "hedef.md").write_text("# Hedef\n\nİçerik.", encoding="utf-8")
+    (tmp_path / "kaynak.md").write_text("# Kaynak\n\nBkz: [[Hedef]]", encoding="utf-8")
+
+    imported, skipped = import_path(str(tmp_path), source="obsidian")
+    assert imported == 2
+    assert skipped == 0
+
+    kaynak = db.get_note_by_title("Kaynak")
+    links = db.get_outgoing_links(kaynak.id)
+    assert len(links) == 1
+    assert links[0].is_broken is False

@@ -15,6 +15,7 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "markdownify>=0.12",
     "anthropic>=0.50",
+    "markdown>=3.6",
 ]
 
 [project.scripts]

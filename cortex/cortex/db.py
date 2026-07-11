@@ -359,7 +359,8 @@ def _sync_links(conn: sqlite3.Connection, note_id: int, content: str) -> None:
     now = _now()
     seen: set[str] = set()
     for raw_title in _LINK_PATTERN.findall(content):
-        title = raw_title.strip()
+        # Support Obsidian-style [[Title|Alias]] and [[Title#Heading]] links.
+        title = raw_title.split("|")[0].split("#")[0].strip()
         key = title.lower()
         if not title or key in seen:
             continue

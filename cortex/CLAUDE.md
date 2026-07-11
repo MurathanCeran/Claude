@@ -28,12 +28,14 @@
 - [x] Faz 5: Web clipper (URL'den içerik çekme)
 - [x] Faz 6: Not ilişkileri ve graf ([[link]] sistemi)
 - [x] Faz 7: Günlük not sistemi ve spaced repetition (Leitner)
+- [x] Faz 8: Export ve yedekleme
 - [x] Bonus: Günlük özet (digest) komutu
 
 ## Veritabanı
 - Parameterized queries zorunlu (SQL injection yok)
 - FTS5 virtual table ile full-text search
 - data/cortex.db gitignore'da tutulur
+- backups/ klasörü gitignore'da tutulur, max 10 yedek saklanır
 
 ## CLI Komutları
 | Komut | Açıklama |
@@ -56,3 +58,8 @@
 | `cortex daily` | Bugünün günlük notunu aç veya oluştur |
 | `cortex review` | Bugün tekrar edilecek notları Leitner sistemiyle göster |
 | `cortex review --stats` | Toplam tekrar sayısı, seri ve en çok tekrar edilen notlar |
+| `cortex export --format md\|json\|html` | Notları Markdown/JSON/tek sayfa HTML olarak dışa aktar |
+| `cortex backup` | Veritabanının tarihli yedeğini al |
+| `cortex backup --list` | Mevcut yedekleri listele |
+| `cortex backup --restore <dosya>` | Bir yedekten geri yükle (onaylı) |
+| `cortex import-obsidian <vault_yolu>` | Obsidian vault'unu import et |

@@ -8,10 +8,11 @@ from typing import Annotated, Optional
 import typer
 from rich.prompt import Confirm, Prompt
 
-from cortex import clipper, db, digest, importer, search, semantic
+from cortex import backup, clipper, db, digest, export, importer, search, semantic
 from cortex.display import (
     console,
     print_ask_result,
+    print_backup_list,
     print_digest,
     print_error,
     print_graph,
@@ -148,6 +149,18 @@ def cmd_import(
     """Markdown dosyalarını import et."""
     console.print(f"[cyan]Import başlıyor:[/cyan] {path}")
     imported, skipped = importer.import_path(path)
+    print_success(
+        f"Import tamamlandı: [bold]{imported}[/bold] eklendi, {skipped} atlandı."
+    )
+
+
+@app.command("import-obsidian")
+def cmd_import_obsidian(
+    vault_path: Annotated[str, typer.Argument(help="Obsidian vault klasör yolu")],
+) -> None:
+    """Obsidian vault'unu import et ([[wikilink]] ve frontmatter etiketleri dahil)."""
+    console.print(f"[cyan]Obsidian vault import ediliyor:[/cyan] {vault_path}")
+    imported, skipped = importer.import_path(vault_path, source="obsidian")
     print_success(
         f"Import tamamlandı: [bold]{imported}[/bold] eklendi, {skipped} atlandı."
     )
@@ -369,6 +382,74 @@ def cmd_review(
 
     streak = db.get_review_stats()["streak"]
     print_review_summary(reviewed, streak)
+
+
+@app.command("export")
+def cmd_export(
+    fmt: Annotated[str, typer.Option("--format", "-f", help="md | json | html")] = "md",
+    output: Annotated[
+        Optional[str], typer.Option("--output", "-o", help="Çıktı yolu")
+    ] = None,
+) -> None:
+    """Notları Markdown klasörü, JSON veya tek sayfa HTML olarak dışa aktar."""
+    if db.db_stats()["notes"] == 0:
+        print_warning("Export edilecek not yok.")
+        raise typer.Exit(0)
+
+    if fmt == "md":
+        out_dir = output or "./export"
+        count = export.export_markdown(out_dir)
+        print_success(
+            f"{count} not Markdown olarak dışa aktarıldı: [cyan]{out_dir}[/cyan]"
+        )
+    elif fmt == "json":
+        out_path = output or "cortex_export.json"
+        count = export.export_json(out_path)
+        print_success(
+            f"{count} not JSON olarak dışa aktarıldı: [cyan]{out_path}[/cyan]"
+        )
+    elif fmt == "html":
+        out_path = output or "cortex_export.html"
+        count = export.export_html(out_path)
+        print_success(
+            f"{count} not HTML olarak dışa aktarıldı: [cyan]{out_path}[/cyan]"
+        )
+    else:
+        print_error(f"Bilinmeyen format: '{fmt}'. Kullanılabilir: md, json, html")
+        raise typer.Exit(1)
+
+
+@app.command("backup")
+def cmd_backup(
+    show_list: Annotated[
+        bool, typer.Option("--list", help="Mevcut yedekleri göster")
+    ] = False,
+    restore: Annotated[
+        Optional[str], typer.Option("--restore", help="Belirtilen yedekten geri yükle")
+    ] = None,
+) -> None:
+    """Veritabanının yedeğini al, yedekleri listele veya bir yedekten geri yükle."""
+    if restore:
+        confirmed = Confirm.ask(
+            f"[yellow]'{restore}' yedeğinden geri yüklenecek ve mevcut veritabanının "
+            f"üzerine yazılacak. Emin misiniz?[/yellow]"
+        )
+        if not confirmed:
+            print_warning("Geri yükleme iptal edildi.")
+            raise typer.Exit(0)
+
+        if backup.restore_backup(restore):
+            print_success(f"Veritabanı '{restore}' yedeğinden geri yüklendi.")
+        else:
+            raise typer.Exit(1)
+        return
+
+    if show_list:
+        print_backup_list(backup.list_backups())
+        return
+
+    path = backup.create_backup()
+    print_success(f"Yedek alındı: [cyan]{path.name}[/cyan]")
 
 
 def main() -> None:
