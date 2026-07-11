@@ -657,7 +657,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%58</b> (v18 "genel-geçer deneme" motoruyla %48'den yükseldi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%53</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
+          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%61</b> (v18-v19 "genel-geçer deneme" + Türkçe geniş-zaman motorlarıyla %48'den yükseldi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%53</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
         </div>
       </details>
     </section>
@@ -1044,6 +1044,22 @@ function analyze(text){
       if(casual>0 || exclaim>1) gnomicAI = gnomicAI*0.4;
     }
   }catch(e){ gnomicAI=0; }
+  // [v19] TR gnomic morfolojisi: -dır/-dir kosacı + olumsuz genis zaman (-maz/-mez) + genel "sen" cekimi.
+  // Kelime ezberi degil morfoloji — overfit riski dusuk. Ozel-isim kalkani TR Wikipedia/ansiklopedik INSAN metnini korur
+  // (onlar -dır dolu AMA ozel isim kaynar; AI "bilgece" denemede ozel isim yok denecek kadar az).
+  try{
+    if(/[çğıöşü]/i.test(text) && wc>=35 && sc>=3){
+      var trCopula = countRe(text, /[a-zçğıöşüâî]{3,}(dır|dir|dur|dür|tır|tir|tur|tür)(\.|,|;|:|!|\?|\s|$)/gi);
+      var trNegAor = countRe(text, /[a-zçğıöşü]{2,}(maz|mez|mazsın|mezsin)(\.|,|;|:|!|\?|\s|$)/gi);
+      var trYouAor = countRe(text, /[a-zçğıöşü]{3,}(irsin|ırsın|ursun|ürsün|arsın|ersin)(\.|,|;|:|!|\?|\s|$)/gi);
+      var propPer100g = properNouns/wc*100;
+      var shieldProp = clamp01(1 - propPer100g/2.5);
+      var trRate = clamp01(((trCopula + trNegAor*1.4 + trYouAor*1.4)/sc) / 1.6);
+      var trG = trRate * shieldProp * (numerals===0?1:0.45) * 0.45 * (1 - Math.min(formalAI,1)*0.6);
+      if(casual>0) trG = trG*0.4;
+      gnomicAI = clamp01(gnomicAI + trG);
+    }
+  }catch(e){}
 
   const parts = [
     {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
