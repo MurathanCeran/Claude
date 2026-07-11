@@ -27,6 +27,7 @@
 - [x] Faz 4: Claude API entegrasyonu (semantic search)
 - [x] Faz 5: Web clipper (URL'den içerik çekme)
 - [x] Faz 6: Not ilişkileri ve graf ([[link]] sistemi)
+- [x] Faz 7: Günlük not sistemi ve spaced repetition (Leitner)
 - [x] Bonus: Günlük özet (digest) komutu
 
 ## Veritabanı
@@ -52,3 +53,6 @@
 | `cortex links <id>` | Notun verdiği ve aldığı linkleri göster |
 | `cortex orphans` | Hiçbir yere bağlı olmayan notları listele |
 | `cortex graph` | Not ilişki haritasını ASCII ağaç olarak göster |
+| `cortex daily` | Bugünün günlük notunu aç veya oluştur |
+| `cortex review` | Bugün tekrar edilecek notları Leitner sistemiyle göster |
+| `cortex review --stats` | Toplam tekrar sayısı, seri ve en çok tekrar edilen notlar |

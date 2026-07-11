@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import sys
+from datetime import date
 from typing import Annotated, Optional
 
 import typer
@@ -19,6 +19,9 @@ from cortex.display import (
     print_note_links,
     print_note_table,
     print_orphans,
+    print_review_card,
+    print_review_stats,
+    print_review_summary,
     print_search_results,
     print_stats,
     print_success,
@@ -242,7 +245,16 @@ def cmd_ask(
         print_search_results(results, query)
         return
 
-    console.print(f"[cyan]Semantik arama çalışıyor...[/cyan]")
+    if not db.get_all_summaries():
+        print_warning(
+            "Henüz hiç not özeti oluşturulmamış. Önce 'cortex reindex' çalıştırın. "
+            "Şimdilik FTS5 aramasına geçiliyor..."
+        )
+        results = search.search(query, limit=10)
+        print_search_results(results, query)
+        return
+
+    console.print("[cyan]Semantik arama çalışıyor...[/cyan]")
     notes, answer = semantic.ask(query)
     print_ask_result(query, notes, answer)
 
@@ -303,6 +315,60 @@ def cmd_graph() -> None:
     id_to_title = {n.id: n.title for n in notes}
     links = db.get_all_links()
     print_graph(id_to_title, links)
+
+
+_DAILY_TEMPLATE = "## Bugün Öğrendiklerim\n\n\n## Yapılacaklar\n\n\n## Notlar\n\n"
+
+_REVIEW_RESULTS = {"1": "remembered", "2": "unsure", "3": "forgot"}
+
+
+@app.command("daily")
+def cmd_daily() -> None:
+    """Bugünün günlük notunu aç veya oluştur."""
+    title = date.today().isoformat()
+    note = db.get_note_by_title(title)
+
+    if note is None:
+        note_id = db.create_note(title=title, content=_DAILY_TEMPLATE, source="daily")
+        db.attach_tags(note_id, ["günlük"])
+        note = db.get_note(note_id)
+        print_success(f"Bugünün günlük notu oluşturuldu: [cyan]{title}[/cyan]")
+    else:
+        console.print(f"[dim]Bugünün günlük notu açılıyor: {title}[/dim]")
+
+    print_note_detail(note)
+
+
+@app.command("review")
+def cmd_review(
+    show_stats: Annotated[
+        bool, typer.Option("--stats", help="Tekrar istatistiklerini göster")
+    ] = False,
+) -> None:
+    """Bugün tekrar edilecek notları tek tek göster."""
+    if show_stats:
+        print_review_stats(db.get_review_stats())
+        return
+
+    due_notes = db.get_due_notes()
+    if not due_notes:
+        console.print("[green]Bugün tekrar edilecek not yok.[/green]")
+        return
+
+    console.print(f"[cyan]{len(due_notes)} not tekrar edilecek.[/cyan]")
+    reviewed = 0
+    for i, note in enumerate(due_notes, start=1):
+        print_review_card(note, i, len(due_notes))
+        choice = Prompt.ask(
+            "[1] Hatırlıyorum  [2] Belirsiz  [3] Unutmuşum",
+            choices=["1", "2", "3"],
+            default="1",
+        )
+        db.record_review(note.id, _REVIEW_RESULTS[choice])
+        reviewed += 1
+
+    streak = db.get_review_stats()["streak"]
+    print_review_summary(reviewed, streak)
 
 
 def main() -> None:

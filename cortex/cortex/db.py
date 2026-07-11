@@ -3,7 +3,7 @@
 import re
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Generator, Optional
 
@@ -46,6 +46,21 @@ CREATE TABLE IF NOT EXISTS note_links (
     target_title TEXT    NOT NULL,
     is_broken    INTEGER NOT NULL DEFAULT 0,
     created_at   TEXT    NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS review_schedule (
+    note_id       INTEGER PRIMARY KEY REFERENCES notes(id) ON DELETE CASCADE,
+    next_review   TEXT    NOT NULL,
+    interval_days INTEGER NOT NULL DEFAULT 1,
+    ease_factor   REAL    NOT NULL DEFAULT 2.5,
+    review_count  INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS review_log (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    note_id     INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+    result      TEXT    NOT NULL,
+    reviewed_at TEXT    NOT NULL
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
@@ -107,6 +122,16 @@ def _migrate(conn: sqlite3.Connection) -> None:
     if "source_url" not in cols:
         conn.execute("ALTER TABLE notes ADD COLUMN source_url TEXT")
 
+    # Backfill review schedules for notes that predate the review feature.
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO review_schedule
+            (note_id, next_review, interval_days, ease_factor, review_count)
+        SELECT id, ?, 1, 2.5, 0 FROM notes
+        """,
+        (date.today().isoformat(),),
+    )
+
 
 # ── Note CRUD ────────────────────────────────────────────────────────────────
 
@@ -131,6 +156,7 @@ def create_note(
         )
         note_id = cur.lastrowid
         _sync_links(conn, note_id, content)
+        _schedule_review(conn, note_id)
         return note_id  # type: ignore[return-value]
 
 
@@ -142,6 +168,19 @@ def get_note(note_id: int) -> Optional[Note]:
             return None
         note = _row_to_note(row)
         note.tags = _get_tags_for_note(conn, note_id)
+        return note
+
+
+def get_note_by_title(title: str) -> Optional[Note]:
+    """Fetch a single note by exact title (case-insensitive)."""
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT * FROM notes WHERE LOWER(title) = LOWER(?)", (title,)
+        ).fetchone()
+        if row is None:
+            return None
+        note = _row_to_note(row)
+        note.tags = _get_tags_for_note(conn, note.id)
         return note
 
 
@@ -402,6 +441,140 @@ def get_all_links() -> list[tuple[int, int]]:
         return [(r["source_id"], r["target_id"]) for r in rows]
 
 
+# ── Review Schedule (Leitner / simplified SM-2) ─────────────────────────────
+
+_LEITNER_INTERVALS = [1, 3, 7, 14, 30, 90]  # days
+_MIN_EASE = 1.3
+_MAX_EASE = 3.0
+
+
+def _schedule_review(conn: sqlite3.Connection, note_id: int) -> None:
+    """Seed a fresh note into the review queue, due tomorrow."""
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
+    conn.execute(
+        "INSERT OR IGNORE INTO review_schedule "
+        "(note_id, next_review, interval_days, ease_factor, review_count) "
+        "VALUES (?, ?, 1, 2.5, 0)",
+        (note_id, tomorrow),
+    )
+
+
+def get_due_notes(today: Optional[str] = None) -> list[Note]:
+    """Notes due for review today or earlier, weakest ease_factor first."""
+    today = today or date.today().isoformat()
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT n.* FROM notes n
+            JOIN review_schedule rs ON rs.note_id = n.id
+            WHERE rs.next_review <= ?
+            ORDER BY rs.ease_factor ASC, rs.next_review ASC
+            """,
+            (today,),
+        ).fetchall()
+        notes = [_row_to_note(r) for r in rows]
+        for note in notes:
+            note.tags = _get_tags_for_note(conn, note.id)
+        return notes
+
+
+def record_review(note_id: int, result: str) -> None:
+    """Update a note's review schedule and log the outcome.
+
+    result must be one of: 'remembered', 'unsure', 'forgot'.
+    """
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT interval_days, ease_factor, review_count "
+            "FROM review_schedule WHERE note_id = ?",
+            (note_id,),
+        ).fetchone()
+        interval_days = row["interval_days"] if row else 1
+        ease_factor = row["ease_factor"] if row else 2.5
+        review_count = row["review_count"] if row else 0
+
+        interval_days, ease_factor = _next_schedule(interval_days, ease_factor, result)
+        next_review = (date.today() + timedelta(days=interval_days)).isoformat()
+
+        conn.execute(
+            """
+            INSERT INTO review_schedule
+                (note_id, next_review, interval_days, ease_factor, review_count)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(note_id) DO UPDATE SET
+                next_review = excluded.next_review,
+                interval_days = excluded.interval_days,
+                ease_factor = excluded.ease_factor,
+                review_count = excluded.review_count
+            """,
+            (note_id, next_review, interval_days, ease_factor, review_count + 1),
+        )
+        conn.execute(
+            "INSERT INTO review_log (note_id, result, reviewed_at) VALUES (?, ?, ?)",
+            (note_id, result, _now()),
+        )
+
+
+def _next_schedule(
+    interval_days: int, ease_factor: float, result: str
+) -> tuple[int, float]:
+    """Compute the next (interval_days, ease_factor) via Leitner boxes."""
+    try:
+        box = _LEITNER_INTERVALS.index(interval_days)
+    except ValueError:
+        box = 0
+
+    if result == "remembered":
+        box = min(box + 1, len(_LEITNER_INTERVALS) - 1)
+        ease_factor = min(ease_factor + 0.1, _MAX_EASE)
+    elif result == "unsure":
+        ease_factor = max(ease_factor - 0.15, _MIN_EASE)
+    else:  # forgot
+        box = 0
+        ease_factor = max(ease_factor - 0.3, _MIN_EASE)
+
+    return _LEITNER_INTERVALS[box], round(ease_factor, 2)
+
+
+def get_review_stats() -> dict:
+    """Aggregate review stats: total reviews, current streak, top notes."""
+    with get_conn() as conn:
+        total = conn.execute("SELECT COUNT(*) FROM review_log").fetchone()[0]
+        streak = _compute_streak(conn)
+        rows = conn.execute("""
+            SELECT n.id, n.title, COUNT(rl.id) as cnt
+            FROM review_log rl
+            JOIN notes n ON n.id = rl.note_id
+            GROUP BY rl.note_id
+            ORDER BY cnt DESC
+            LIMIT 5
+            """).fetchall()
+        top_notes = [
+            {"id": r["id"], "title": r["title"], "count": r["cnt"]} for r in rows
+        ]
+        return {"total_reviews": total, "streak": streak, "top_notes": top_notes}
+
+
+def _compute_streak(conn: sqlite3.Connection) -> int:
+    """Consecutive days (ending today or yesterday) with at least one review."""
+    rows = conn.execute(
+        "SELECT DISTINCT DATE(reviewed_at) as d FROM review_log ORDER BY d DESC"
+    ).fetchall()
+    review_dates = {r["d"] for r in rows}
+    if not review_dates:
+        return 0
+
+    cursor = date.today()
+    if cursor.isoformat() not in review_dates:
+        cursor -= timedelta(days=1)
+
+    streak = 0
+    while cursor.isoformat() in review_dates:
+        streak += 1
+        cursor -= timedelta(days=1)
+    return streak
+
+
 # ── FTS5 search ──────────────────────────────────────────────────────────────
 
 
@@ -435,7 +608,6 @@ def _build_fts_query(query: str) -> str:
     tokens = [t for t in query.split() if t]
     if len(tokens) <= 1:
         return query
-    # Try AND first (more precise); caller may fall back to OR if no results
     return " OR ".join(tokens)
 
 

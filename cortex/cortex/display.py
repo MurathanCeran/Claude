@@ -255,6 +255,47 @@ def print_graph(id_to_title: dict[int, str], links: list[tuple[int, int]]) -> No
     console.print(tree)
 
 
+def print_review_card(note: Note, position: int, total: int) -> None:
+    """Render a single note as a review flashcard."""
+    console.print(f"\n[dim]Tekrar {position}/{total}[/dim]")
+    console.print(
+        Panel(
+            Markdown(note.content[:1500]),
+            title=f"[bold white]#{note.id} — {note.title}[/bold white]",
+            border_style="cyan",
+        )
+    )
+
+
+def print_review_summary(reviewed: int, streak: int) -> None:
+    """Render the end-of-session review summary."""
+    console.print()
+    print_success(f"{reviewed} not tekrar edildi.")
+    console.print(f"[bold cyan]Güncel seri:[/bold cyan] {streak} gün")
+
+
+def print_review_stats(stats: dict) -> None:
+    """Render aggregate review statistics."""
+    panel = Panel(
+        f"[bold cyan]Toplam Tekrar:[/bold cyan] {stats['total_reviews']}\n"
+        f"[bold green]Güncel Seri:[/bold green] {stats['streak']} gün",
+        title="[bold]Review İstatistikleri[/bold]",
+        expand=False,
+    )
+    console.print(panel)
+
+    if stats["top_notes"]:
+        console.print("\n[bold]En Çok Tekrar Edilen Notlar:[/bold]")
+        table = Table(show_header=False, box=None, padding=(0, 2))
+        table.add_column("Başlık", style="bold white")
+        table.add_column("Tekrar", style="cyan", justify="right")
+        for row in stats["top_notes"]:
+            table.add_row(f"#{row['id']} {row['title']}", str(row["count"]))
+        console.print(table)
+    else:
+        console.print("[dim]Henüz tekrar yapılmadı.[/dim]")
+
+
 def print_error(message: str) -> None:
     console.print(f"[bold red]Hata:[/bold red] {message}")
 
