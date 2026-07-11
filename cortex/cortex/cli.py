@@ -14,8 +14,11 @@ from cortex.display import (
     print_ask_result,
     print_digest,
     print_error,
+    print_graph,
     print_note_detail,
+    print_note_links,
     print_note_table,
+    print_orphans,
     print_search_results,
     print_stats,
     print_success,
@@ -39,12 +42,18 @@ def _init(_ctx: typer.Context) -> None:
 @app.command("add")
 def cmd_add(
     title: Annotated[str, typer.Argument(help="Not başlığı")],
-    content: Annotated[Optional[str], typer.Option("--content", "-c", help="Not içeriği")] = None,
-    tags: Annotated[Optional[str], typer.Option("--tags", "-t", help="Virgülle ayrılmış etiketler")] = None,
+    content: Annotated[
+        Optional[str], typer.Option("--content", "-c", help="Not içeriği")
+    ] = None,
+    tags: Annotated[
+        Optional[str], typer.Option("--tags", "-t", help="Virgülle ayrılmış etiketler")
+    ] = None,
 ) -> None:
     """Yeni not ekle."""
     if content is None:
-        console.print("[dim]Not içeriğini girin (bitirmek için boş satır + Enter):[/dim]")
+        console.print(
+            "[dim]Not içeriğini girin (bitirmek için boş satır + Enter):[/dim]"
+        )
         lines: list[str] = []
         try:
             while True:
@@ -66,13 +75,19 @@ def cmd_add(
         tag_list = [t.strip() for t in tags.split(",")]
         db.attach_tags(note_id, tag_list)
 
-    print_success(f"Not eklendi. ID: [bold]{note_id}[/bold]  Başlık: [cyan]{title}[/cyan]")
+    print_success(
+        f"Not eklendi. ID: [bold]{note_id}[/bold]  Başlık: [cyan]{title}[/cyan]"
+    )
 
 
 @app.command("list")
 def cmd_list(
-    all_notes: Annotated[bool, typer.Option("--all", "-a", help="Tüm notları getir")] = False,
-    tag: Annotated[Optional[str], typer.Option("--tag", "-t", help="Etikete göre filtrele")] = None,
+    all_notes: Annotated[
+        bool, typer.Option("--all", "-a", help="Tüm notları getir")
+    ] = False,
+    tag: Annotated[
+        Optional[str], typer.Option("--tag", "-t", help="Etikete göre filtrele")
+    ] = None,
 ) -> None:
     """Son notları listele."""
     limit = 0 if all_notes else 20
@@ -98,7 +113,9 @@ def cmd_show(
 @app.command("search")
 def cmd_search(
     query: Annotated[str, typer.Argument(help="Arama sorgusu")],
-    limit: Annotated[int, typer.Option("--limit", "-n", help="Maksimum sonuç sayısı")] = 10,
+    limit: Annotated[
+        int, typer.Option("--limit", "-n", help="Maksimum sonuç sayısı")
+    ] = 10,
 ) -> None:
     """Notlarda arama yap (FTS5 + TF-IDF)."""
     results = search.search(query, limit=limit)
@@ -128,13 +145,17 @@ def cmd_import(
     """Markdown dosyalarını import et."""
     console.print(f"[cyan]Import başlıyor:[/cyan] {path}")
     imported, skipped = importer.import_path(path)
-    print_success(f"Import tamamlandı: [bold]{imported}[/bold] eklendi, {skipped} atlandı.")
+    print_success(
+        f"Import tamamlandı: [bold]{imported}[/bold] eklendi, {skipped} atlandı."
+    )
 
 
 @app.command("delete")
 def cmd_delete(
     note_id: Annotated[int, typer.Argument(help="Silinecek not ID")],
-    force: Annotated[bool, typer.Option("--force", "-f", help="Onay sormadan sil")] = False,
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Onay sormadan sil")
+    ] = False,
 ) -> None:
     """Bir notu sil."""
     note = db.get_note(note_id)
@@ -165,8 +186,12 @@ def cmd_stats() -> None:
 @app.command("clip")
 def cmd_clip(
     url: Annotated[str, typer.Argument(help="Kaydedilecek web sayfası URL'i")],
-    tags: Annotated[Optional[str], typer.Option("--tags", "-t", help="Virgülle ayrılmış etiketler")] = None,
-    make_summary: Annotated[bool, typer.Option("--summary", "-s", help="Claude API ile özet oluştur")] = False,
+    tags: Annotated[
+        Optional[str], typer.Option("--tags", "-t", help="Virgülle ayrılmış etiketler")
+    ] = None,
+    make_summary: Annotated[
+        bool, typer.Option("--summary", "-s", help="Claude API ile özet oluştur")
+    ] = False,
 ) -> None:
     """Web sayfasını markdown olarak kaydet."""
     console.print(f"[cyan]Çekiliyor:[/cyan] {url}")
@@ -193,8 +218,12 @@ def cmd_clip(
 
 @app.command("digest")
 def cmd_digest(
-    memory_days: Annotated[int, typer.Option("--days", "-d", help="Kaç gün öncesinden hatırlat")] = 7,
-    memory_count: Annotated[int, typer.Option("--count", "-n", help="Kaç not hatırlatılsın")] = 3,
+    memory_days: Annotated[
+        int, typer.Option("--days", "-d", help="Kaç gün öncesinden hatırlat")
+    ] = 7,
+    memory_count: Annotated[
+        int, typer.Option("--count", "-n", help="Kaç not hatırlatılsın")
+    ] = 3,
 ) -> None:
     """Günlük özet: bugünün notları + geçmişten hatırlatmalar."""
     today_notes = digest.get_today_notes()
@@ -240,7 +269,40 @@ def cmd_reindex(
 
     console.print(f"[cyan]{len(notes)} not için özet oluşturuluyor...[/cyan]")
     created, failed = semantic.reindex_all()
-    print_success(f"Tamamlandı: [bold]{created}[/bold] özet oluşturuldu, {failed} başarısız.")
+    print_success(
+        f"Tamamlandı: [bold]{created}[/bold] özet oluşturuldu, {failed} başarısız."
+    )
+
+
+@app.command("links")
+def cmd_links(
+    note_id: Annotated[int, typer.Argument(help="Not ID")],
+) -> None:
+    """Bir notun verdiği ve aldığı linkleri göster."""
+    note = db.get_note(note_id)
+    if note is None:
+        print_error(f"#{note_id} numaralı not bulunamadı.")
+        raise typer.Exit(1)
+
+    outgoing = db.get_outgoing_links(note_id)
+    incoming = db.get_backlinks(note_id)
+    print_note_links(note, outgoing, incoming)
+
+
+@app.command("orphans")
+def cmd_orphans() -> None:
+    """Hiçbir yere bağlı olmayan notları listele."""
+    orphans = db.get_orphan_notes()
+    print_orphans(orphans)
+
+
+@app.command("graph")
+def cmd_graph() -> None:
+    """Not ilişki haritasını ASCII ağaç olarak göster."""
+    notes = db.list_notes(limit=10_000)
+    id_to_title = {n.id: n.title for n in notes}
+    links = db.get_all_links()
+    print_graph(id_to_title, links)
 
 
 def main() -> None:

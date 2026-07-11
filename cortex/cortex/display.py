@@ -1,14 +1,17 @@
 """Rich-powered terminal output formatters."""
 
+from collections import defaultdict
+from typing import Optional
+
 from rich.columns import Columns
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+from rich.tree import Tree
 
-from cortex.models import Note, SearchResult
-from typing import Optional
+from cortex.models import Backlink, Note, NoteLink, SearchResult
 
 console = Console()
 
@@ -69,9 +72,7 @@ def print_search_results(results: list[SearchResult], query: str) -> None:
         console.print(f"[yellow]'{query}' için sonuç bulunamadı.[/yellow]")
         return
 
-    console.print(
-        f"\n[cyan]'{query}'[/cyan] için [bold]{len(results)}[/bold] sonuç:\n"
-    )
+    console.print(f"\n[cyan]'{query}'[/cyan] için [bold]{len(results)}[/bold] sonuç:\n")
 
     table = Table(show_header=True, header_style="bold cyan", show_lines=True)
     table.add_column("ID", width=5, justify="right")
@@ -188,10 +189,70 @@ def print_ask_result(
         table.add_column("Etiketler", min_width=12)
         for note, summary in notes:
             tags_str = ", ".join(note.tag_names) or "—"
-            table.add_row(str(note.id), note.title, summary or note.short_content, tags_str)
+            table.add_row(
+                str(note.id), note.title, summary or note.short_content, tags_str
+            )
         console.print(table)
     else:
         console.print("[yellow]İlgili not bulunamadı.[/yellow]")
+
+
+def print_note_links(
+    note: Note, outgoing: list[NoteLink], incoming: list[Backlink]
+) -> None:
+    """Render a note's outgoing links (with broken-link status) and backlinks."""
+    console.print(f"\n[bold]#{note.id} — {note.title}[/bold]\n")
+
+    console.print("[bold]Verdiği Linkler:[/bold]")
+    if outgoing:
+        for link in outgoing:
+            if link.is_broken:
+                console.print(f"  [red]✗ {link.target_title} (kırık link)[/red]")
+            else:
+                console.print(
+                    f"  [green]✓ {link.target_title}[/green] [dim](#{link.target_id})[/dim]"
+                )
+    else:
+        console.print("  [dim]Yok[/dim]")
+
+    console.print("\n[bold]Bu Nota Referans Verenler (Backlink):[/bold]")
+    if incoming:
+        for bl in incoming:
+            console.print(
+                f"  [cyan]← {bl.source_title}[/cyan] [dim](#{bl.source_id})[/dim]"
+            )
+    else:
+        console.print("  [dim]Yok[/dim]")
+    console.print()
+
+
+def print_orphans(notes: list[Note]) -> None:
+    """Render notes with no incoming or outgoing links."""
+    if not notes:
+        console.print("[green]Tüm notlar birbirine bağlı — yalnız not yok.[/green]")
+        return
+    print_note_table(notes, title="Yalnız (Bağlantısız) Notlar")
+
+
+def print_graph(id_to_title: dict[int, str], links: list[tuple[int, int]]) -> None:
+    """Render a simple ASCII graph of note → note links as a Rich Tree."""
+    if not links:
+        console.print("[yellow]Henüz not ilişkisi yok.[/yellow]")
+        return
+
+    outgoing: dict[int, list[int]] = defaultdict(list)
+    for source_id, target_id in links:
+        outgoing[source_id].append(target_id)
+
+    tree = Tree("[bold cyan]Not Grafiği[/bold cyan]")
+    for source_id in sorted(outgoing):
+        title = id_to_title.get(source_id, f"#{source_id}")
+        branch = tree.add(f"[bold white]{title}[/bold white] [dim](#{source_id})[/dim]")
+        for target_id in outgoing[source_id]:
+            target_title = id_to_title.get(target_id, f"#{target_id}")
+            branch.add(f"[green]→ {target_title}[/green] [dim](#{target_id})[/dim]")
+
+    console.print(tree)
 
 
 def print_error(message: str) -> None:

@@ -1,12 +1,13 @@
 """SQLite connection, schema creation, and CRUD operations."""
 
+import re
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Generator, Optional
 
-from cortex.models import Note, Tag
+from cortex.models import Backlink, Note, NoteLink, Tag
 
 DB_PATH = Path(__file__).parent.parent / "data" / "cortex.db"
 
@@ -36,6 +37,15 @@ CREATE TABLE IF NOT EXISTS note_tags (
     note_id INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
     tag_id  INTEGER NOT NULL REFERENCES tags(id)  ON DELETE CASCADE,
     PRIMARY KEY (note_id, tag_id)
+);
+
+CREATE TABLE IF NOT EXISTS note_links (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_id    INTEGER NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+    target_id    INTEGER          REFERENCES notes(id) ON DELETE SET NULL,
+    target_title TEXT    NOT NULL,
+    is_broken    INTEGER NOT NULL DEFAULT 0,
+    created_at   TEXT    NOT NULL
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
@@ -100,6 +110,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
 
 # ── Note CRUD ────────────────────────────────────────────────────────────────
 
+
 def _now() -> str:
     return datetime.utcnow().isoformat()
 
@@ -118,7 +129,9 @@ def create_note(
             "VALUES (?, ?, ?, ?, ?, ?)",
             (title, content, source, source_url, now, now),
         )
-        return cur.lastrowid  # type: ignore[return-value]
+        note_id = cur.lastrowid
+        _sync_links(conn, note_id, content)
+        return note_id  # type: ignore[return-value]
 
 
 def get_note(note_id: int) -> Optional[Note]:
@@ -165,17 +178,24 @@ def update_note(note_id: int, title: str, content: str) -> bool:
             "UPDATE notes SET title=?, content=?, updated_at=? WHERE id=?",
             (title, content, _now(), note_id),
         )
-        return cur.rowcount > 0
+        changed = cur.rowcount > 0
+        if changed:
+            _sync_links(conn, note_id, content)
+        return changed
 
 
 def delete_note(note_id: int) -> bool:
-    """Delete a note and its tag links. Returns True if deleted."""
+    """Delete a note. Links pointing to it are marked broken, not removed."""
     with get_conn() as conn:
+        conn.execute(
+            "UPDATE note_links SET is_broken = 1 WHERE target_id = ?", (note_id,)
+        )
         cur = conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
         return cur.rowcount > 0
 
 
 # ── Tag CRUD ─────────────────────────────────────────────────────────────────
+
 
 def get_or_create_tag(name: str) -> int:
     """Return tag id, creating the tag if it doesn't exist."""
@@ -204,28 +224,24 @@ def attach_tags(note_id: int, tag_names: list[str]) -> None:
 def get_all_tags() -> list[Tag]:
     """Return every tag with usage count as Tag objects."""
     with get_conn() as conn:
-        rows = conn.execute(
-            """
+        rows = conn.execute("""
             SELECT t.id, t.name
             FROM tags t
             ORDER BY t.name
-            """
-        ).fetchall()
+            """).fetchall()
         return [Tag(id=r["id"], name=r["name"]) for r in rows]
 
 
 def tag_stats() -> list[dict]:
     """Return tags with note counts, sorted by count desc."""
     with get_conn() as conn:
-        rows = conn.execute(
-            """
+        rows = conn.execute("""
             SELECT t.name, COUNT(nt.note_id) as count
             FROM tags t
             LEFT JOIN note_tags nt ON nt.tag_id = t.id
             GROUP BY t.id
             ORDER BY count DESC
-            """
-        ).fetchall()
+            """).fetchall()
         return [{"name": r["name"], "count": r["count"]} for r in rows]
 
 
@@ -246,6 +262,7 @@ def db_stats() -> dict:
 
 
 # ── Note Summaries ───────────────────────────────────────────────────────────
+
 
 def create_summary(note_id: int, summary: str) -> None:
     """Insert or replace a summary for a note."""
@@ -277,14 +294,12 @@ def get_all_summaries() -> dict[int, str]:
 def get_notes_without_summaries() -> list[Note]:
     """Return all notes that have no entry in note_summaries."""
     with get_conn() as conn:
-        rows = conn.execute(
-            """
+        rows = conn.execute("""
             SELECT n.* FROM notes n
             LEFT JOIN note_summaries s ON s.note_id = n.id
             WHERE s.note_id IS NULL
             ORDER BY n.id
-            """
-        ).fetchall()
+            """).fetchall()
         return [_row_to_note(r) for r in rows]
 
 
@@ -294,7 +309,101 @@ def delete_all_summaries() -> None:
         conn.execute("DELETE FROM note_summaries")
 
 
+# ── Note Links ───────────────────────────────────────────────────────────────
+
+_LINK_PATTERN = re.compile(r"\[\[([^\[\]]+)\]\]")
+
+
+def _sync_links(conn: sqlite3.Connection, note_id: int, content: str) -> None:
+    """Parse [[Title]] references from content and rebuild note_links rows."""
+    conn.execute("DELETE FROM note_links WHERE source_id = ?", (note_id,))
+    now = _now()
+    seen: set[str] = set()
+    for raw_title in _LINK_PATTERN.findall(content):
+        title = raw_title.strip()
+        key = title.lower()
+        if not title or key in seen:
+            continue
+        seen.add(key)
+        row = conn.execute(
+            "SELECT id FROM notes WHERE LOWER(title) = LOWER(?)", (title,)
+        ).fetchone()
+        target_id = row["id"] if row else None
+        conn.execute(
+            "INSERT INTO note_links (source_id, target_id, target_title, is_broken, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (note_id, target_id, title, 0 if target_id else 1, now),
+        )
+
+
+def get_outgoing_links(note_id: int) -> list[NoteLink]:
+    """Links this note makes to others, including broken ones."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT target_id, target_title, is_broken
+            FROM note_links
+            WHERE source_id = ?
+            ORDER BY id
+            """,
+            (note_id,),
+        ).fetchall()
+        return [
+            NoteLink(
+                target_id=r["target_id"],
+                target_title=r["target_title"],
+                is_broken=bool(r["is_broken"]),
+            )
+            for r in rows
+        ]
+
+
+def get_backlinks(note_id: int) -> list[Backlink]:
+    """Notes that link to this note (valid links only)."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT n.id AS source_id, n.title AS source_title
+            FROM note_links nl
+            JOIN notes n ON n.id = nl.source_id
+            WHERE nl.target_id = ? AND nl.is_broken = 0
+            ORDER BY n.id
+            """,
+            (note_id,),
+        ).fetchall()
+        return [
+            Backlink(source_id=r["source_id"], source_title=r["source_title"])
+            for r in rows
+        ]
+
+
+def get_orphan_notes() -> list[Note]:
+    """Notes with no incoming links and no valid outgoing links."""
+    with get_conn() as conn:
+        rows = conn.execute("""
+            SELECT n.* FROM notes n
+            WHERE n.id NOT IN (
+                SELECT target_id FROM note_links WHERE target_id IS NOT NULL
+            )
+            AND n.id NOT IN (
+                SELECT source_id FROM note_links WHERE is_broken = 0
+            )
+            ORDER BY n.id
+            """).fetchall()
+        return [_row_to_note(r) for r in rows]
+
+
+def get_all_links() -> list[tuple[int, int]]:
+    """All valid (non-broken) links as (source_id, target_id) pairs, for graphing."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT source_id, target_id FROM note_links WHERE is_broken = 0"
+        ).fetchall()
+        return [(r["source_id"], r["target_id"]) for r in rows]
+
+
 # ── FTS5 search ──────────────────────────────────────────────────────────────
+
 
 def fts_search(query: str, limit: int = 20) -> list[tuple[int, str]]:
     """Full-text search via FTS5. Returns list of (note_id, snippet).
@@ -331,6 +440,7 @@ def _build_fts_query(query: str) -> str:
 
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
+
 
 def _row_to_note(row: sqlite3.Row) -> Note:
     return Note(

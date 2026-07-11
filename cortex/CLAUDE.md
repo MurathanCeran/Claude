@@ -26,6 +26,7 @@
 - [x] Faz 3: Import sistemi
 - [x] Faz 4: Claude API entegrasyonu (semantic search)
 - [x] Faz 5: Web clipper (URL'den içerik çekme)
+- [x] Faz 6: Not ilişkileri ve graf ([[link]] sistemi)
 - [x] Bonus: Günlük özet (digest) komutu
 
 ## Veritabanı
@@ -48,3 +49,6 @@
 | `cortex digest` | Günlük özet: bugünün notları + geçmişten hatırlatmalar |
 | `cortex ask "soru"` | Semantik arama + Claude'dan bağlamsal yanıt |
 | `cortex reindex` | Tüm notlar için Claude özetleri oluştur |
+| `cortex links <id>` | Notun verdiği ve aldığı linkleri göster |
+| `cortex orphans` | Hiçbir yere bağlı olmayan notları listele |
+| `cortex graph` | Not ilişki haritasını ASCII ağaç olarak göster |

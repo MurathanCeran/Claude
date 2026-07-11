@@ -44,3 +44,16 @@ class NoteSummary:
     note_id: int
     summary: str
     created_at: datetime
+
+
+@dataclass
+class NoteLink:
+    target_id: Optional[int]
+    target_title: str
+    is_broken: bool
+
+
+@dataclass
+class Backlink:
+    source_id: int
+    source_title: str
