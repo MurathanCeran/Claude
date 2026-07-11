@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from datetime import date
 from typing import Annotated, Optional
 
@@ -450,6 +451,21 @@ def cmd_backup(
 
     path = backup.create_backup()
     print_success(f"Yedek alındı: [cyan]{path.name}[/cyan]")
+
+
+@app.command("ui")
+def cmd_ui() -> None:
+    """Tam ekran interaktif terminal arayüzünü aç."""
+    cols, rows = shutil.get_terminal_size(fallback=(80, 24))
+    if cols < 80 or rows < 24:
+        print_warning(
+            f"Terminal boyutu {cols}x{rows} — önerilen minimum 80x24. "
+            "Arayüz düzgün görünmeyebilir."
+        )
+
+    from cortex.tui import CortexApp
+
+    CortexApp().run()
 
 
 def main() -> None:

@@ -29,6 +29,7 @@
 - [x] Faz 6: Not ilişkileri ve graf ([[link]] sistemi)
 - [x] Faz 7: Günlük not sistemi ve spaced repetition (Leitner)
 - [x] Faz 8: Export ve yedekleme
+- [x] Faz 9: Terminal dashboard (Textual TUI)
 - [x] Bonus: Günlük özet (digest) komutu
 
 ## Veritabanı
@@ -36,6 +37,12 @@
 - FTS5 virtual table ile full-text search
 - data/cortex.db gitignore'da tutulur
 - backups/ klasörü gitignore'da tutulur, max 10 yedek saklanır
+
+## Terminal Dashboard (cortex ui)
+- Textual framework, min terminal boyutu 80x24 (küçükse uyarı verir, yine de açılır)
+- Kısayollar: `/` ara, `n` yeni not, `d` sil, `t` etiketle, `r` review, `b` etiket tarayıcı, `q` çıkış
+- Liste navigasyonu: `j`/`k` (vim-style) veya ok tuşları
+- Ekranlar: Ana (liste+detay), Arama (sonuç+preview), Etiket tarayıcı, Review (flashcard)
 
 ## CLI Komutları
 | Komut | Açıklama |
@@ -63,3 +70,4 @@
 | `cortex backup --list` | Mevcut yedekleri listele |
 | `cortex backup --restore <dosya>` | Bir yedekten geri yükle (onaylı) |
 | `cortex import-obsidian <vault_yolu>` | Obsidian vault'unu import et |
+| `cortex ui` | Tam ekran interaktif terminal dashboard (Textual) aç |

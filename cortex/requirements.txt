@@ -6,6 +6,8 @@ beautifulsoup4>=4.12
 markdownify>=0.12
 anthropic>=0.50
 markdown>=3.6
+textual>=0.60
 pytest>=8
 pytest-cov
+pytest-asyncio>=0.23
 black
