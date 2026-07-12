@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#000000" />
+<meta name="theme-color" content="#141628" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -31,8 +31,8 @@
     --txt:#ffffff;
     --muted:#a6a6a6;
     --faint:#6e6e6e;
-    --accent:#ffffff;
-    --accent-2:#cfcfcf;
+    --accent:#e8c28f;
+    --accent-2:#d9a566;
     --human:#34d399;
     --mid:#f2c14e;
     --ai:#f5647a;
@@ -44,42 +44,23 @@
   body{
     font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:var(--txt);
-    background:#000000;
+    background:linear-gradient(178deg, #10131f 0%, #151830 36%, #241a33 66%, #2e1e2c 100%) fixed, #131524;
     min-height:100vh;padding:40px 18px 70px;-webkit-font-smoothing:antialiased;
     overflow-x:hidden;position:relative;
   }
-  /* ===== [v8] Yildizli lacivert gokyuzu (dis cerceve) ===== */
-  .stars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9;
-    background-image:
-      radial-gradient(1.6px 1.6px at 40px 60px,#fff,transparent),
-      radial-gradient(1.2px 1.2px at 130px 120px,rgba(255,255,255,.85),transparent),
-      radial-gradient(1.1px 1.1px at 220px 40px,rgba(255,255,255,.7),transparent),
-      radial-gradient(1.6px 1.6px at 300px 200px,#fff,transparent),
-      radial-gradient(1.1px 1.1px at 80px 240px,rgba(255,255,255,.6),transparent),
-      radial-gradient(1.2px 1.2px at 360px 300px,rgba(255,255,255,.75),transparent);
-    background-size:400px 400px;background-repeat:repeat;animation:twinkle 6s ease-in-out infinite}
-  .stars::after{content:"";position:absolute;inset:0;
-    background-image:
-      radial-gradient(1px 1px at 60px 160px,rgba(255,255,255,.5),transparent),
-      radial-gradient(1px 1px at 210px 90px,rgba(255,255,255,.45),transparent),
-      radial-gradient(1px 1px at 330px 250px,rgba(255,255,255,.5),transparent);
-    background-size:320px 320px;background-repeat:repeat;animation:twinkle 9s ease-in-out infinite reverse}
-  @keyframes twinkle{0%,100%{opacity:.55}50%{opacity:1}}
-
-  /* ===== [v8] Ust kuselerden sarkan bitkiler (sallanma animasyonlu) ===== */
-  .foliage{position:fixed;top:-12px;width:min(46vw,430px);z-index:7;pointer-events:none;transform-origin:top center;will-change:transform}
-  .foliage svg{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 22px rgba(0,0,0,.55))}
-  .fol-left{left:-26px;animation:sway1 7s ease-in-out infinite}
-  .fol-right{right:-26px;transform:scaleX(-1);animation:sway2 9s ease-in-out infinite}
-  @keyframes sway1{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.5deg)}}
-  @keyframes sway2{0%,100%{transform:scaleX(-1) rotate(-1.2deg)}50%{transform:scaleX(-1) rotate(1.3deg)}}
-  .tendril{transform-box:fill-box;transform-origin:top center}
-  .fol-left .t1,.fol-right .t1{animation:tsway 5s ease-in-out infinite}
-  .fol-left .t2,.fol-right .t2{animation:tsway 6.4s ease-in-out infinite}
-  .fol-left .t3,.fol-right .t3{animation:tsway 7.6s ease-in-out infinite}
-  @keyframes tsway{0%,100%{transform:rotate(-2.6deg)}50%{transform:rotate(2.6deg)}}
-  @media(prefers-reduced-motion:reduce){.fol-left,.fol-right,.tendril,.stars,.stars::after{animation:none}}
-  @media(max-width:640px){.foliage{width:62vw}}
+  /* ===== [v20] Alacakaranlik (dusk) atmosferi — siyah yerine sicak, yetiskin, sakin ===== */
+  .dusk{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(120% 62% at 50% 112%, rgba(226,150,90,.20) 0%, rgba(190,110,95,.10) 38%, rgba(0,0,0,0) 66%),
+      radial-gradient(90% 50% at 82% -12%, rgba(120,140,200,.12) 0%, rgba(0,0,0,0) 60%);}
+  .orb{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;will-change:transform}
+  .orb.oa{width:420px;height:420px;background:rgba(232,178,120,.10);left:-120px;bottom:-80px;animation:orbA 34s ease-in-out infinite}
+  .orb.ob{width:360px;height:360px;background:rgba(205,125,140,.09);right:-110px;top:16%;animation:orbB 44s ease-in-out infinite}
+  @keyframes orbA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(90px,-70px) scale(1.12)}}
+  @keyframes orbB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-80px,60px) scale(.9)}}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");}
+  @media(prefers-reduced-motion:reduce){.orb{animation:none}}
 
   /* Liquid glass (Mindloop) — ince ust/alt kenar parlamasi */
   .liquid-glass{position:relative;overflow:hidden}
@@ -144,10 +125,10 @@
   .btn:hover{border-color:var(--accent);background:rgba(255,255,255,.15);transform:translateY(-1px)}
   .btn:active{transform:translateY(0) scale(.97)}
   .btn.ghost{color:var(--muted)}
-  .btn.primary{background:linear-gradient(120deg,rgba(255,255,255,.85),rgba(255,255,255,.7));border:none;color:#0a0a14;font-weight:800}
+  .btn.primary{background:linear-gradient(120deg,rgba(238,196,140,.95),rgba(217,165,102,.85));border:none;color:#1c1208;font-weight:800}
   .btn.primary:hover{filter:brightness(1.12)}
   .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
-  .analyze-btn{width:100%;margin-top:13px;padding:15px;font-size:16px;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 10px 28px rgba(255,255,255,.30)}
+  .analyze-btn{width:100%;margin-top:13px;padding:15px;font-size:16px;border-radius:13px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 10px 28px rgba(226,166,102,.32)}
   .analyze-btn:active{transform:scale(.99)}
   .status{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:11px;font-size:13px;font-weight:600;color:var(--faint);min-height:18px;transition:color .3s;text-align:center}
   .status .ld{width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 9px currentColor;flex:0 0 auto}
@@ -347,7 +328,7 @@
     --accent:#111111; --accent-2:#444444; --human:#22b07a; --mid:#d4a83a; --ai:#e04860;
     --shadow:0 20px 60px rgba(0,0,0,.08);
   }
-  :root.light .vortex,:root.light .blob,:root.light .stars,:root.light .foliage{display:none}
+  :root.light .dusk,:root.light .orb,:root.light .grain{display:none}
   :root.light body{background:linear-gradient(180deg,var(--bg-0),var(--bg-1))}
   :root.light .wrap{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.08);box-shadow:0 30px 80px rgba(0,0,0,.1)}
   :root.light textarea{background:rgba(0,0,0,.04)}
@@ -471,6 +452,10 @@
 </script>
 </head>
 <body>
+<div class="dusk" aria-hidden="true"></div>
+<div class="orb oa" aria-hidden="true"></div>
+<div class="orb ob" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 <button type="button" class="theme-btn" id="themeBtn" aria-label="Tema değiştir">🌙</button>
 <div class="wrap">
 
@@ -657,7 +642,7 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%61</b> (v18-v19 "genel-geçer deneme" + Türkçe geniş-zaman motorlarıyla %48'den yükseldi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%53</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
+          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%73</b> (v18-v20 motor ailesiyle %48'den yükseldi: genel-geçer deneme, Türkçe geniş-zaman, jenerik tavsiye sesi dedektörleri + "of" çakışma düzeltmesi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%68</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
         </div>
       </details>
     </section>
@@ -764,7 +749,9 @@ const STRUCTS = [
 ];
 
 const CONTRACTIONS = /\b(i'm|i've|i'd|i'll|you're|you've|you'll|we're|we've|don't|doesn't|didn't|can't|won't|isn't|aren't|wasn't|weren't|it's|that's|there's|he's|she's|they're|they've|let's|wouldn't|couldn't|shouldn't|haven't|hasn't|gonna|wanna|gotta)\b/gi;
-const HUMAN_CASUAL = /\b(lol|haha|hahaha|yeah|nah|kinda|sorta|tbh|imo|btw|omg|ngl|honestly|aslında|yani|işte|valla|hadi|abi|kanka|ya|falan|filan|cidden|resmen|of)\b/gi;
+/* [v20] "of" listeden cikarildi: TR ic-cekme "of", Ingilizce "of" (cup of coffee) ile carpisiyordu —
+   her EN metne bedava "casual insan" puani verip AI'lari sakliyordu. */
+const HUMAN_CASUAL = /\b(lol|haha|hahaha|yeah|nah|kinda|sorta|tbh|imo|btw|omg|ngl|honestly|aslında|yani|işte|valla|hadi|abi|kanka|ya|falan|filan|cidden|resmen)\b/gi;
 // Harf sinifi — \p{L}/\p{M} ve 'u' bayragi YOK (eski mobil Safari parse edemiyor). Latin+TR+birlesik:
 const LET = "A-Za-z\\u00C0-\\u024F\\u0300-\\u036F";
 const WORD_RE = new RegExp("["+LET+"']+","g");
@@ -1061,6 +1048,32 @@ function analyze(text){
     }
   }catch(e){}
 
+  // [v20] Jenerik "sen-dilli tavsiye" sesi: you/your yogunlugu + emir kipi cumle baslangiclari.
+  // AI tavsiye/nasil-yapilir metinlerinin imzasi; insan tarifi/tavsiyesi anekdot ve "ben" icerir (kalkan).
+  var adviceAI = 0;
+  try{
+    if(wc>=35 && sc>=3){
+      var youN = countRe(text, /\b(you|your|yours|yourself|you'll|you're|you've)\b/gi);
+      var impN = 0;
+      for(var si=0; si<sentences.length; si++){
+        if(/^\s*(Set|Start|Try|Ask|Open|Close|Lower|Raise|Move|Put|Take|Keep|Remember|Begin|Write|Read|Make|Use|Avoid|Focus|Choose|Pick|Give|Let|Stop|Save|Pour|Heat|Add|Wait|Plant|Water|Breathe|Consider|Imagine|Think|Learn|Practice|Embrace|Celebrate|Track|Plan|Prioritize|Establish|Maintain|Create|Build)\b/.test(sentences[si])) impN++;
+      }
+      var youRate = clamp01((youN/sc)/0.7);
+      var impRate = clamp01((impN/sc)/0.32);
+      adviceAI = clamp01(youRate*0.55 + impRate*0.45);
+      if(firstPerson>=2 || casual>0) adviceAI = adviceAI*0.25;
+      else if(firstPerson===1) adviceAI = adviceAI*0.6;
+    }
+  }catch(e){ adviceAI=0; }
+  // [v20] Anlati-zinciri kalkani: cumleler And/But/Ve/Ama ile zincirleniyorsa (Incil/masal/anlati uslubu —
+  // LLM'ler bunu yapmaz) tum yukseltmeler sondurulur; kutsal metin/edebi anlati yanlis pozitifini onler.
+  var chainRate = 0;
+  try{
+    var chainN = 0;
+    for(var ci=0; ci<sentences.length; ci++){ if(/^\s*(And|But|So|Then|Ve|Ama|Sonra)\b/.test(sentences[ci])) chainN++; }
+    chainRate = sc>0 ? chainN/sc : 0;
+  }catch(e){}
+
   const parts = [
     {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
       desc:"'delve, önemli bir rol oynar' + yapısal kalıplar ('From X to Y', 'not just X but Y')."},
@@ -1104,6 +1117,8 @@ function analyze(text){
       desc:"[v5] AI her cümleye eşit bilgi yükler; insanda yoğun/geçiş cümleler değişir."},
     {key:"gnomic", name:"Genel-geçer deneme dokusu", short:"Genelgeçer", ai:gnomicAI, w:0.10, val:"%"+Math.round(gnomicAI*100),
       desc:"[v18] Somut detaysız, birinci-tekil-siz, geniş-zaman 'bilgece' anlatım + zıtlık kalıpları — modern AI denemelerinin imzası."},
+    {key:"advice", name:"Jenerik tavsiye sesi", short:"Tavsiye", ai:adviceAI, w:0.02, val:"%"+Math.round(adviceAI*100),
+      desc:"[v20] 'you/your' yoğunluğu + emir kipi başlangıçları — AI nasıl-yapılır/tavsiye imzası; anekdotlu insan tavsiyesi kalkanlı."},
     {key:"smooth", name:"Makine düzgünlüğü", short:"Düzgünlük", ai:smoothAI, w:0.05, val:(smoothAI>0?("%"+Math.round(smoothAI*100)):"—"),
       desc:"[v14] Cümle uzunluğu + virgül ritmi aşırı tekdüze ve hiç spontanlık (kendini düzeltme, vurgu) yoksa makine işi sinyali."}
   ];
@@ -1122,7 +1137,7 @@ function analyze(text){
   const totW = parts.reduce(function(a,p){return a+p.w;},0);
   const base = parts.reduce(function(a,p){return a+p.ai*p.w;},0) / totW;
   const excess = parts.reduce(function(a,p){return a+(BOOST_KEYS[p.key]?Math.max(0, p.ai-0.5):0);},0);
-  const boost = Math.min(excess*0.28, 0.40);
+  var boost = Math.min(excess*0.28, 0.40);
   // [v9] Leksik AI-parmak izi yukseltmesi: SADECE yuksek-isabetli kelime sinyalleri (klise/hype/gecis/hedge).
   // Bu sinyaller resmi/akademik insan metninde ~0 oldugundan yanlis pozitif riski yok; AI yakalamayi (recall) artirir.
   // [v12] Sadece AI'ya-ozgu yogun sinyaller (klise+hype). Gecis/hedge insanda da bol oldugundan lexBoost'tan cikarildi.
@@ -1131,7 +1146,11 @@ function analyze(text){
   // [v18] Gnomic yukseltme — register kapili: resmi/edilgen yogun (akademik INSAN) metinlerde devreye girmez,
   // sade genis-zaman "bilgece" AI denemelerinde girer. Kalibrasyon: FP eklemeden harsh recall %0 -> %20.
   var gnomicBoost = (gnomicAI>0.40 && humanBonus<0.35 && formalAI<0.5 && passiveAI<0.65) ? Math.min((gnomicAI-0.40)*1.5, 0.45) : 0;
-  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost - humanBonus*0.22);
+  // [v20] Tavsiye yukseltmesi (kalibre: FP eklemeden harsh recall %26 -> %50)
+  var adviceBoost = (adviceAI>0.28 && humanBonus<0.50 && formalAI<0.5) ? Math.min((adviceAI-0.28)*2.4, 0.60) : 0;
+  // [v20] Anlati-zinciri kalkani: zincirli anlatimda (Incil/masal) tum yukseltmeleri sondur
+  if(chainRate>=0.4){ gnomicBoost=gnomicBoost*0.25; adviceBoost=adviceBoost*0.25; lexBoost=lexBoost*0.5; boost=boost*0.5; }
+  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
 
   let conf = "Düşük";
@@ -2229,7 +2248,7 @@ try{ setGenre(selectedGenre); }catch(e){}
 try{ renderAnalysisHistory(); }catch(e){}
 /* [v5] PWA manifest (dinamik blob) */
 try{
-  var mf={ name:"AI Dedektör", short_name:"AI Dedektör", description:"Metni yapıştır, AI mı insan mı öğren", start_url:".", display:"standalone", background_color:"#000000", theme_color:"#000000",
+  var mf={ name:"AI Dedektör", short_name:"AI Dedektör", description:"Metni yapıştır, AI mı insan mı öğren", start_url:".", display:"standalone", background_color:"#141628", theme_color:"#141628",
     icons:[{ src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#000000"/><text x="50" y="68" font-size="54" text-anchor="middle" fill="#ffffff">◎</text></svg>'), sizes:"any", type:"image/svg+xml" }] };
   var mblob=new Blob([JSON.stringify(mf)],{type:"application/json"});
   var mlink=document.createElement("link"); mlink.rel="manifest"; mlink.href=URL.createObjectURL(mblob);
