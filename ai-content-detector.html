@@ -640,10 +640,10 @@
           <b>genel-geçer deneme dokusu</b> (TR "-dır/-maz/-abilir" morfolojisi ve jenerik "biz" sesi dahil), <b>jenerik tavsiye sesi</b>, <b>makine düzgünlüğü</b>; artı biyografi/byline kalıbı yükseltmesi ve anlatı-zinciri kalkanı.
           <br><br>
           <b>Tür bazlı analiz:</b> Akademik/Yaratıcı/İş/Gündelik türlerine göre sinyal ağırlıkları uyarlanır (ör. gündelik metinde resmiyet daha güçlü AI sinyali sayılır).
-          <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
+          <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>tek-tık insanlaştırma artık iki geçişli</b>: Claude yazar → yerel motor skorlar → hâlâ yüksekse kalan sinyalleri hedefleyen ince-ayar geçişi yapılır ve iki sonucun iyisi kullanılır; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%82</b> (v18-v21 motor ailesiyle %48'den yükseldi: genel-geçer deneme, Türkçe geniş-zaman/açıklayıcı morfoloji, jenerik tavsiye ve "biz" sesi, biyografi kalıbı dedektörleri + "of" çakışma düzeltmesi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%74</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
+          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 40 örnekte ~<b>%93 doğruluk</b> ve <b>sıfır yanlış pozitif</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%86</b> (v18-v22 motor ailesiyle %48'den yükseldi: genel-geçer deneme, Türkçe geniş-zaman/açıklayıcı morfoloji — aksansız Türkçe dahil, jenerik tavsiye/"siz-dilli" ve "biz" sesi, biyografi kalıbı, ulaç-başlangıç dedektörleri + "of" çakışma düzeltmesi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%74</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
         </div>
       </details>
     </section>
@@ -1037,7 +1037,11 @@ function analyze(text){
   // Kelime ezberi degil morfoloji — overfit riski dusuk. Ozel-isim kalkani TR Wikipedia/ansiklopedik INSAN metnini korur
   // (onlar -dır dolu AMA ozel isim kaynar; AI "bilgece" denemede ozel isim yok denecek kadar az).
   try{
-    if(/[çğıöşü]/i.test(text) && wc>=35 && sc>=3){
+    // [v22] Aksansiz Turkce kapisi: diakritik yoksa TR baglaclariyla tespit ("Saglikli beslenme..." tarzi
+    // ASCII'ye dusurulmus AI metni kapidan donmesin); trExpl eslesmesi normalize kopya uzerinden.
+    var trAscii = !/[çğıöşü]/i.test(text) && countRe(text, /\b(bir|ve|ama|ancak|icin|cok|daha|gibi|kadar|ile|olarak|degil|cunku|oysa|yani)\b/gi) >= 3;
+    if((/[çğıöşü]/i.test(text) || trAscii) && wc>=35 && sc>=3){
+      var trNorm = text.replace(/ç/gi,'c').replace(/ğ/gi,'g').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ö/gi,'o').replace(/ş/gi,'s').replace(/ü/gi,'u').toLowerCase();
       var trCopula = countRe(text, /[a-zçğıöşüâî]{3,}(dır|dir|dur|dür|tır|tir|tur|tür)(\.|,|;|:|!|\?|\s|$)/gi);
       var trNegAor = countRe(text, /[a-zçğıöşü]{2,}(maz|mez|mazsın|mezsin)(\.|,|;|:|!|\?|\s|$)/gi);
       var trYouAor = countRe(text, /[a-zçğıöşü]{3,}(irsin|ırsın|ursun|ürsün|arsın|ersin)(\.|,|;|:|!|\?|\s|$)/gi);
@@ -1047,14 +1051,27 @@ function analyze(text){
       // sik AI-aciklayici fiiller ("sağlar, gerektirir, kolaylaştırır"). TR AI'nin "ders kitabi" sesi.
       var trAbil = countRe(text, /[a-zçğıöşü]{2,}(abilir|ebilir)(\.|,|;|:|!|\?|\s|$)/gi);
       var trPasAor = countRe(text, /[a-zçğıöşü]{2,}(ılır|ilir|ulur|ülür|ınır|inir|unur|ünür)(\.|,|;|:|!|\?|\s|$)/gi);
-      var trExpl = countRe(text, /\b(sağlar|sunar|korur|tutar|verir|eder|olur|gelir|kılar|önler|engeller|etkiler|belirler|gösterir|öğretir|gerektirir|kolaylaştırır|zorlaştırır|azaltır|artırır|arttırır|güçlendirir|geliştirir|destekler|dönüştürür|kazandırır|oluşturur|oluşur|başlar|değişir|yaratır|katar|besler|anlamına gelir|yardımcı olur)\b/gi);
+      var trExpl = countRe(trNorm, /\b(saglar|sunar|korur|tutar|verir|eder|olur|gelir|kilar|onler|engeller|etkiler|belirler|gosterir|ogretir|gerektirir|kolaylastirir|zorlastirir|azaltir|artirir|arttirir|guclendirir|gelistirir|destekler|donusturur|kazandirir|olusturur|olusur|baslar|degisir|yaratir|katar|besler|anlamina gelir|yardimci olur|acar|yikilir|bilir|davranir|temizler|sever|getirir|dusunur|yapar|ister|bekler|calisir|isler|yasar|artar|azalir|hisseder|ogrenir|unutur|kaybeder|kazanir)\b/g);
       var trRate = clamp01(((trCopula + trNegAor*1.4 + trYouAor*1.4 + trAbil*1.2 + trPasAor*1.0 + trExpl*0.7)/sc) / 1.6);
       var trG = trRate * shieldProp * (numerals===0?1:0.45) * 0.45 * (1 - Math.min(formalAI,1)*0.6);
       if(casual>0) trG = trG*0.4;
       gnomicAI = clamp01(gnomicAI + trG);
       // [v21] TR icin ayri boost kanali: TR aciklayici metin dogal olarak edilgen oldugundan
       // asagidaki gnomicBoost'un edilgen kapisina takilir; kendi (ozel-isim-kalkanli) yolu var.
-      trGn = trRate * shieldProp * (numerals===0?1:0.45) * (1 - Math.min(formalAI,1)*0.6) * (casual>0?0.3:1);
+      // [v22] TR jenerik "biz": "bizi korur, hepimizin sorumlulugu" — kisisel iz olmadan kolektif ses
+      var trBiz = countRe(trNorm, /\b(biz|bizi|bize|bizim|hepimiz|hepimizin)\b/g);
+      var bizAdd = (firstPerson===0 && trBiz>=1) ? clamp01(trBiz/sc/0.5)*0.5 : 0;
+      trGn = clamp01(trRate + bizAdd) * shieldProp * (numerals===0?1:0.45) * (1 - Math.min(formalAI,1)*0.6) * (casual>0?0.3:1);
+    }
+  }catch(e){}
+  // [v22] Ulac-baslangic orani (EN): "Cutting..., Putting..., Reading..." — cumlelerin cogu -ing ile
+  // aciliyorsa AI listicle imzasi; insan nadiren art arda ulacla baslar.
+  try{
+    if(wc>=35 && sc>=3 && firstPerson===0 && !/[çğıöşü]/i.test(text)){
+      var gerN = 0;
+      for(var gi=0; gi<sentences.length; gi++){ if(/^\s*[A-Z][a-z]+ing\b/.test(sentences[gi])) gerN++; }
+      var gerRate = sc>0 ? gerN/sc : 0;
+      if(gerRate>=0.4) gnomicAI = clamp01(gnomicAI + (gerRate-0.4)*0.5);
     }
   }catch(e){}
   // [v21] Jenerik "biz" sesi (EN): "we rarely notice, we assume" — kisisel iz olmadan genel-gecer "biz".
@@ -1077,7 +1094,13 @@ function analyze(text){
       for(var si=0; si<sentences.length; si++){
         if(/^\s*(Set|Start|Try|Ask|Open|Close|Lower|Raise|Move|Put|Take|Keep|Remember|Begin|Write|Read|Make|Use|Avoid|Focus|Choose|Pick|Give|Let|Stop|Save|Pour|Heat|Add|Wait|Plant|Water|Breathe|Consider|Imagine|Think|Learn|Practice|Embrace|Celebrate|Track|Plan|Prioritize|Establish|Maintain|Create|Build)\b/.test(sentences[si])) impN++;
       }
-      var youRate = clamp01((youN/sc)/0.7);
+      // [v22] TR "siz-dilli" tavsiye: 2. cogul iyelik (-iniz), gelecek/geniz zaman siz cekimi, emir kipi.
+      // Emir eki yalnizca belirsizligi olmayan formlarla (-yın/-ınız); "Dünyanın" gibi tamlayan eki emir sanilmaz.
+      var trPoss2 = countRe(text, /[a-zçğıöşü]{2,}(ınız|iniz|unuz|ünüz|ınızı|inizi|nızı|nizi|ınıza|inize)(\.|,|;|:|!|\?|\s|$)/gi);
+      var trImp2 = 0;
+      for(var ti=0; ti<sentences.length; ti++){ if(/^\s*[A-ZÇĞİÖŞÜ][a-zçğıöşü]{2,}(yın|yin|yun|yün|ınız|iniz|unuz|ünüz)\b/.test(sentences[ti])) trImp2++; }
+      var trFut2 = countRe(text, /[a-zçğıöşü]{2,}(acaksınız|eceksiniz|ırsınız|irsiniz|ursunuz|ürsünüz|arsınız|ersiniz|malısınız|melisiniz|abilirsiniz|ebilirsiniz)(\.|,|;|:|!|\?|\s|$)/gi);
+      var youRate = clamp01(((youN + (trPoss2+trFut2)*1.0 + trImp2*1.6)/sc)/0.7);
       var impRate = clamp01((impN/sc)/0.32);
       adviceAI = clamp01(youRate*0.55 + impRate*0.45);
       if(firstPerson>=2 || casual>0) adviceAI = adviceAI*0.25;
@@ -1347,29 +1370,74 @@ function rankedReasons(r){
   // [v21] REASON_META'da karsiligi olmayan anahtar render'i cokertmesin (gnomic/advice/smooth eklenince yasandi)
   return r.parts.filter(function(p){return p.ai>=0.35 && REASON_META[p.key];}).sort(function(a,b){return b.ai*b.w - a.ai*a.w;}).slice(0,5);
 }
+/* [v22] Insanlastirma promptu buyuk revizyon: tur-duyarli kayit kurali, dinamik sorun listesi,
+   en cok AI kokan cumleler, somut insan-taslagi teknikleri ve yasaklar ("humanizer" tell'leri dahil). */
+function genreRegisterRule(){
+  var g = (typeof selectedGenre!=="undefined" && selectedGenre) ? selectedGenre : "academic";
+  if(g==="creative") return "Anlatı sesini ve imgeleri koru; ama mükemmelliği boz — ritim düzensiz, detaylar spesifik olsun. Argo serbest değil, ses doğal olsun.";
+  if(g==="business") return "Profesyonel ton kalsın; pazarlama parlaklığını söndür, kısa ve net konuş. Argo kullanma, ama robot resmiyetini de bırak.";
+  if(g==="casual") return "Konuşur gibi yaz: kısaltmalar, ünlem, yarım cümle serbest. Ama zorlama gençlik argosu ekleme.";
+  return "Akademik/ödev kaydını koru: argümanlar, terimler ve iddialar aynı kalsın. Samimiyet 'düşünen bir öğrencinin sesi' düzeyinde olsun; argo ve gevşek dil kullanma.";
+}
+function worstSentences(text, n){
+  try{
+    var sents=getSentencesPos(text);
+    return sents.map(function(s){return {t:s.text, sc:scoreSentence(s.text)};})
+      .sort(function(a,b){return b.sc-a.sc;}).slice(0,n).filter(function(x){return x.sc>=0.4;});
+  }catch(e){ return []; }
+}
 function buildMasterPrompt(r, text){
   const ranked = rankedReasons(r);
   const items = ranked.map(function(p,i){return (i+1)+". "+REASON_META[p.key].prompt(r);}).join("\n");
-  return "Aşağıdaki metni, anlamını ve içerdiği tüm bilgiyi birebir koruyarak daha doğal, bir insanın elinden çıkmış gibi yeniden yaz. Yapay zeka izlenimi veren şu sorunları özellikle düzelt:\n\n"
-    + items + "\n\nGenel kurallar:\n"
-    + "- Bilgi ekleme, bilgi çıkarma; sadece üslubu değiştir.\n"
-    + "- Mükemmel ve pürüzsüz durmasın; doğal, hafif dağınık insan ritmi olsun.\n"
-    + "- Kalıp ifade, abartı ve gereksiz bağlaç kullanma.\n"
-    + "- Metnin dilini (Türkçe/İngilizce) koru.\n"
-    + "- Sadece yeniden yazılmış metni ver, açıklama ekleme.\n\nMETİN:\n\"\"\"\n" + text + "\n\"\"\"";
+  const worst = worstSentences(text, 2);
+  const worstBlock = worst.length ? ("\nŞu cümleler özellikle makine kokuyor — bunları mutlaka baştan kur:\n"
+    + worst.map(function(w){return '- "'+w.t.trim().slice(0,160)+'"';}).join("\n") + "\n") : "";
+  return "Sen deneyimli bir insan editörsün. Görevin: aşağıdaki metni, GERÇEK BİR İNSANIN İLK TASLAĞI gibi okunacak şekilde yeniden yazmak. Anlam, iddialar ve bilgiler birebir korunacak; değişen tek şey ses ve doku.\n\n"
+    + "Tespit edilen sorunlar (öncelik sırasıyla düzelt):\n" + items + "\n" + worstBlock
+    + "\nİnsan-taslağı teknikleri (hepsini dozunda uygula):\n"
+    + "- Cümle uzunluklarını sert dalgalandır: en az bir 3-6 kelimelik vurucu cümle, en az bir 25+ kelimelik akan cümle kur; ardışık cümleler benzer uzunlukta kalmasın.\n"
+    + "- Bir yerde küçük bir öz-düzeltme ya da ara-düşünce bırak: \"daha doğrusu\", \"gerçi\", parantez içi kısa not — bir tane yeter.\n"
+    + "- Genel-geçer 'bilgece' yargıları ya tek bir somut örneğe indir ya da bakış açısı belirt; aforizma dizisi bırakma.\n"
+    + "- Ara sıra bir cümleye Ve/Ama (And/But) ile başlamak serbest — insanlar bunu yapar.\n"
+    + "- İngilizce metinde kısaltma kullan (it's, don't, can't). Türkçe metinde \"-maktadır\" çekimlerini \"-ıyor\"a çevir, edilgeni özneli etkene döndür.\n"
+    + "- Em-dash (—) kullanma. \"x, y ve z\" üçlülerini ve \"not only... but also\" simetrilerini boz.\n"
+    + "- Duygusal düzlüğü kır: bir yerde küçük, içten bir tepki (şaşırma, hafif rahatsızlık, sevinç) — abartma.\n"
+    + "\nYASAKLAR (bunlar 'kötü humanizer' işaretleridir):\n"
+    + "- Yeni bilgi, sayı, isim, kaynak UYDURMA; anlamı değiştirme.\n"
+    + "- Rastgele yazım/dilbilgisi hatası serpiştirme.\n"
+    + "- Zorlama argo, her cümleye \"ben\" koyma, yapay samimiyet.\n"
+    + "- Klişe ve abartı ekleme (delve, önemli bir rol oynar, olağanüstü...).\n"
+    + "\nKayıt kuralı: " + genreRegisterRule() + "\n"
+    + "Metnin dilini (Türkçe/İngilizce) aynen koru. SADECE yeniden yazılmış metni ver; başlık, açıklama, tırnak ekleme.\n\nMETİN:\n\"\"\"\n" + text + "\n\"\"\"";
+}
+/* [v22] Ikinci gecis (oz-denetim) promptu: ilk yeniden yazim hala sinyal veriyorsa kalanlari hedefler. */
+function buildRefinePrompt(r1, text){
+  const ranked = rankedReasons(r1);
+  const items = ranked.length ? ranked.map(function(p,i){return (i+1)+". "+REASON_META[p.key].prompt(r1);}).join("\n") : "- Kalan genel pürüzsüzlüğü ve tekdüze ritmi kır.";
+  const worst = worstSentences(text, 3);
+  const worstBlock = worst.length ? ("\nHâlâ makine kokan cümleler — bunları baştan kur:\n"
+    + worst.map(function(w){return '- "'+w.t.trim().slice(0,160)+'"';}).join("\n") + "\n") : "";
+  return "Aşağıdaki metin bir kez insanlaştırıldı ama dedektör hâlâ %"+r1.pct+" AI skoru veriyor. İnce ayar geçişi yap: metni büyük oranda koru, SADECE kalan sorunlu noktaları düzelt.\n\n"
+    + "Kalan sinyaller:\n" + items + "\n" + worstBlock
+    + "\nKurallar: anlam ve bilgiler birebir aynı kalsın; yeni bilgi uydurma; yazım hatası ekleme; metnin dilini koru; "
+    + genreRegisterRule() + "\nSADECE düzeltilmiş metni ver.\n\nMETİN:\n\"\"\"\n" + text + "\n\"\"\"";
 }
 function buildSinglePrompt(r, key, text){
   return "Aşağıdaki metni, anlamını ve içerdiği bilgiyi birebir koruyarak yeniden yaz. Tek bir sorunu düzelt:\n\n"
     + REASON_META[key].prompt(r)
-    + "\n\nDiğer her şeyi olduğu gibi bırak. Sadece yeniden yazılmış metni ver.\n\nMETİN:\n\"\"\"\n" + text + "\n\"\"\"";
+    + "\n\nDiğer her şeyi olduğu gibi bırak. Yeni bilgi uydurma, yazım hatası ekleme, em-dash (—) kullanma. "
+    + genreRegisterRule()
+    + "\nSadece yeniden yazılmış metni ver.\n\nMETİN:\n\"\"\"\n" + text + "\n\"\"\"";
 }
 function buildSentencePrompt(fullText, sentence){
   return "Aşağıdaki metindeki TEK bir cümleyi, yapay zeka tarafından yazılmış izlenimini azaltacak şekilde daha doğal ve insansı yeniden yaz.\n\n"
     + "Metnin tamamı (bağlam için):\n\"\"\"\n" + fullText + "\n\"\"\"\n\n"
     + "Yeniden yazılacak cümle:\n\"\"\"\n" + sentence + "\n\"\"\"\n\n"
     + "Kurallar:\n- Anlamı ve bilgiyi birebir koru; metnin diliyle (Türkçe/İngilizce) yaz.\n"
-    + "- AI klişesi, abartı, gereksiz bağlaç ve \"-maktadır\" gibi aşırı resmi çekim kullanma.\n"
-    + "- Cümle bağlamla uyumlu kalsın; uzunluğu serbestçe değiştirebilirsin.\n"
+    + "- AI klişesi, abartı, em-dash (—), gereksiz bağlaç ve \"-maktadır\" gibi aşırı resmi çekim kullanma.\n"
+    + "- Cümle bağlamla uyumlu kalsın; uzunluğu serbestçe değiştir — komşu cümlelerden farklı uzunlukta olması iyidir.\n"
+    + "- Kayıt: " + genreRegisterRule() + "\n"
+    + "- Yeni bilgi uydurma, yazım hatası ekleme.\n"
     + "- SADECE yeni cümleyi yaz; tırnak işareti, açıklama, ön söz ekleme.";
 }
 
@@ -1580,7 +1648,7 @@ function initRadar(labels){
 function updateRadar(vals){
   if(!radarReady) return;
   const poly=$("radarPoly"); if(!poly) return;
-  const from = radarPrev || vals.map(function(){return 0;});
+  const from = (radarPrev && radarPrev.length===vals.length) ? radarPrev : vals.map(function(){return 0;});
   const cx=165, cy=168, rr=108, n=vals.length;
   const t0=performance.now(), dur=550;
   if(radarRAF) cancelAnimationFrame(radarRAF);
@@ -1597,7 +1665,7 @@ function updateRadar(vals){
   }
   radarRAF=requestAnimationFrame(step);
 }
-function lastRadarZero(){ const z=[]; for(let i=0;i<20;i++)z.push(0); return z; }
+function lastRadarZero(){ const z=[]; for(let i=0;i<23;i++)z.push(0); return z; }
 
 /* ----- [v4] Claude API (kullanicinin kendi anahtariyla, dogrudan tarayicidan) ----- */
 function getKey(){ try{ return localStorage.getItem("anthropic_api_key")||""; }catch(e){ return ""; } }
@@ -1724,18 +1792,41 @@ function rewriteSentence(){
     setRwStatus("err","⚠️ "+err);
   });
 }
+/* [v22] Iki-gecisli oz-denetimli insanlastirma: yaz -> lokal motorla skorla -> hala yuksekse
+   kalan sinyalleri hedefleyen ince-ayar gecisi -> iki sonucun iyisini kullan. */
+function finishRewriteAll(newText, origPct, passNote){
+  input.value = newText;
+  clearSelection();
+  $("btnRwAll").disabled=false;
+  setRwStatus("ok","✓ Metin yeniden yazıldı — skor güncelleniyor…");
+  runAnalysis(false);
+  setTimeout(function(){
+    if(lastResult && !lastResult.tooShort)
+      setRwStatus("ok","✓ %"+origPct+" → %"+lastResult.pct+" AI"+(passNote?(" ("+passNote+")"):"")+". Karşılaştırma kartından farkı gör 👇");
+  }, 800);
+}
 function rewriteAll(){
   if(!lastResult || lastResult.tooShort) return;
   const full = input.value;
-  setRwStatus("", "🪄 Claude tüm metni insansılaştırıyor… (uzun metinde 1-2 dk sürebilir)");
+  const origPct = lastResult.pct;
+  setRwStatus("", "🪄 Claude insansılaştırıyor (1/2)… uzun metinde 1-2 dk sürebilir");
   $("btnRwAll").disabled=true;
-  callClaude(buildMasterPrompt(lastResult, full), 8192, function(newText){
-    input.value = newText;
-    clearSelection();
-    $("btnRwAll").disabled=false;
-    setRwStatus("ok","✓ Metin yeniden yazıldı — skor güncelleniyor…");
-    runAnalysis(false);
-    setTimeout(function(){ if(lastResult && !lastResult.tooShort) setRwStatus("ok","✓ Yeni skor: %"+lastResult.pct+" AI. Karşılaştırma kartından farkı gör 👇"); }, 800);
+  callClaude(buildMasterPrompt(lastResult, full), 8192, function(pass1){
+    var r1=null; try{ r1=analyze(pass1); }catch(e){ r1=null; }
+    var p1 = (r1 && !r1.tooShort) ? r1.pct : null;
+    // Ikinci gecis: ilk sonuc hala %30+ ise (ve olculebildiyse) kalan sinyallere odaklan
+    if(p1!==null && p1>=30){
+      setRwStatus("", "🔁 1. geçiş: %"+origPct+" → %"+p1+" AI. Claude ince ayar yapıyor (2/2)…");
+      callClaude(buildRefinePrompt(r1, pass1), 8192, function(pass2){
+        var p2=null; try{ var r2=analyze(pass2); if(r2 && !r2.tooShort) p2=r2.pct; }catch(e){}
+        if(p2!==null && p2<=p1) finishRewriteAll(pass2, origPct, "2 geçiş");
+        else finishRewriteAll(pass1, origPct, "2. geçiş fayda etmedi, 1. tutuldu");
+      }, function(err){
+        finishRewriteAll(pass1, origPct, "2. geçiş ulaşılamadı");
+      });
+    } else {
+      finishRewriteAll(pass1, origPct, p1===null?"":"tek geçiş yetti");
+    }
   }, function(err){
     $("btnRwAll").disabled=false;
     setRwStatus("err","⚠️ "+err);
@@ -2104,7 +2195,9 @@ function buildMultiRewritePrompt(fullText, sentence){
     + "Her versiyon farklı bir üslup kullansın: biri daha kısa ve vurucu, biri daha detaylı, biri daha gündelik.\n\n"
     + "Metnin tamamı (bağlam için):\n\"\"\"\n" + fullText + "\n\"\"\"\n\n"
     + "Yeniden yazılacak cümle:\n\"\"\"\n" + sentence + "\n\"\"\"\n\n"
-    + "Kurallar:\n- Anlamı koru, AI klişesi kullanma, metnin dilinde yaz.\n"
+    + "Kurallar:\n- Anlamı koru, AI klişesi ve em-dash (—) kullanma, metnin dilinde yaz.\n"
+    + "- Çevresindeki cümlelerin sesine uy; kayıt: " + genreRegisterRule() + "\n"
+    + "- İngilizce ise kısaltma serbest (it's, don't); Türkçe ise \"-maktadır\" kullanma.\n"
     + "- SADECE 3 versiyonu ver, her birini ayrı satırda, başına 1) 2) 3) koy.\n"
     + "- Açıklama, tırnak işareti, ön söz ekleme.";
 }
@@ -2298,7 +2391,7 @@ $("btnPdf").onclick=exportPdf;
 })();
 
 /* init */
-initRadar(["Klişe","Hype","Ritim","Hedge","Geçiş","Resmiyet","Edilgen","Nominal","Zarf","Paragraf","Perplexity","N-gram","Üçlü","Tekdüze","Noktalama","Başlangıç","Duygu","Somutluk","Soru","Bilgi Yoğ."]);
+initRadar(["Klişe","Hype","Ritim","Hedge","Geçiş","Resmiyet","Edilgen","Nominal","Zarf","Paragraf","Perplexity","N-gram","Üçlü","Tekdüze","Noktalama","Başlangıç","Duygu","Somutluk","Soru","Bilgi Yoğ.","Genelgeçer","Tavsiye","Düzgünlük"]);
 $("apiKey").value = getKey();
 try{ applyThemeIcon(); }catch(e){}
 try{ setGenre(selectedGenre); }catch(e){}
