@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="AI Dedektör" />
-<meta name="description" content="Metni yapıştır, AI mı insan mı öğren — 20 sinyal, ısı haritası, Claude ile insansılaştırma." />
+<meta name="description" content="Metni yapıştır, AI mı insan mı öğren — 23 sinyal, ısı haritası, Claude ile insansılaştırma." />
 <title>AI Dedektör — Yapay zekâ mı, insan mı?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -510,7 +510,7 @@
       </div>
 
       <div class="card">
-        <h2>🔬 Sinyal dökümü (16 dedektör)</h2>
+        <h2>🔬 Sinyal dökümü (23 dedektör)</h2>
         <div id="metrics"></div>
       </div>
 
@@ -634,21 +634,22 @@
       <details class="how">
         <summary>⚙️ Motor nasıl çalışıyor? (ve doğruluk notu)</summary>
         <div class="content">
-          <b>Heuristik</b>, tarayıcıda lokal çalışır (Claude insansılaştırma hariç — o, kendi API anahtarınla doğrudan Anthropic'e gider). <b>20 sinyal:</b>
+          <b>Heuristik</b>, tarayıcıda lokal çalışır (Claude insansılaştırma hariç — o, kendi API anahtarınla doğrudan Anthropic'e gider). <b>23 sinyal:</b>
           AI klişeleri, abartı/hype, burstiness, hedge, geçiş kelimeleri, aşırı resmiyet, edilgen çatı, nominalizasyon, zarf yığını, paragraf tekdüzeliği,
-          perplexity vekili, n-gram tekrarı, üçlü liste, cümle tekdüzeliği, noktalama, cümle başı tekrarı, <b>duygu tekdüzeliği</b>, <b>somutluk</b>, <b>soru kullanımı</b>, <b>bilgi yoğunluğu varyansı</b>.
+          perplexity vekili, n-gram tekrarı, üçlü liste, cümle tekdüzeliği, noktalama, cümle başı tekrarı, <b>duygu tekdüzeliği</b>, <b>somutluk</b>, <b>soru kullanımı</b>, <b>bilgi yoğunluğu varyansı</b>,
+          <b>genel-geçer deneme dokusu</b> (TR "-dır/-maz/-abilir" morfolojisi ve jenerik "biz" sesi dahil), <b>jenerik tavsiye sesi</b>, <b>makine düzgünlüğü</b>; artı biyografi/byline kalıbı yükseltmesi ve anlatı-zinciri kalkanı.
           <br><br>
           <b>Tür bazlı analiz:</b> Akademik/Yaratıcı/İş/Gündelik türlerine göre sinyal ağırlıkları uyarlanır (ör. gündelik metinde resmiyet daha güçlü AI sinyali sayılır).
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%73</b> (v18-v20 motor ailesiyle %48'den yükseldi: genel-geçer deneme, Türkçe geniş-zaman, jenerik tavsiye sesi dedektörleri + "of" çakışma düzeltmesi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%68</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
+          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 100 örnekte ~<b>%78 doğruluk</b> ve <b>%100 yanlış-pozitifsizlik</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%82</b> (v18-v21 motor ailesiyle %48'den yükseldi: genel-geçer deneme, Türkçe geniş-zaman/açıklayıcı morfoloji, jenerik tavsiye ve "biz" sesi, biyografi kalıbı dedektörleri + "of" çakışma düzeltmesi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%74</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
         </div>
       </details>
     </section>
   </div>
 
-  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 20 sinyal · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
+  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
 </div>
 <div id="toast">✓ Kopyalandı</div>
 <div id="printReport"></div>
@@ -1019,6 +1020,7 @@ function analyze(text){
   // [v18] GNOMIC: "genel-gecer bilgece deneme" dokusu — modern/humanized AI'nin en yaygin sesi.
   // Somut detay yok (rakam/birinci-tekil yok), genis-zaman genel yargilar, zitlik kaliplari.
   var gnomicAI = 0;
+  var trGn = 0;
   try{
     var contrastN = countRe(text, /\b(not because|not only|not just|not merely|but rather|yet it|yet we|yet our|rather than|instead of|far from being|less a |less about|more than a |does more than|which is to say|değil, aynı zamanda|değil aslında|yerine|aksine)\b/gi);
     var gnomicVerbs = countRe(text, /\b(is|are|tends to|tend to|remains|becomes|offers|teaches|carries|reveals|demands|requires|begins|matters|sağlar|öğretir|korur|gerektirir|demektir|kazandırır|besler|geçer|verir)\b/gi);
@@ -1041,10 +1043,27 @@ function analyze(text){
       var trYouAor = countRe(text, /[a-zçğıöşü]{3,}(irsin|ırsın|ursun|ürsün|arsın|ersin)(\.|,|;|:|!|\?|\s|$)/gi);
       var propPer100g = properNouns/wc*100;
       var shieldProp = clamp01(1 - propPer100g/2.5);
-      var trRate = clamp01(((trCopula + trNegAor*1.4 + trYouAor*1.4)/sc) / 1.6);
+      // [v21] Aciklayici genis-zaman dokusu: -abilir olasilik kipi, edilgen genis zaman (-ılır/-ilir),
+      // sik AI-aciklayici fiiller ("sağlar, gerektirir, kolaylaştırır"). TR AI'nin "ders kitabi" sesi.
+      var trAbil = countRe(text, /[a-zçğıöşü]{2,}(abilir|ebilir)(\.|,|;|:|!|\?|\s|$)/gi);
+      var trPasAor = countRe(text, /[a-zçğıöşü]{2,}(ılır|ilir|ulur|ülür|ınır|inir|unur|ünür)(\.|,|;|:|!|\?|\s|$)/gi);
+      var trExpl = countRe(text, /\b(sağlar|sunar|korur|tutar|verir|eder|olur|gelir|kılar|önler|engeller|etkiler|belirler|gösterir|öğretir|gerektirir|kolaylaştırır|zorlaştırır|azaltır|artırır|arttırır|güçlendirir|geliştirir|destekler|dönüştürür|kazandırır|oluşturur|oluşur|başlar|değişir|yaratır|katar|besler|anlamına gelir|yardımcı olur)\b/gi);
+      var trRate = clamp01(((trCopula + trNegAor*1.4 + trYouAor*1.4 + trAbil*1.2 + trPasAor*1.0 + trExpl*0.7)/sc) / 1.6);
       var trG = trRate * shieldProp * (numerals===0?1:0.45) * 0.45 * (1 - Math.min(formalAI,1)*0.6);
       if(casual>0) trG = trG*0.4;
       gnomicAI = clamp01(gnomicAI + trG);
+      // [v21] TR icin ayri boost kanali: TR aciklayici metin dogal olarak edilgen oldugundan
+      // asagidaki gnomicBoost'un edilgen kapisina takilir; kendi (ozel-isim-kalkanli) yolu var.
+      trGn = trRate * shieldProp * (numerals===0?1:0.45) * (1 - Math.min(formalAI,1)*0.6) * (casual>0?0.3:1);
+    }
+  }catch(e){}
+  // [v21] Jenerik "biz" sesi (EN): "we rarely notice, we assume" — kisisel iz olmadan genel-gecer "biz".
+  // Akademik "we" kalkani: edilgen/resmi/rakamli metinde sayilmaz; tek seferlik anlati "we"si icin weN>=2 sarti.
+  try{
+    if(wc>=35 && sc>=3 && firstPerson===0 && numerals===0 && passiveAI<0.4 && formalAI<0.3 && !/[çğıöşü]/i.test(text)){
+      var weN = countRe(text, /\b(we|our|us|ourselves)\b/gi);
+      var weRate = weN>=2 ? clamp01((weN/sc)/0.5) : 0;
+      gnomicAI = clamp01(gnomicAI + weRate*0.25*(casual>0?0.3:1));
     }
   }catch(e){}
 
@@ -1073,6 +1092,15 @@ function analyze(text){
     for(var ci=0; ci<sentences.length; ci++){ if(/^\s*(And|But|So|Then|Ve|Ama|Sonra)\b/.test(sentences[ci])) chainN++; }
     chainRate = sc>0 ? chainN/sc : 0;
   }catch(e){}
+  // [v21] AI biyografi/tanitim kalibi: "based in X... can usually be found..." — LLM'lerin ezber byline sesi.
+  // En az 2 FARKLI kalip ailesi + ucuncu-sahis (I yok) + kisa metin sarti; tek kalip tesadufu boost'lamaz.
+  var bioHits = 0;
+  try{
+    if(wc>=30 && wc<=230 && firstPerson===0){
+      var bioPats = [/\bbased in [A-ZÇĞİÖŞÜ]/, /can usually be found/i, /when (he|she|they) (isn't|aren't|is not|are not)/i, /\b(her|his|their) work (moves|explores|focuses|spans|circles|examines|sits|lives)\b/i, /believes? (that )?(the )?(best|good|great)/i, /has spent the past/i, /at the intersection of/i, /is passionate about/i, /helps? (small |busy )?(teams|people|brands|companies|clients)\b/i, /with a background in/i, /is (a|an) [a-z]+ (designer|writer|developer|artist|engineer|consultant|photographer|strategist|researcher) (based|living|working)/i];
+      for(var bi=0;bi<bioPats.length;bi++) if(bioPats[bi].test(text)) bioHits++;
+    }
+  }catch(e){ bioHits=0; }
 
   const parts = [
     {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
@@ -1145,12 +1173,18 @@ function analyze(text){
   var lexBoost = Math.min(lexEvidence*0.30, 0.30);
   // [v18] Gnomic yukseltme — register kapili: resmi/edilgen yogun (akademik INSAN) metinlerde devreye girmez,
   // sade genis-zaman "bilgece" AI denemelerinde girer. Kalibrasyon: FP eklemeden harsh recall %0 -> %20.
-  var gnomicBoost = (gnomicAI>0.40 && humanBonus<0.35 && formalAI<0.5 && passiveAI<0.65) ? Math.min((gnomicAI-0.40)*1.5, 0.45) : 0;
+  // [v21] Edilgen kapisinda istisna: gnomicAI cok yuksekse (>0.66 — insan maks. ~0.54'un uzerinde)
+  // edilgen sart aranmaz; kisa "bilgece" AI denemeleri edilgen fiil icerse de yakalanir.
+  var gnomicBoost = (gnomicAI>0.40 && humanBonus<0.35 && formalAI<0.5 && (passiveAI<0.65 || gnomicAI>0.66)) ? Math.min((gnomicAI-0.40)*1.7, 0.45) : 0;
   // [v20] Tavsiye yukseltmesi (kalibre: FP eklemeden harsh recall %26 -> %50)
   var adviceBoost = (adviceAI>0.28 && humanBonus<0.50 && formalAI<0.5) ? Math.min((adviceAI-0.28)*2.4, 0.60) : 0;
-  // [v20] Anlati-zinciri kalkani: zincirli anlatimda (Incil/masal) tum yukseltmeleri sondur
-  if(chainRate>=0.4){ gnomicBoost=gnomicBoost*0.25; adviceBoost=adviceBoost*0.25; lexBoost=lexBoost*0.5; boost=boost*0.5; }
-  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost - humanBonus*0.22);
+  // [v21] TR aciklayici-genis-zaman yukseltmesi (ozel-isim kalkani trGn icinde; edilgen kapisiz kendi yolu)
+  var trBoost = (trGn>0.50 && humanBonus<0.35) ? Math.min((trGn-0.50)*1.2, 0.40) : 0;
+  // [v21] Biyografi kalibi yukseltmesi: en az 2 farkli kalip ailesi gerekli
+  var bioBoost = bioHits>=2 ? Math.min((bioHits-1)*0.15, 0.30) : 0;
+  // [v20/v21] Anlati-zinciri kalkani: zincirli anlatimda (Incil/masal) tum yukseltmeleri sondur
+  if(chainRate>=0.4){ gnomicBoost=gnomicBoost*0.25; adviceBoost=adviceBoost*0.25; trBoost=trBoost*0.25; bioBoost=bioBoost*0.25; lexBoost=lexBoost*0.5; boost=boost*0.4; }
+  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost + trBoost + bioBoost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
 
   let conf = "Düşük";
@@ -1184,7 +1218,8 @@ function analyze(text){
            passiveTotal:passiveTotal, passivePer100:passivePer100, nomCount:nomCount, advCount:advCount,
            paraCount:paraCount, paraCV:paraCV, wps:wps, lix:lix,
            emoStd:emoStd, posTotal:posTotal, negTotal:negTotal, concreteCount:concreteCount,
-           concretePer100:concretePer100, questionsCount:questionsCount, ttrStd:ttrStd}
+           concretePer100:concretePer100, questionsCount:questionsCount, ttrStd:ttrStd,
+           bioHits:bioHits, chainRate:chainRate, trGnomic:trGn, numerals:numerals}
   };
 }
 
@@ -1293,11 +1328,24 @@ const REASON_META = {
   infodensity:{name:"Bilgi yoğunluğu eşit dağılmış",
     why:function(r){return "Her cümle <b>neredeyse eşit yoğunlukta</b>"+(r.flags.ttrStd!==null?(" (σ="+r.flags.ttrStd.toFixed(2)+")"):"")+". AI her cümleye aynı miktarda bilgi yükler; insanda bazı cümleler yoğun, bazıları geçiştir.";},
     fix:function(){return "Bazı cümleleri kısa geçiş cümlesi yap, bazılarına daha çok bilgi yükle.";},
-    prompt:function(){return "Cümlelerin bilgi yoğunluğunu değiştir: bazı cümleleri kısa, geçiştirici/nefes aldıran cümlelere indir; bazılarına daha fazla detay yükle. Her cümle aynı yoğunlukta olmasın.";}}
+    prompt:function(){return "Cümlelerin bilgi yoğunluğunu değiştir: bazı cümleleri kısa, geçiştirici/nefes aldıran cümlelere indir; bazılarına daha fazla detay yükle. Her cümle aynı yoğunlukta olmasın.";}},
+  gnomic:{name:"Genel-geçer \"bilgece deneme\" sesi",
+    why:function(r){return "Metin <b>aforizma tonunda genel-geçer yargılarla</b> ilerliyor: geniş-zaman \"bilgece\" cümleler var ama kişisel iz (ben, rakam, anı) yok"+(r.flags.trGnomic>0.3?"; Türkçede \"-dır / -maz / -abilir\" ders kitabı dokusu belirgin":"")+". Bu, modern AI'nın en yaygın sesidir.";},
+    fix:function(){return "En az bir yargıyı kendi yaşantından somut bir örneğe bağla; bir cümleye \"ben/bence\" ve gerçek bir detay (yer, tarih, sayı) kat.";},
+    prompt:function(){return "Metindeki genel-geçer, aforizma tadındaki yargıları kişiselleştir: bir-iki yargıyı birinci tekil şahısla ('ben denediğimde', 'bana göre') ve somut bir detayla (gerçek yer, zaman, sayı) destekle. Geniş-zaman 'bilgece' tonu kır ama anlamı ve ana fikirleri koru.";}},
+  advice:{name:"Jenerik \"sen-dilli\" tavsiye sesi",
+    why:function(r){return "Metin <b>jenerik tavsiye modunda</b>: yoğun \"you/your\" hitabı ve emir kipiyle açılan cümleler var, ama tek bir anekdot ya da \"ben\" yok. AI nasıl-yapılır metinlerinin imzası budur.";},
+    fix:function(){return "Bir tavsiyeyi kendi deneyiminle gerekçelendir: \"ben şöyle yapıyorum çünkü...\" — emir cümlelerinin birkaçını kişisel gözleme çevir.";},
+    prompt:function(){return "Tavsiye cümlelerinin bir kısmını kişisel deneyime çevir: emir kipi yerine 'ben ... yaptığımda' gibi birinci tekil anlatım kullan, küçük bir başarısızlık ya da itiraf ekle. Önerilerin içeriğini koru, sadece sesi kişiselleştir.";}},
+  smooth:{name:"Makine düzgünlüğü",
+    why:function(r){return "Metin <b>fazla pürüzsüz</b>: cümle uzunlukları ve virgül ritmi neredeyse sabit, kendini düzeltme, duraksama ya da ünlem hiç yok. İnsan taslağı böyle akmaz.";},
+    fix:function(){return "Bir yerde kendini düzelt (\"daha doğrusu...\"), bir cümleyi kısa ve kesik bir vurguyla bitir.";},
+    prompt:function(){return "Metnin ritmini insanileştir: bir yere kendini düzeltme ('daha doğrusu', 'aslında şöyle diyeyim'), bir yere 3-5 kelimelik kesik bir vurgu cümlesi ekle; virgül ritmini ve cümle uzunluklarını dalgalandır. Anlamı değiştirme.";}}
 };
 
 function rankedReasons(r){
-  return r.parts.filter(function(p){return p.ai>=0.35;}).sort(function(a,b){return b.ai*b.w - a.ai*a.w;}).slice(0,5);
+  // [v21] REASON_META'da karsiligi olmayan anahtar render'i cokertmesin (gnomic/advice/smooth eklenince yasandi)
+  return r.parts.filter(function(p){return p.ai>=0.35 && REASON_META[p.key];}).sort(function(a,b){return b.ai*b.w - a.ai*a.w;}).slice(0,5);
 }
 function buildMasterPrompt(r, text){
   const ranked = rankedReasons(r);
@@ -1373,6 +1421,15 @@ function buildTeacher(r){
   if(P.question>0.7 && f.questionsCount===0)
     n.push({t:"Baştan sona <b>tek bir soru bile yok</b> — saf açıklama modu. İnsan yazısı okuyucuya seslenir, ara sıra soru sorar.",
             e:"Kanıt: 0 soru / "+r.wc+" kelime"});
+  if(P.gnomic>0.55 && f.chainRate<0.4)
+    n.push({t:"Metin <b>\"bilgece deneme\"</b> tonunda: geniş-zaman genel yargılar art arda, sıfır kişisel iz. Öğretmen \"bu fikri nereden buldun, kendi örneğin ne?\" dediğinde savunulamayan aforizma dizisi en modern AI imzasıdır.",
+            e:"Kanıt: genel-geçer doku %"+Math.round(P.gnomic*100)+(f.trGnomic>0.3?", Türkçe \"-dır/-maz/-abilir\" ders kitabı dokusu":"")+", "+f.firstPerson+" birinci tekil ifade"});
+  if(P.advice>0.5)
+    n.push({t:"<b>Jenerik tavsiye sesi</b>: emir cümleleri ve \"you/your\" hitabı bol, ama tek bir \"bende şöyle olmuştu\" yok. Gerçek tavsiye yazısı kendi denemesinden bahseder; bu kalıbı bilen öğretmen listicle kokusunu hemen alır.",
+            e:"Kanıt: tavsiye dokusu %"+Math.round(P.advice*100)+", "+f.firstPerson+" birinci tekil ifade"});
+  if(f.bioHits>=2)
+    n.push({t:"<b>Tanıtım/biyografi şablonu</b>: \"based in…, can usually be found…\" tarzı kalıplar LLM'lerin ezber byline sesidir. Bu şablonu bilen okuyucu metni saniyeler içinde tanır.",
+            e:"Kanıt: "+f.bioHits+" farklı byline kalıbı eşleşti"});
   if(r.pct>=60 && n.length<2)
     n.push({t:"Genel ton <b>tekdüze ve hatasız</b>: imla hatası, yarım kalmış düşünce, kişisel kelime yok. \"Fazla temiz\" metin başlı başına şüphe sebebidir.",
             e:"Kanıt: genel skor %"+r.pct});
