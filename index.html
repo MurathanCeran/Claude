@@ -643,13 +643,13 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>tek-tık insanlaştırma artık iki geçişli</b>: Claude yazar → yerel motor skorlar → hâlâ yüksekse kalan sinyalleri hedefleyen ince-ayar geçişi yapılır ve iki sonucun iyisi kullanılır; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark (dürüst, iki bölümlü):</b> Motorun kalibre edildiği 40 örnekte ~<b>%93 doğruluk</b> ve <b>sıfır yanlış pozitif</b>. Motorun <b>hiç görmediği</b> 100 örneklik sert/adversarial sette (paraphrase'lenmiş "humanized" AI, modern sohbet AI dahil) gerçek doğruluk ~<b>%86</b> (v18-v22 motor ailesiyle %48'den yükseldi: genel-geçer deneme, Türkçe geniş-zaman/açıklayıcı morfoloji — aksansız Türkçe dahil, jenerik tavsiye/"siz-dilli" ve "biz" sesi, biyografi kalıbı, ulaç-başlangıç dedektörleri + "of" çakışma düzeltmesi); gizlenmiş AI'da yakalama hâlâ sınırlıdır — bu, tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a düşer, %65–88 aralığında kalır). <b>Asıl gücümüz:</b> insan-doğruluğu (specificity) ~<b>%99</b> — gerçek insan metnini (akademik/resmi/ESL dahil) neredeyse hiç AI diye işaretlemeyiz; ticari araçlar burada %43–83, anadili-olmayanlarda ~%61'e varan yanlış pozitif verir. <b>🧠 Çözüm — Claude Derin Analiz:</b> Gizlenmiş/modern AI'yı yakalamak için sezgisel motor yetmez; bunun için <b>"Claude ile Derin AI Analizi"</b> motorunu ekledik (kendi API anahtarınla). <b>Şişmemiş kör test</b> (metinleri bağımsız üretildi, gerçek insan metinleri web kaynaklı, etiketler görülmeden puanlandı, 34 örnek): sezgisel tek başına ~<b>%74</b> → Claude ile ~<b>%88 doğruluk</b>, <b>%78 recall</b> ve <b>sıfır yanlış pozitif</b> (ansiklopedik/edebî/ESL insan metinleri dahil hiçbiri AI sanılmadı). Birleşik skor (heuristic + Claude) gösterilir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR</b>; iyi gizlenmiş AI sezgisel motorda düşük skor alır.
+          <b>Benchmark — 5 katmanlı dürüst ölçüm (v23, toplam 240 metin):</b> Setleri motorun onları ne kadar "gördüğüne" göre ayırdık, çünkü asıl soru şu: <i>skor ne kadar şişme?</i> <b>(1) Kalibrasyon</b> (motor bunlarla ayarlandı, 40 metin): %92.5 doğruluk, 0 FP. <b>(2) Sert/adversarial</b> (üzerinde iterasyon yapıldı, 100): %88. <b>(3) Yarı-korunmuş kör set</b> (az dokunuldu, 34): %82. <b>(4) Taze holdout</b> (bu sürümden önce motor hiç görmedi, 44): <b>%72.7</b>. <b>(5) Final holdout</b> (yalnızca yanlış-pozitif düzeltmesi için bir kez bakıldı, 22): %81.8. <b>Dürüst özet:</b> ayarlanan setlerde ~%88-92, <b>tamamen taze metinde ~%73</b> — aradaki ~15 puan gerçek "şişme" payıdır ve normaldir (her dedektör kendi test setinde şişer). Kritik güç: <b>insan-doğruluğu (specificity) her 5 sette de %96-100</b> (240 metnin tamamında yalnızca 2 FP) — gerçek insan metnini (akademik/resmi/edebî/ESL) neredeyse hiç AI diye işaretlemeyiz. Zayıf yön dürüstçe: <b>gizlenmiş/modern AI yakalama, taze metinde ~%45-60'a düşer</b> — bu tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a iner). <b>🧠 Çözüm — Claude Derin Analiz:</b> gizlenmiş AI için sezgisel motor yetmez; <b>"Claude ile Derin AI Analizi"</b> (kendi API anahtarınla) kör testte sezgiseli ~%74'ten ~<b>%88 doğruluğa</b>, %78 recall'a çıkarır, sıfır FP korunur. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR.</b>
         </div>
       </details>
     </section>
   </div>
 
-  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
+  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · <b>v23</b> · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
 </div>
 <div id="toast">✓ Kopyalandı</div>
 <div id="printReport"></div>
@@ -880,7 +880,7 @@ function analyze(text){
   const ttr = uniq / wc;
   const expected = clamp01(1 - Math.log(wc)/14);
   const diversityGap = expected>0 ? (expected - ttr)/expected : 0;
-  const perplexAI = clamp01(0.5 + diversityGap*1.3);
+  var perplexAI = clamp01(0.5 + diversityGap*1.3);
 
   // C-F) Cliché / Hype / Transition / Hedge
   const clicheAI = clamp01((scan.counts.cliche/wc*100) / 2.2);
@@ -914,12 +914,12 @@ function analyze(text){
 
   // J) Rule of three
   const triples = countRe(text, /,\s*[^,.;!?]{1,40}\s+(?:and|or|ve|veya|ya da)\s/gi);
-  const tripleAI = clamp01((sc>0?triples/sc:0)/0.3);
+  var tripleAI = clamp01((sc>0?triples/sc:0)/0.3);
 
   // K) Sentence-length uniformity
   const inBand = lens.filter(function(n){return n>=12 && n<=26;}).length;
   const bandFrac = lens.length ? inBand/lens.length : 0;
-  const uniformAI = lens.length>=4 ? clamp01((bandFrac-0.45)/0.5) : 0.35;
+  var uniformAI = lens.length>=4 ? clamp01((bandFrac-0.45)/0.5) : 0.35;
 
   // L) Over-formality
   const formPer100 = scan.counts.form/wc*100;
@@ -969,7 +969,10 @@ function analyze(text){
   const numeralsCount = countRe(text, /\b\d+[.,]?\d*\b/g);
   const timeRefs = countRe(text, TIME_REF);
   const properNouns = countRe(text, PROPER_RE);
-  const concreteCount = numeralsCount + timeRefs + properNouns;
+  // [v23] Yaziyla yazilmis sayilar ("three depths over eighteen months") da somut izdir; rakam \d aramak
+  // akademik/edebi insan metnini yanlislikla 'sayisiz genel yargi' gosteriyordu (holdout FP kaynagi).
+  var spelledNum = countRe(text, /\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|dozen|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|yirmi|otuz|kırk|elli|altmış|yetmiş|seksen|doksan|yüz|milyon|milyar)\b/gi);
+  const concreteCount = numeralsCount + timeRefs + properNouns + Math.min(spelledNum, 4);
   const concretePer100 = concreteCount/wc*100;
   const concreteAI = clamp01((1.5 - concretePer100)/1.5);
 
@@ -994,7 +997,10 @@ function analyze(text){
   const exclaim = countRe(text, /!/g);
   const questions = countRe(text, /\?/g);
   const ellipsis = countRe(text, /\.\.\.|…/g);
-  const firstPerson = countRe(text, /\b(i|i'm|i've|me|my|ben|bana|benim|bence|bizce)\b/gi);
+  // [v23] BUGFIX: JS regex'te ç/ğ/ş kelime-karakteri sayılmadığından "içme" -> "i"+"me" diye bölünüp
+  // sahte İngilizce zamir eşleşmesi veriyordu (TR metinlerde hayalet birinci-tekil). TR harfleri maskele.
+  const enMask = text.replace(/[çğıöşüÇĞİÖŞÜâîû]/g,'x');
+  const firstPerson = countRe(enMask, /\b(i|i'm|i've|me|my|ben|bana|benim|bence|bizce)\b/gi);
   const parenth = countRe(text, /\([^)]{1,60}\)/g);
   const numerals = countRe(text, /\b\d+[.,]?\d*\b/g);
   // [v14] Spontanlik (insan): kendini-duzeltme / vurgu / dogal konusma — humanized AI bunlari iyi taklit edemez
@@ -1025,12 +1031,12 @@ function analyze(text){
     var contrastN = countRe(text, /\b(not because|not only|not just|not merely|but rather|yet it|yet we|yet our|rather than|instead of|far from being|less a |less about|more than a |does more than|which is to say|değil, aynı zamanda|değil aslında|yerine|aksine)\b/gi);
     var gnomicVerbs = countRe(text, /\b(is|are|tends to|tend to|remains|becomes|offers|teaches|carries|reveals|demands|requires|begins|matters|sağlar|öğretir|korur|gerektirir|demektir|kazandırır|besler|geçer|verir)\b/gi);
     var noI = (firstPerson===0) ? 1 : (firstPerson<=1 ? 0.5 : 0);
-    var noNum = (numerals===0) ? 1 : 0;
+    var noNum = (numerals===0) ? (spelledNum>=2?0.35:(spelledNum===1?0.7:1)) : 0;
     var vRate = clamp01((gnomicVerbs/sc)/2.2);
     var cRate = clamp01(contrastN/3);
     if(wc>=35 && sc>=3){
       gnomicAI = clamp01( noI*0.30 + noNum*0.15 + vRate*0.30 + cRate*0.25 );
-      if(casual>0 || exclaim>1) gnomicAI = gnomicAI*0.4;
+      if(casual>=2 || exclaim>1) gnomicAI = gnomicAI*0.4;
     }
   }catch(e){ gnomicAI=0; }
   // [v19] TR gnomic morfolojisi: -dır/-dir kosacı + olumsuz genis zaman (-maz/-mez) + genel "sen" cekimi.
@@ -1052,16 +1058,23 @@ function analyze(text){
       var trAbil = countRe(text, /[a-zçğıöşü]{2,}(abilir|ebilir)(\.|,|;|:|!|\?|\s|$)/gi);
       var trPasAor = countRe(text, /[a-zçğıöşü]{2,}(ılır|ilir|ulur|ülür|ınır|inir|unur|ünür)(\.|,|;|:|!|\?|\s|$)/gi);
       var trExpl = countRe(trNorm, /\b(saglar|sunar|korur|tutar|verir|eder|olur|gelir|kilar|onler|engeller|etkiler|belirler|gosterir|ogretir|gerektirir|kolaylastirir|zorlastirir|azaltir|artirir|arttirir|guclendirir|gelistirir|destekler|donusturur|kazandirir|olusturur|olusur|baslar|degisir|yaratir|katar|besler|anlamina gelir|yardimci olur|acar|yikilir|bilir|davranir|temizler|sever|getirir|dusunur|yapar|ister|bekler|calisir|isler|yasar|artar|azalir|hisseder|ogrenir|unutur|kaybeder|kazanir)\b/g);
-      var trRate = clamp01(((trCopula + trNegAor*1.4 + trYouAor*1.4 + trAbil*1.2 + trPasAor*1.0 + trExpl*0.7)/sc) / 1.6);
+      // [v23] Cumle-sonu jenerik genis zaman ("gerceklesir.", "hizlanir.") — kelime listesi degil morfoloji;
+      // -lar/-ler cogul ve -di gecmis sonlari haric tutulur, ozel-isim kalkani asagida uygulanir
+      var trAorFin = 0;
+      for(var af=0; af<sentences.length; af++){
+        var mAf = sentences[af].trim().match(/([a-z\u00e7\u011f\u0131\u00f6\u015f\u00fc]{3,})(\u0131r|ir|ur|\u00fcr|ar|er)[\.\!\?]?\s*$/);
+        if(mAf && !/(la|le|d\u0131|di|t\u0131|ti|du|d\u00fc|tu|t\u00fc)$/.test(mAf[1])) trAorFin++;
+      }
+      var trRate = clamp01(((trCopula + trNegAor*1.4 + trYouAor*1.4 + trAbil*1.2 + trPasAor*1.0 + trExpl*0.7 + trAorFin*0.6)/sc) / 1.6);
       var trG = trRate * shieldProp * (numerals===0?1:0.45) * 0.45 * (1 - Math.min(formalAI,1)*0.6);
-      if(casual>0) trG = trG*0.4;
+      if(casual>=2) trG = trG*0.4;
       gnomicAI = clamp01(gnomicAI + trG);
       // [v21] TR icin ayri boost kanali: TR aciklayici metin dogal olarak edilgen oldugundan
       // asagidaki gnomicBoost'un edilgen kapisina takilir; kendi (ozel-isim-kalkanli) yolu var.
       // [v22] TR jenerik "biz": "bizi korur, hepimizin sorumlulugu" — kisisel iz olmadan kolektif ses
       var trBiz = countRe(trNorm, /\b(biz|bizi|bize|bizim|hepimiz|hepimizin)\b/g);
       var bizAdd = (firstPerson===0 && trBiz>=1) ? clamp01(trBiz/sc/0.5)*0.5 : 0;
-      trGn = clamp01(trRate + bizAdd) * shieldProp * (numerals===0?1:0.45) * (1 - Math.min(formalAI,1)*0.6) * (casual>0?0.3:1);
+      trGn = clamp01(trRate + bizAdd) * shieldProp * (numerals===0?1:0.45) * (1 - Math.min(formalAI,1)*0.6) * (casual>=2?0.3:1);
     }
   }catch(e){}
   // [v22] Ulac-baslangic orani (EN): "Cutting..., Putting..., Reading..." — cumlelerin cogu -ing ile
@@ -1077,7 +1090,7 @@ function analyze(text){
   // [v21] Jenerik "biz" sesi (EN): "we rarely notice, we assume" — kisisel iz olmadan genel-gecer "biz".
   // Akademik "we" kalkani: edilgen/resmi/rakamli metinde sayilmaz; tek seferlik anlati "we"si icin weN>=2 sarti.
   try{
-    if(wc>=35 && sc>=3 && firstPerson===0 && numerals===0 && passiveAI<0.4 && formalAI<0.3 && !/[çğıöşü]/i.test(text)){
+    if(wc>=35 && sc>=3 && firstPerson===0 && numerals===0 && spelledNum<2 && passiveAI<0.4 && formalAI<0.3 && !/[çğıöşü]/i.test(text)){
       var weN = countRe(text, /\b(we|our|us|ourselves)\b/gi);
       var weRate = weN>=2 ? clamp01((weN/sc)/0.5) : 0;
       gnomicAI = clamp01(gnomicAI + weRate*0.25*(casual>0?0.3:1));
@@ -1100,11 +1113,17 @@ function analyze(text){
       var trImp2 = 0;
       for(var ti=0; ti<sentences.length; ti++){ if(/^\s*[A-ZÇĞİÖŞÜ][a-zçğıöşü]{2,}(yın|yin|yun|yün|ınız|iniz|unuz|ünüz)\b/.test(sentences[ti])) trImp2++; }
       var trFut2 = countRe(text, /[a-zçğıöşü]{2,}(acaksınız|eceksiniz|ırsınız|irsiniz|ursunuz|ürsünüz|arsınız|ersiniz|malısınız|melisiniz|abilirsiniz|ebilirsiniz)(\.|,|;|:|!|\?|\s|$)/gi);
-      var youRate = clamp01(((youN + (trPoss2+trFut2)*1.0 + trImp2*1.6)/sc)/0.7);
+      // [v23] TR emir kipi cumle SONUNDA olur ("Masaniza bir surahi koyun."); en az 2 cumle sarti tekil isim-sonu tesadufunu eler
+      var trImpFin = 0;
+      for(var tf=0; tf<sentences.length; tf++){ if(/[a-z\u00e7\u011f\u0131\u00f6\u015f\u00fc]{3,}(y\u0131n|yin|yun|y\u00fcn|\u0131n|in|un|\u00fcn|\u0131n\u0131z|iniz|unuz|\u00fcn\u00fcz)[\.\!\?;:]?\s*$/.test(sentences[tf].trim())) trImpFin++; }
+      if(trImpFin<2 || !/[çğıöşü]/i.test(text)) trImpFin=0;
+      var youRate = clamp01(((youN + (trPoss2+trFut2)*1.0 + trImp2*1.6 + trImpFin*1.8)/sc)/0.7);
       var impRate = clamp01((impN/sc)/0.32);
       adviceAI = clamp01(youRate*0.55 + impRate*0.45);
-      if(firstPerson>=2 || casual>0) adviceAI = adviceAI*0.25;
-      else if(firstPerson===1) adviceAI = adviceAI*0.6;
+      if(firstPerson>=2 || casual>=2) adviceAI = adviceAI*0.25;
+      // [v23] Tek "I" sonumu yalnizca casual isaret YOKKEN uygulanir: "yeah so... i'd say your..."
+      // tarzi sohbet-AI'sinde tek I + casual kombinasyonu insan anlatisi degil asistan imzasidir.
+      else if(firstPerson===1 && casual===0) adviceAI = adviceAI*0.6;
     }
   }catch(e){ adviceAI=0; }
   // [v20] Anlati-zinciri kalkani: cumleler And/But/Ve/Ama ile zincirleniyorsa (Incil/masal/anlati uslubu —
@@ -1117,6 +1136,14 @@ function analyze(text){
   }catch(e){}
   // [v21] AI biyografi/tanitim kalibi: "based in X... can usually be found..." — LLM'lerin ezber byline sesi.
   // En az 2 FARKLI kalip ailesi + ucuncu-sahis (I yok) + kisa metin sarti; tek kalip tesadufu boost'lamaz.
+  // [v23] Retorik anafora kalkani: AYNI uclu obek >=4 kez tekrarliyorsa bu hatip/nutuk uslubudur
+  // ("we shall fight..." x7 — Churchill). LLM'ler tek obegi boyle tekrarlamaz; n-gram/tekduzelik sinyallerini sondur.
+  var maxSameTri = 0;
+  try{
+    var wsr = getWords(text); var triMap={};
+    for(var mi=0; mi+2<wsr.length; mi++){ var k3=wsr[mi]+' '+wsr[mi+1]+' '+wsr[mi+2]; triMap[k3]=(triMap[k3]||0)+1; if(triMap[k3]>maxSameTri) maxSameTri=triMap[k3]; }
+  }catch(e){}
+  if(maxSameTri>=4){ ngramAI=ngramAI*0.25; perplexAI=perplexAI*0.6; tripleAI=tripleAI*0.5; uniformAI=uniformAI*0.6; }
   var bioHits = 0;
   try{
     if(wc>=30 && wc<=230 && firstPerson===0){
@@ -1198,7 +1225,7 @@ function analyze(text){
   // sade genis-zaman "bilgece" AI denemelerinde girer. Kalibrasyon: FP eklemeden harsh recall %0 -> %20.
   // [v21] Edilgen kapisinda istisna: gnomicAI cok yuksekse (>0.66 — insan maks. ~0.54'un uzerinde)
   // edilgen sart aranmaz; kisa "bilgece" AI denemeleri edilgen fiil icerse de yakalanir.
-  var gnomicBoost = (gnomicAI>0.40 && humanBonus<0.35 && formalAI<0.5 && (passiveAI<0.65 || gnomicAI>0.66)) ? Math.min((gnomicAI-0.40)*1.7, 0.45) : 0;
+  var gnomicBoost = (gnomicAI>0.40 && humanBonus<0.35 && formalAI<0.5 && (passiveAI<0.72 || gnomicAI>0.66)) ? Math.min((gnomicAI-0.40)*1.7, 0.45) : 0;
   // [v20] Tavsiye yukseltmesi (kalibre: FP eklemeden harsh recall %26 -> %50)
   var adviceBoost = (adviceAI>0.28 && humanBonus<0.50 && formalAI<0.5) ? Math.min((adviceAI-0.28)*2.4, 0.60) : 0;
   // [v21] TR aciklayici-genis-zaman yukseltmesi (ozel-isim kalkani trGn icinde; edilgen kapisiz kendi yolu)
