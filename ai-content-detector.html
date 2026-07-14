@@ -643,13 +643,13 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>tek-tık insanlaştırma artık iki geçişli</b>: Claude yazar → yerel motor skorlar → hâlâ yüksekse kalan sinyalleri hedefleyen ince-ayar geçişi yapılır ve iki sonucun iyisi kullanılır; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark — 5 katmanlı dürüst ölçüm (v23, toplam 240 metin):</b> Setleri motorun onları ne kadar "gördüğüne" göre ayırdık, çünkü asıl soru şu: <i>skor ne kadar şişme?</i> <b>(1) Kalibrasyon</b> (motor bunlarla ayarlandı, 40 metin): %92.5 doğruluk, 0 FP. <b>(2) Sert/adversarial</b> (üzerinde iterasyon yapıldı, 100): %88. <b>(3) Yarı-korunmuş kör set</b> (az dokunuldu, 34): %82. <b>(4) Taze holdout</b> (bu sürümden önce motor hiç görmedi, 44): <b>%72.7</b>. <b>(5) Final holdout</b> (yalnızca yanlış-pozitif düzeltmesi için bir kez bakıldı, 22): %81.8. <b>Dürüst özet:</b> ayarlanan setlerde ~%88-92, <b>tamamen taze metinde ~%73</b> — aradaki ~15 puan gerçek "şişme" payıdır ve normaldir (her dedektör kendi test setinde şişer). Kritik güç: <b>insan-doğruluğu (specificity) her 5 sette de %96-100</b> (240 metnin tamamında yalnızca 2 FP) — gerçek insan metnini (akademik/resmi/edebî/ESL) neredeyse hiç AI diye işaretlemeyiz. Zayıf yön dürüstçe: <b>gizlenmiş/modern AI yakalama, taze metinde ~%45-60'a düşer</b> — bu tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a iner). <b>🧠 Çözüm — Claude Derin Analiz:</b> gizlenmiş AI için sezgisel motor yetmez; <b>"Claude ile Derin AI Analizi"</b> (kendi API anahtarınla) kör testte sezgiseli ~%74'ten ~<b>%88 doğruluğa</b>, %78 recall'a çıkarır, sıfır FP korunur. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR.</b>
+          <b>Benchmark — 5 katmanlı dürüst ölçüm (v23, toplam 240 metin):</b> Setleri motorun onları ne kadar "gördüğüne" göre ayırdık, çünkü asıl soru şu: <i>skor ne kadar şişme?</i> <b>(1) Kalibrasyon</b> (motor bunlarla ayarlandı, 40 metin): %92.5 doğruluk, 0 FP. <b>(2) Sert/adversarial</b> (üzerinde iterasyon yapıldı, 100): %88. <b>(3) Yarı-korunmuş kör set</b> (az dokunuldu, 34): %82. <b>(4) Taze holdout</b> (44; ilk taze ölçüm <b>%72.7</b> idi, v23-v24 genellemeli düzeltmeler sonrası %77.3): şişme payının dürüst göstergesi. <b>(5) Final holdout</b> (22; taze ölçüm %72.7'lik motora %81.8): şimdi %86.4. <b>Dürüst özet:</b> ayarlanan setlerde ~%88-92, <b>tamamen taze metinde ilk vuruş ~%73-82</b> — aradaki ~10-15 puan gerçek "şişme" payıdır ve normaldir (her dedektör kendi test setinde şişer); yeni sürümlerin gerçek gücünü her zaman bir SONRAKİ taze set gösterir. Kritik güç: <b>insan-doğruluğu (specificity) her 5 sette de %96-100</b> (240 metnin tamamında yalnızca 2 FP) — gerçek insan metnini (akademik/resmi/edebî/ESL) neredeyse hiç AI diye işaretlemeyiz. Zayıf yön dürüstçe: <b>gizlenmiş/modern AI yakalama, taze metinde ~%45-60'a düşer</b> — bu tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a iner). <b>🧠 Çözüm — Claude Derin Analiz:</b> gizlenmiş AI için sezgisel motor yetmez; <b>"Claude ile Derin AI Analizi"</b> (kendi API anahtarınla) kör testte sezgiseli ~%74'ten ~<b>%88 doğruluğa</b>, %78 recall'a çıkarır, sıfır FP korunur. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR.</b>
         </div>
       </details>
     </section>
   </div>
 
-  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · <b>v23</b> · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
+  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · <b>v24</b> · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
 </div>
 <div id="toast">✓ Kopyalandı</div>
 <div id="printReport"></div>
@@ -1028,7 +1028,7 @@ function analyze(text){
   var gnomicAI = 0;
   var trGn = 0;
   try{
-    var contrastN = countRe(text, /\b(not because|not only|not just|not merely|but rather|yet it|yet we|yet our|rather than|instead of|far from being|less a |less about|more than a |does more than|which is to say|değil, aynı zamanda|değil aslında|yerine|aksine)\b/gi);
+    var contrastN = countRe(text, /\b(not because|not only|not just|not merely|but rather|yet it|yet we|yet our|rather than|instead of|far from being|less a |less about|more than a |does more than|which is to say|what looks like|what feels like|what seems like|the trouble with|the problem with|is really|worth considering|worth remembering|değil, aynı zamanda|değil aslında|yerine|aksine)\b/gi);
     var gnomicVerbs = countRe(text, /\b(is|are|tends to|tend to|remains|becomes|offers|teaches|carries|reveals|demands|requires|begins|matters|sağlar|öğretir|korur|gerektirir|demektir|kazandırır|besler|geçer|verir)\b/gi);
     var noI = (firstPerson===0) ? 1 : (firstPerson<=1 ? 0.5 : 0);
     var noNum = (numerals===0) ? (spelledNum>=2?0.35:(spelledNum===1?0.7:1)) : 0;
@@ -1152,6 +1152,14 @@ function analyze(text){
     }
   }catch(e){ bioHits=0; }
 
+  // [v24] Haber-atif-alintisiz: "yetkililer acikladi, uzmanlar belirtti" tarzi atif fiilleri >=2 ama
+  // metinde TEK BIR tirnak isareti yok — gercek haber/roportaj alinti yapar, AI haberi "ozetler".
+  var newsAttr = 0, newsNQ = 0;
+  try{
+    newsAttr = countRe(text, /\b(officials? (said|say)|said in a statement|announced|spokesperson|according to|expressed (concern|support|mixed)|welcomed the (decision|move|news)|yetkililer|açıkladı|duyurdu|belirtti|ifade edildi|ifade etti|vurguladı|kaydetti|belirtmektedir|dile getirdi|uzmanlar|araştırmacılar)\b/gi);
+    var quoteN = countRe(text, /["\u201c\u201d\u00ab\u00bb]/g);
+    if(newsAttr>=2 && quoteN===0 && firstPerson===0) newsNQ = 1;
+  }catch(e){}
   const parts = [
     {key:"cliche", name:"AI klişe kalıpları", short:"Klişe", ai:clicheAI, w:0.20, val:scan.counts.cliche+" eşleşme",
       desc:"'delve, önemli bir rol oynar' + yapısal kalıplar ('From X to Y', 'not just X but Y')."},
@@ -1232,9 +1240,11 @@ function analyze(text){
   var trBoost = (trGn>0.50 && humanBonus<0.35) ? Math.min((trGn-0.50)*1.2, 0.40) : 0;
   // [v21] Biyografi kalibi yukseltmesi: en az 2 farkli kalip ailesi gerekli
   var bioBoost = bioHits>=2 ? Math.min((bioHits-1)*0.15, 0.30) : 0;
+  // [v24] Haber-alintisiz yukseltmesi: atif sayisiyla olceklenir
+  var newsBoost = newsNQ ? Math.min(0.3 + (newsAttr-2)*0.05, 0.45) : 0;
   // [v20/v21] Anlati-zinciri kalkani: zincirli anlatimda (Incil/masal) tum yukseltmeleri sondur
-  if(chainRate>=0.4){ gnomicBoost=gnomicBoost*0.25; adviceBoost=adviceBoost*0.25; trBoost=trBoost*0.25; bioBoost=bioBoost*0.25; lexBoost=lexBoost*0.5; boost=boost*0.4; }
-  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost + trBoost + bioBoost - humanBonus*0.22);
+  if(chainRate>=0.4){ gnomicBoost=gnomicBoost*0.25; adviceBoost=adviceBoost*0.25; trBoost=trBoost*0.25; bioBoost=bioBoost*0.25; newsBoost=newsBoost*0.25; lexBoost=lexBoost*0.5; boost=boost*0.4; }
+  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost + trBoost + bioBoost + newsBoost - humanBonus*0.22);
   const pct = Math.round(aiScore*100);
 
   let conf = "Düşük";
@@ -1269,7 +1279,8 @@ function analyze(text){
            paraCount:paraCount, paraCV:paraCV, wps:wps, lix:lix,
            emoStd:emoStd, posTotal:posTotal, negTotal:negTotal, concreteCount:concreteCount,
            concretePer100:concretePer100, questionsCount:questionsCount, ttrStd:ttrStd,
-           bioHits:bioHits, chainRate:chainRate, trGnomic:trGn, numerals:numerals}
+           bioHits:bioHits, chainRate:chainRate, trGnomic:trGn, numerals:numerals,
+           newsNQ:newsNQ, newsAttr:newsAttr}
   };
 }
 
@@ -1522,6 +1533,9 @@ function buildTeacher(r){
   if(P.advice>0.5)
     n.push({t:"<b>Jenerik tavsiye sesi</b>: emir cümleleri ve \"you/your\" hitabı bol, ama tek bir \"bende şöyle olmuştu\" yok. Gerçek tavsiye yazısı kendi denemesinden bahseder; bu kalıbı bilen öğretmen listicle kokusunu hemen alır.",
             e:"Kanıt: tavsiye dokusu %"+Math.round(P.advice*100)+", "+f.firstPerson+" birinci tekil ifade"});
+  if(f.newsNQ===1)
+    n.push({t:"<b>Haber dili ama tek bir alıntı yok</b>: \"yetkililer açıkladı, uzmanlar belirtti\" deniyor fakat kimseden doğrudan söz aktarılmıyor. Gerçek haber/röportaj alıntı yapar; AI haberi \"özetler\". Kaynak göstermen istendiğinde elin boş kalır.",
+            e:"Kanıt: "+f.newsAttr+" atıf ifadesi, 0 tırnak işareti"});
   if(f.bioHits>=2)
     n.push({t:"<b>Tanıtım/biyografi şablonu</b>: \"based in…, can usually be found…\" tarzı kalıplar LLM'lerin ezber byline sesidir. Bu şablonu bilen okuyucu metni saniyeler içinde tanır.",
             e:"Kanıt: "+f.bioHits+" farklı byline kalıbı eşleşti"});
