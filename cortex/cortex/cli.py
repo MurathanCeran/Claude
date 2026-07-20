@@ -9,7 +9,17 @@ from typing import Annotated, Optional
 import typer
 from rich.prompt import Confirm, Prompt
 
-from cortex import backup, clipper, db, digest, export, importer, search, semantic
+from cortex import (
+    backup,
+    clipper,
+    db,
+    digest,
+    export,
+    importer,
+    plugins,
+    search,
+    semantic,
+)
 from cortex.display import (
     console,
     print_ask_result,
@@ -21,6 +31,7 @@ from cortex.display import (
     print_note_links,
     print_note_table,
     print_orphans,
+    print_plugin_list,
     print_review_card,
     print_review_stats,
     print_review_summary,
@@ -40,8 +51,9 @@ app = typer.Typer(
 
 @app.callback(invoke_without_command=True)
 def _init(_ctx: typer.Context) -> None:
-    """Ensure DB is ready before every command."""
+    """Ensure DB is ready and plugins are loaded before every command."""
     db.init_db()
+    plugins.load_all_enabled()
 
 
 @app.command("add")
@@ -188,8 +200,10 @@ def cmd_delete(
             print_warning("Silme iptal edildi.")
             raise typer.Exit(0)
 
-    db.delete_note(note_id)
-    print_success(f"Not #{note_id} silindi.")
+    if db.delete_note(note_id):
+        print_success(f"Not #{note_id} silindi.")
+    else:
+        print_warning(f"Not #{note_id} silinmedi (bir plugin engelledi).")
 
 
 @app.command("stats")
@@ -466,6 +480,41 @@ def cmd_ui() -> None:
     from cortex.tui import CortexApp
 
     CortexApp().run()
+
+
+@app.command("plugins")
+def cmd_plugins(
+    enable: Annotated[
+        Optional[str], typer.Option("--enable", help="Plugin'i etkinleştir")
+    ] = None,
+    disable: Annotated[
+        Optional[str], typer.Option("--disable", help="Plugin'i devre dışı bırak")
+    ] = None,
+    new: Annotated[
+        Optional[str], typer.Option("--new", help="Boş plugin template'i oluştur")
+    ] = None,
+) -> None:
+    """Pluginleri listele, aç/kapat veya yeni bir template oluştur."""
+    if new:
+        try:
+            path = plugins.create_template(new)
+        except FileExistsError as exc:
+            print_error(str(exc))
+            raise typer.Exit(1)
+        print_success(f"Plugin template oluşturuldu: [cyan]{path}[/cyan]")
+        return
+
+    if enable:
+        plugins.set_enabled(enable, True)
+        print_success(f"Plugin etkinleştirildi: [cyan]{enable}[/cyan]")
+        return
+
+    if disable:
+        plugins.set_enabled(disable, False)
+        print_warning(f"Plugin devre dışı bırakıldı: {disable}")
+        return
+
+    print_plugin_list(plugins.list_plugins())
 
 
 def main() -> None:

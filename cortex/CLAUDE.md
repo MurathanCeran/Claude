@@ -30,6 +30,7 @@
 - [x] Faz 7: Günlük not sistemi ve spaced repetition (Leitner)
 - [x] Faz 8: Export ve yedekleme
 - [x] Faz 9: Terminal dashboard (Textual TUI)
+- [x] Faz 10: Plugin sistemi
 - [x] Bonus: Günlük özet (digest) komutu
 
 ## Veritabanı
@@ -43,6 +44,14 @@
 - Kısayollar: `/` ara, `n` yeni not, `d` sil, `t` etiketle, `r` review, `b` etiket tarayıcı, `q` çıkış
 - Liste navigasyonu: `j`/`k` (vim-style) veya ok tuşları
 - Ekranlar: Ana (liste+detay), Arama (sonuç+preview), Etiket tarayıcı, Review (flashcard)
+
+## Plugin Sistemi
+- Plugin klasörü: ~/.cortex/plugins/ — her plugin bir .py dosyası, içinde `register(api)` fonksiyonu olmalı
+- Hooklar: `before_add(fields)`, `after_add(note)`, `before_delete(note_id)` (False dönerse silme iptal), `after_search(query, results)`
+- Plugin kendi tablosunu ancak `plugin_<isim>_` prefix'iyle oluşturabilir (`api.create_table(...)`)
+- Plugin hataları try/except ile yakalanır, `~/.cortex/plugins/errors.log`'a loglanır, Cortex çökmez
+- Sandboxing yok — ilk gerçek yüklemede tek seferlik uyarı gösterilir
+- Örnek pluginler: `examples/plugins/` altında (auto_tagger, word_counter, daily_digest_email) — kullanmak için ~/.cortex/plugins/ içine kopyalanır
 
 ## CLI Komutları
 | Komut | Açıklama |
@@ -71,3 +80,7 @@
 | `cortex backup --restore <dosya>` | Bir yedekten geri yükle (onaylı) |
 | `cortex import-obsidian <vault_yolu>` | Obsidian vault'unu import et |
 | `cortex ui` | Tam ekran interaktif terminal dashboard (Textual) aç |
+| `cortex plugins` | Yüklü pluginleri listele |
+| `cortex plugins --enable <isim>` | Plugin'i etkinleştir |
+| `cortex plugins --disable <isim>` | Plugin'i devre dışı bırak |
+| `cortex plugins --new <isim>` | Boş plugin template'i oluştur |

@@ -246,11 +246,14 @@ class MainScreen(Screen):
         self.app.push_screen(ConfirmScreen(message), self._on_delete_confirmed)
 
     def _on_delete_confirmed(self, confirmed: bool) -> None:
-        if confirmed and self.current_note is not None:
-            db.delete_note(self.current_note.id)
+        if not confirmed or self.current_note is None:
+            return
+        if db.delete_note(self.current_note.id):
             self.notify(f"Not silindi: #{self.current_note.id}")
             self.current_note = None
             self.refresh_notes()
+        else:
+            self.notify("Silme bir plugin tarafından engellendi.", severity="warning")
 
     def action_tag_note(self) -> None:
         if self.current_note is None:

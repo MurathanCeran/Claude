@@ -20,6 +20,11 @@ def search(query: str, limit: int = 10) -> list[SearchResult]:
     1. FTS5 candidate retrieval (fast, exact token match)
     2. TF-IDF cosine re-ranking for relevance ordering
     """
+    results = _run_search(query, limit)
+    return _plugin_after_search(query, results)
+
+
+def _run_search(query: str, limit: int) -> list[SearchResult]:
     fts_hits = db.fts_search(query, limit=limit * 3)
     if not fts_hits:
         return []
@@ -45,6 +50,15 @@ def search(query: str, limit: int = 10) -> list[SearchResult]:
         for note, score in scored
     ]
     return results[:limit]
+
+
+def _plugin_after_search(query: str, results: list[SearchResult]) -> list[SearchResult]:
+    try:
+        from cortex import plugins
+
+        return plugins.run_after_search(query, results)
+    except Exception:  # noqa: BLE001
+        return results
 
 
 def _fetch_notes_by_ids(ids: list[int]) -> list[Note]:

@@ -315,6 +315,27 @@ def print_backup_list(backups: list[Path]) -> None:
     console.print(table)
 
 
+def print_plugin_list(plugins: list[dict]) -> None:
+    """Render the list of discovered plugins with enabled/loaded status."""
+    if not plugins:
+        console.print(
+            "[yellow]Henüz plugin yok.[/yellow] "
+            "~/.cortex/plugins/ klasörüne .py dosyası ekleyin veya "
+            "'cortex plugins --new <isim>' kullanın."
+        )
+        return
+
+    table = Table(title="Pluginler", header_style="bold cyan")
+    table.add_column("İsim", style="bold white")
+    table.add_column("Durum", justify="center")
+    table.add_column("Yüklendi", justify="center")
+    for p in plugins:
+        status = "[green]açık[/green]" if p["enabled"] else "[dim]kapalı[/dim]"
+        loaded = "[green]✓[/green]" if p["loaded"] else "[red]✗[/red]"
+        table.add_row(p["name"], status, loaded)
+    console.print(table)
+
+
 def print_error(message: str) -> None:
     console.print(f"[bold red]Hata:[/bold red] {message}")
 

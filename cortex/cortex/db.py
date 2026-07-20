@@ -147,6 +147,19 @@ def create_note(
     source_url: Optional[str] = None,
 ) -> int:
     """Insert a note and return its new id."""
+    fields = _plugin_before_add(
+        {
+            "title": title,
+            "content": content,
+            "source": source,
+            "source_url": source_url,
+        }
+    )
+    title = fields.get("title", title)
+    content = fields.get("content", content)
+    source = fields.get("source", source)
+    source_url = fields.get("source_url", source_url)
+
     now = _now()
     with get_conn() as conn:
         cur = conn.execute(
@@ -157,7 +170,29 @@ def create_note(
         note_id = cur.lastrowid
         _sync_links(conn, note_id, content)
         _schedule_review(conn, note_id)
-        return note_id  # type: ignore[return-value]
+
+    note = get_note(note_id)  # type: ignore[arg-type]
+    if note is not None:
+        _plugin_after_add(note)
+    return note_id  # type: ignore[return-value]
+
+
+def _plugin_before_add(fields: dict) -> dict:
+    try:
+        from cortex import plugins
+
+        return plugins.run_before_add(fields)
+    except Exception:  # noqa: BLE001
+        return fields
+
+
+def _plugin_after_add(note: Note) -> None:
+    try:
+        from cortex import plugins
+
+        plugins.run_after_add(note)
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def get_note(note_id: int) -> Optional[Note]:
@@ -224,13 +259,28 @@ def update_note(note_id: int, title: str, content: str) -> bool:
 
 
 def delete_note(note_id: int) -> bool:
-    """Delete a note. Links pointing to it are marked broken, not removed."""
+    """Delete a note. Links pointing to it are marked broken, not removed.
+
+    Returns False if the note doesn't exist, or a plugin vetoes the deletion.
+    """
+    if not _plugin_before_delete(note_id):
+        return False
+
     with get_conn() as conn:
         conn.execute(
             "UPDATE note_links SET is_broken = 1 WHERE target_id = ?", (note_id,)
         )
         cur = conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
         return cur.rowcount > 0
+
+
+def _plugin_before_delete(note_id: int) -> bool:
+    try:
+        from cortex import plugins
+
+        return plugins.run_before_delete(note_id)
+    except Exception:  # noqa: BLE001
+        return True
 
 
 # ── Tag CRUD ─────────────────────────────────────────────────────────────────
