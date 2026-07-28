@@ -6,151 +6,189 @@
 <title>GökRehber — Bölgesel Astronomi & Hava Durumu</title>
 <style>
 :root{
-  --bg:#070b1a; --bg2:#0d1330; --card:#121a3d; --card2:#182253;
-  --ink:#e8ecff; --muted:#9aa5d1; --accent:#7c9cff; --accent2:#ffd166;
-  --ok:#4ade80; --warn:#fbbf24; --danger:#f87171;
-  --line:rgba(124,156,255,.18);
+  --ink:#e8ecff; --muted:rgba(232,236,255,.5); --muted2:rgba(232,236,255,.62);
+  --accent:#7c9cff; --accent2:#ffd166; --lila:#b08cff;
+  --ok:#4ade80; --warn:#fbbf24; --orange:#fb923c; --danger:#f87171; --purple:#c084fc;
+  --line:rgba(124,156,255,.22); --line2:rgba(124,156,255,.12);
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-  background:radial-gradient(ellipse at 20% -10%, #1a2456 0%, var(--bg) 55%);
-  color:var(--ink); min-height:100vh; overflow-x:hidden;
+html{background:#000}
+body{background:transparent;
+  font-family:'Helvetica Neue',Helvetica,'Segoe UI',system-ui,Arial,sans-serif;
+  color:var(--ink);min-height:100vh;overflow-x:hidden;
 }
-#stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
-.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 80px}
-header{text-align:center;padding:28px 0 10px}
-header h1{
-  font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:.5px;
-  background:linear-gradient(90deg,#8fb0ff,#e3c8ff,#ffd166);
+a{color:var(--accent);text-decoration:none}
+a:hover{color:var(--accent2)}
+::selection{background:rgba(124,156,255,.3)}
+#sky{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-2}
+#vignette{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(140% 100% at 20% 100%, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 45%, rgba(0,0,0,0) 75%);}
+.wrap{position:relative;max-width:1180px;margin:0 auto;padding:56px 24px 80px}
+
+/* ── Başlık ── */
+.eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:rgba(232,236,255,.45);font-family:var(--mono);margin-bottom:14px}
+h1.title{
+  font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.02;font-weight:600;letter-spacing:-.02em;
+  background:linear-gradient(100deg,#7c9cff 0%,#b08cff 46%,#ffd166 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-header p{color:var(--muted);margin-top:6px;font-size:.95rem}
+.subtitle{margin:14px 0 0;font-size:16px;color:var(--muted2);max-width:52ch}
+header{margin-bottom:34px}
 
-/* ── Konum paneli ── */
-.panel{
-  background:linear-gradient(180deg,var(--card2),var(--card));
-  border:1px solid var(--line);border-radius:18px;
-  padding:18px;margin:22px 0;box-shadow:0 10px 40px rgba(0,0,0,.35);
+/* ── Hızlı seçim çipleri ── */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{
+  padding:9px 15px;border-radius:999px;font:inherit;font-size:13px;cursor:pointer;
+  border:1px solid rgba(124,156,255,.25);background:rgba(12,16,38,.6);
+  color:rgba(232,236,255,.72);backdrop-filter:blur(8px);
+  transition:border-color .2s,color .2s,background .2s;
 }
-.panel h2{font-size:1.05rem;margin-bottom:12px;color:#c9d4ff;display:flex;align-items:center;gap:8px}
-.panel-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px}
-@media(max-width:820px){.panel-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.panel-grid{grid-template-columns:1fr}}
+.chip:hover{border-color:rgba(124,156,255,.55)}
+.chip.on{border-color:rgba(255,209,102,.55);background:rgba(255,209,102,.12);color:var(--accent2)}
+
+/* ── Kartlar ── */
+.card{
+  background:linear-gradient(160deg,rgba(19,26,58,.80),rgba(10,14,34,.72));
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--line);border-radius:18px;padding:26px 28px 28px;
+  box-shadow:0 24px 60px -30px rgba(0,0,0,1);
+}
+.card-label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-family:var(--mono)}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px;gap:10px;flex-wrap:wrap}
+.card-head .where{font-size:12px;color:rgba(255,209,102,.85);font-family:var(--mono)}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start;margin-bottom:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+/* Konum paneli */
+.panel-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px}
+@media(max-width:700px){.panel-grid{grid-template-columns:1fr}}
 select,input[type=text]{
-  width:100%;padding:11px 12px;border-radius:10px;font-size:.95rem;
-  background:#0b1230;color:var(--ink);border:1px solid var(--line);outline:none;
+  width:100%;padding:11px 12px;border-radius:10px;font-size:.93rem;
+  background:rgba(6,9,22,.8);color:var(--ink);border:1px solid var(--line);outline:none;
 }
 select:focus,input:focus{border-color:var(--accent)}
 button.go{
-  padding:11px 22px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:.95rem;
-  background:linear-gradient(90deg,#5b7cfa,#7c9cff);color:#fff;transition:.2s;white-space:nowrap;
+  padding:11px 22px;border-radius:10px;border:1px solid rgba(255,209,102,.4);cursor:pointer;font-weight:600;font-size:.93rem;
+  background:rgba(255,209,102,.12);color:var(--accent2);transition:.2s;white-space:nowrap;
 }
-button.go:hover{filter:brightness(1.15);transform:translateY(-1px)}
+button.go:hover{background:rgba(255,209,102,.22)}
 .search-row{display:flex;gap:10px;margin-top:10px}
 .search-row input{flex:1}
-.search-results{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.search-results{margin-top:8px;display:none;flex-direction:column;gap:6px}
 .search-results button{
   text-align:left;padding:9px 12px;border-radius:9px;border:1px solid var(--line);
-  background:#0b1230;color:var(--ink);cursor:pointer;font-size:.9rem;
+  background:rgba(6,9,22,.8);color:var(--ink);cursor:pointer;font-size:.88rem;
 }
-.search-results button:hover{border-color:var(--accent);background:#101941}
-.hint{color:var(--muted);font-size:.8rem;margin-top:8px}
-.loc-badge{
-  display:none;margin-top:14px;padding:10px 14px;border-radius:10px;font-size:.95rem;
-  background:rgba(124,156,255,.12);border:1px solid var(--line);
-}
-.loc-badge b{color:var(--accent2)}
-
-/* ── Kartlar ── */
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:880px){.cards{grid-template-columns:1fr}}
-.card{
-  background:linear-gradient(180deg,var(--card2),var(--card));
-  border:1px solid var(--line);border-radius:18px;padding:20px;
-  box-shadow:0 10px 40px rgba(0,0,0,.35);
-}
-.card h2{font-size:1.1rem;color:#c9d4ff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.full{grid-column:1/-1}
+.search-results button:hover{border-color:var(--accent)}
+.hint{color:var(--muted);font-size:.78rem;margin-top:8px;line-height:1.5}
 
 /* Hava durumu */
-.now{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.now .big-icon{font-size:4rem;line-height:1}
-.now .temp{font-size:3rem;font-weight:800}
-.now .desc{color:var(--muted);font-size:1.05rem;margin-top:2px}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px}
-.metric{
-  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
-  padding:10px 12px;
-}
-.metric .lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.metric .val{font-size:1.15rem;font-weight:700;margin-top:3px}
-.metric .sub{font-size:.75rem;margin-top:2px}
-.uv-low{color:var(--ok)} .uv-mid{color:var(--warn)} .uv-high{color:#fb923c} .uv-xhigh{color:var(--danger)} .uv-ext{color:#c084fc}
+.temp-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px}
+.temp-big{font-size:72px;line-height:.9;font-weight:300;letter-spacing:-.03em}
+.temp-unit{font-size:24px;color:rgba(232,236,255,.55);margin-top:6px}
+.sky-desc{font-size:15px;color:var(--muted2);margin-bottom:22px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(124,156,255,.16);border-radius:12px;overflow:hidden}
+@media(max-width:560px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:rgba(6,9,22,.72);padding:15px 14px}
+.metric .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(232,236,255,.45);font-family:var(--mono);margin-bottom:7px}
+.metric .val{font-size:21px;font-weight:500}
+.metric .lvl{font-size:11.5px;font-weight:600;margin-top:4px}
+.metric .fx{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45}
+.c-ok{color:var(--ok)} .c-warn{color:var(--warn)} .c-orange{color:var(--orange)} .c-danger{color:var(--danger)} .c-purple{color:var(--purple)} .c-blue{color:#a8bcff}
 .forecast{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:16px}
-.fday{
-  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
-  padding:10px 6px;text-align:center;font-size:.82rem;
-}
-.fday .d{color:var(--muted);font-weight:600}
-.fday .i{font-size:1.7rem;margin:6px 0}
-.fday .t{font-weight:700}
+.fday{background:rgba(6,9,22,.72);border:1px solid var(--line2);border-radius:12px;padding:10px 6px;text-align:center;font-size:.8rem}
+.fday .d{color:var(--muted);font-weight:600;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.fday .i{font-size:1.6rem;margin:6px 0}
+.fday .t{font-weight:600}
 .fday .t span{color:var(--muted);font-weight:400}
-.fday .u{font-size:.72rem;margin-top:4px;color:var(--muted)}
+.fday .u{font-size:.7rem;margin-top:4px;color:var(--muted)}
+.sim-note{font-size:.78rem;color:var(--warn);margin-bottom:14px;line-height:1.5}
 
-/* Astronomi */
-.evt{
-  display:flex;gap:14px;align-items:flex-start;
-  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
-  padding:12px 14px;margin-bottom:10px;
+/* Gözlem koşulları */
+.cond{margin-bottom:18px}
+.cond:last-child{margin-bottom:0}
+.cond-top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:7px;gap:10px}
+.cond-top .n{color:rgba(232,236,255,.78)}
+.cond-top .v{color:var(--accent2);font-family:var(--mono);font-size:13px;white-space:nowrap}
+.cond-bar{height:4px;border-radius:4px;background:rgba(124,156,255,.14);overflow:hidden}
+.cond-bar div{height:100%;border-radius:4px}
+.cond-exp{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.score-box{
+  margin-top:20px;padding:14px 16px;border-radius:12px;
+  background:rgba(6,9,22,.72);border:1px solid var(--line);
+  display:flex;align-items:center;gap:14px;
 }
-.evt .ico{font-size:1.9rem;line-height:1.2}
-.evt .tit{font-weight:700;font-size:.98rem}
-.evt .dt{color:var(--accent2);font-size:.8rem;font-weight:600;margin-top:2px}
-.evt .dsc{color:var(--muted);font-size:.85rem;margin-top:4px;line-height:1.45}
-.evt .visib{display:inline-block;margin-top:6px;font-size:.72rem;padding:3px 9px;border-radius:99px}
-.v-yes{background:rgba(74,222,128,.15);color:var(--ok);border:1px solid rgba(74,222,128,.3)}
-.v-part{background:rgba(251,191,36,.15);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
-.v-no{background:rgba(248,113,113,.12);color:var(--danger);border:1px solid rgba(248,113,113,.3)}
-.empty{color:var(--muted);font-size:.9rem;padding:14px;text-align:center;background:rgba(10,16,44,.4);border-radius:12px;border:1px dashed var(--line)}
-.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.score-num{font-size:30px;font-weight:600;font-family:var(--mono)}
+.score-txt{font-size:12.5px;color:var(--muted2);line-height:1.5}
+
+/* Gökyüzü olayları */
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .tabs button{
-  padding:8px 16px;border-radius:99px;border:1px solid var(--line);cursor:pointer;
-  background:transparent;color:var(--muted);font-size:.85rem;font-weight:600;transition:.2s;
+  padding:8px 16px;border-radius:999px;border:1px solid var(--line);cursor:pointer;
+  background:rgba(12,16,38,.6);color:var(--muted2);font-size:.83rem;font-weight:600;transition:.2s;
 }
-.tabs button.on{background:linear-gradient(90deg,#5b7cfa,#7c9cff);color:#fff;border-color:transparent}
-.moon-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.moon-chip{
-  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
-  padding:8px 14px;text-align:center;font-size:.8rem;
+.tabs button.on{border-color:rgba(255,209,102,.55);background:rgba(255,209,102,.12);color:var(--accent2)}
+.evt{
+  display:grid;grid-template-columns:62px 1fr auto;gap:14px;align-items:start;
+  padding:15px 0;border-top:1px solid var(--line2);
 }
-.moon-chip .e{font-size:1.5rem}
+@media(max-width:560px){.evt{grid-template-columns:1fr;gap:6px}}
+.evt .date{font-size:12px;font-family:var(--mono);color:var(--muted);padding-top:2px;line-height:1.5}
+.evt .name{font-size:15px;color:rgba(232,236,255,.9);margin-bottom:3px;font-weight:600}
+.evt .detail{font-size:12.5px;color:var(--muted);line-height:1.55}
+.evt .howto{font-size:12px;color:#a8bcff;margin-top:7px;line-height:1.55}
+.evt .howto b{color:#c5d2ff}
+.evt .visib{display:inline-block;margin-top:8px;font-size:.7rem;padding:3px 9px;border-radius:99px;letter-spacing:.04em}
+.v-yes{background:rgba(74,222,128,.12);color:var(--ok);border:1px solid rgba(74,222,128,.3)}
+.v-part{background:rgba(251,191,36,.12);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
+.v-no{background:rgba(248,113,113,.1);color:var(--danger);border:1px solid rgba(248,113,113,.3)}
+.evt-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+@media(max-width:560px){.evt-right{flex-direction:row;align-items:center}}
+.tag{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-family:var(--mono);padding:5px 9px;border-radius:999px;white-space:nowrap}
+.tag-today{color:var(--accent2);background:rgba(255,209,102,.14)}
+.tag-soon{color:#a8bcff;background:rgba(124,156,255,.16)}
+.tag-past{color:rgba(232,236,255,.42);background:rgba(124,156,255,.10)}
+.rating{
+  font-family:var(--mono);font-size:15px;font-weight:700;padding:6px 11px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(6,9,22,.72);white-space:nowrap;
+}
+.rating small{font-size:9.5px;display:block;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.moon-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.moon-chip{background:rgba(6,9,22,.72);border:1px solid var(--line2);border-radius:12px;padding:8px 14px;text-align:center;font-size:.78rem}
+.moon-chip .e{font-size:1.4rem}
 .moon-chip .n{color:var(--muted);margin-top:2px}
+.empty{color:var(--muted);font-size:.9rem;padding:16px;text-align:center;border:1px dashed var(--line);border-radius:12px}
 .loading{text-align:center;color:var(--muted);padding:30px;font-size:.95rem}
-.err{color:var(--danger);text-align:center;padding:20px;font-size:.9rem}
-footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:40px;line-height:1.6}
 .pulse{animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
-#results{display:none}
+footer{margin-top:32px;font-size:11.5px;color:rgba(232,236,255,.3);font-family:var(--mono);letter-spacing:.06em;line-height:1.8}
+.full-card{margin-bottom:20px}
 </style>
 </head>
 <body>
-<canvas id="stars"></canvas>
+<canvas id="sky"></canvas>
+<div id="vignette"></div>
+
 <div class="wrap">
   <header>
-    <h1>🔭 GökRehber</h1>
-    <p>Bölgene göre astronomik olaylar &amp; günlük hava durumu</p>
+    <div class="eyebrow">Gözlem Paneli</div>
+    <h1 class="title">GökRehber</h1>
+    <p class="subtitle">Bölgesel hava durumu ve gökyüzü olayları. Gözlem koşulları, tutulmalar, meteor yağmurları — tek ekranda. Tüm veriler ve olay takvimi her açılışta günün tarihine göre otomatik güncellenir.</p>
   </header>
 
-  <!-- ── KONUM PANELİ ── -->
-  <section class="panel">
-    <h2>📍 Bölgeni Seç</h2>
+  <!-- Hızlı seçim çipleri -->
+  <div class="chips" id="chips"></div>
+
+  <!-- Konum paneli -->
+  <section class="card full-card">
+    <div class="card-head">
+      <div class="card-label">Bölgeni Seç</div>
+      <div class="where" id="locBadge"></div>
+    </div>
     <div class="panel-grid">
       <select id="selCountry"></select>
-      <select id="selProvince"><option value="">— İl / Bölge seç —</option></select>
-      <select id="selQuick">
-        <option value="">⚡ Hızlı seçim (Doğu Anadolu)</option>
-      </select>
+      <select id="selProvince"></select>
       <button class="go" id="btnGo">Göster</button>
     </div>
     <div class="search-row">
@@ -159,51 +197,240 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:40px;lin
     </div>
     <div class="search-results" id="results"></div>
     <p class="hint">Tüm ülkeler kayıtlıdır; Türkiye için 81 ilin tamamı listede. Arama kutusu dünyadaki her yerleşimi bulur.</p>
-    <div class="loc-badge" id="locBadge"></div>
   </section>
 
-  <div class="cards" id="content" style="display:none">
-    <!-- ── HAVA DURUMU ── -->
-    <section class="card full">
-      <h2>⛅ Hava Durumu</h2>
-      <div id="weatherBox" class="loading pulse">Yükleniyor…</div>
-    </section>
+  <div id="content" style="display:none">
+    <div class="grid">
+      <!-- Hava durumu -->
+      <section class="card">
+        <div class="card-head">
+          <div class="card-label">Hava Durumu</div>
+          <div class="where" id="wLoc"></div>
+        </div>
+        <div id="weatherBox" class="loading pulse">Yükleniyor…</div>
+      </section>
 
-    <!-- ── ASTRONOMİ ── -->
-    <section class="card full">
-      <h2>🌌 Bölgendeki Astronomik Olaylar</h2>
+      <!-- Gözlem koşulları -->
+      <section class="card">
+        <div class="card-head">
+          <div class="card-label">Gözlem Koşulları</div>
+          <div class="where">BU GECE</div>
+        </div>
+        <div id="condBox" class="loading pulse">Hesaplanıyor…</div>
+      </section>
+    </div>
+
+    <!-- Gökyüzü olayları -->
+    <section class="card full-card">
+      <div class="card-head">
+        <div class="card-label">Gökyüzü Olayları</div>
+        <div class="where" id="eLoc"></div>
+      </div>
       <div class="moon-strip" id="moonStrip"></div>
       <div class="tabs">
-        <button class="on" data-tab="today">☀️ Bugün</button>
-        <button data-tab="future">🔮 Yaklaşan Olaylar</button>
-        <button data-tab="past">📜 Son 1 Ay</button>
+        <button class="on" data-tab="today">Bugün</button>
+        <button data-tab="future">Yaklaşan</button>
+        <button data-tab="past">Son 1 Ay</button>
       </div>
       <div id="astroBox"></div>
     </section>
   </div>
 
   <footer>
-    Hava verileri <b>Open-Meteo</b> açık API'sinden canlı çekilir; erişilemezse bölge/mevsime göre yaklaşık tahmine düşülür, uygulama her koşulda çalışır · Astronomik takvim yerleşiktir ve ay evreleri anlık hesaplanır.<br>
-    Tutulma görünürlükleri bölgesel yaklaşık değerlendirmedir; kesin saatler için yerel gözlemevi kaynaklarına bakınız.
+    Hava verileri Open-Meteo açık API'sinden canlı çekilir; erişilemezse bölge/mevsime göre yaklaşık tahmine düşülür — uygulama her koşulda çalışır.<br>
+    Ay evreleri ve olay takvimi günün tarihine göre anlık hesaplanır, gün geçtikçe kendini günceller. Tutulma görünürlükleri ve ışık kirliliği bölgesel yaklaşık değerlendirmedir.
   </footer>
 </div>
 
 <script>
-/* ═══════════════ YILDIZLI ARKA PLAN ═══════════════ */
-(function(){
-  const c=document.getElementById('stars'),x=c.getContext('2d');
-  let W,H,stars=[];
-  function init(){W=c.width=innerWidth;H=c.height=innerHeight;stars=[];
-    for(let i=0;i<Math.min(220,W*H/6000);i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.2,p:Math.random()*Math.PI*2,s:.01+Math.random()*.03});}
-  function draw(){x.clearRect(0,0,W,H);
-    for(const s of stars){s.p+=s.s;const a=.25+.75*(Math.sin(s.p)+1)/2;
-      x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fillStyle=`rgba(210,225,255,${a})`;x.fill();}
-    requestAnimationFrame(draw);}
-  addEventListener('resize',init);init();draw();
-})();
+/* ═══════════════ ARKA PLAN: KARA DELİK + YILDIZLI GÖKYÜZÜ ═══════════════
+   Claude Design'da hazırlanan sahnenin vanilla JS uyarlaması:
+   dönen yığılma diskli kara delik, kayan-parıldayan yıldızlar, meteor izleri */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+const SKY={
+  props:{holeSize:.13,spinSpeed:1,discBrightness:.85,motionScale:1,starDensity:1,meteorRate:1.2},
+  init(){
+    this.canvas=document.getElementById('sky');
+    this.meteors=[];this.nextMeteor=6;
+    this.reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    addEventListener('resize',()=>this.resize());
+    this.resize();this.t0=performance.now();this.loop();
+  },
+  resize(){
+    const c=this.canvas,dpr=Math.min(devicePixelRatio||1,2);
+    const w=innerWidth,h=innerHeight;
+    c.width=Math.max(1,Math.round(w*dpr));c.height=Math.max(1,Math.round(h*dpr));
+    this.w=w;this.h=h;
+    this.ctx=c.getContext('2d');this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.buildStars();this.buildHole();
+  },
+  buildStars(){
+    const n=Math.round(this.w*this.h/4200*this.props.starDensity);
+    const rnd=mulberry(20260728);this.stars=[];
+    for(let i=0;i<n;i++){
+      const big=rnd()>.93;
+      this.stars.push({x:rnd()*this.w,y:rnd()*this.h,
+        r:big?.9+rnd()*.7:.3+rnd()*.45,a:big?.6+rnd()*.4:.14+rnd()*.5,
+        tw:.25+rnd()*1.5,ph:rnd()*6.283,sp:.05+rnd()*.25});
+    }
+  },
+  discColor(t){
+    const stops=[[0,[255,253,248]],[.22,[255,244,228]],[.45,[255,222,196]],[.7,[252,186,142]],[.88,[232,146,96]],[1,[186,104,62]]];
+    for(let i=1;i<stops.length;i++){
+      if(t<=stops[i][0]){const a=stops[i-1],b=stops[i],k=(t-a[0])/(b[0]-a[0]);
+        return[0,1,2].map(j=>Math.round(a[1][j]+(b[1][j]-a[1][j])*k));}
+    }
+    return stops[stops.length-1][1];
+  },
+  ringTex(rIn,rOut,seed,gain,filaments){
+    const size=Math.ceil(rOut*2)+6;
+    const cv=document.createElement('canvas');cv.width=cv.height=size;
+    const g=cv.getContext('2d'),c=size/2,rnd=mulberry(seed);
+    g.globalCompositeOperation='lighter';
+    const steps=26;
+    for(let i=0;i<steps;i++){
+      const t0=i/steps,t1=(i+1)/steps,col=this.discColor(t0);
+      g.strokeStyle=`rgba(${col[0]},${col[1]},${col[2]},${gain*.11*Math.pow(1-t0,.75)})`;
+      g.lineWidth=(rOut-rIn)/steps+1.2;
+      g.beginPath();g.arc(c,c,rIn+(rOut-rIn)*(t0+t1)/2,0,6.2832);g.stroke();
+    }
+    g.lineCap='round';
+    for(let i=0;i<filaments;i++){
+      const t=Math.pow(rnd(),.55),r=rIn+(rOut-rIn)*t;
+      const a0=rnd()*6.2832,span=.5+rnd()*3.4,col=this.discColor(t);
+      g.strokeStyle=`rgba(${col[0]},${col[1]},${col[2]},${gain*(.02+rnd()*.075)*Math.pow(1-t*.9,.6)})`;
+      g.lineWidth=Math.max(.6,(rOut-rIn)*(.006+rnd()*.035));
+      g.beginPath();g.arc(c,c,r,a0,a0+span);g.stroke();
+    }
+    const blur=document.createElement('canvas');blur.width=blur.height=size;
+    const bg=blur.getContext('2d');
+    bg.filter=`blur(${Math.max(1,(rOut-rIn)*.018)}px)`;bg.drawImage(cv,0,0);
+    bg.filter='none';bg.globalCompositeOperation='lighter';bg.globalAlpha=.55;bg.drawImage(cv,0,0);
+    return blur;
+  },
+  buildHole(){
+    const vh=Math.min(this.h,innerHeight||this.h);
+    const R=Math.min(this.w,vh)*this.props.holeSize,B=this.props.discBrightness;
+    this.R=R;this.bx=this.w*.74;this.by=vh*.26;
+    this.rings=[
+      {tex:this.ringTex(R*1.20,R*2.30,1201,1.05*B,900),sp:.62},
+      {tex:this.ringTex(R*1.55,R*3.30,4402,.80*B,1100),sp:.36},
+      {tex:this.ringTex(R*2.10,R*4.40,7703,.52*B,1200),sp:.20},
+      {tex:this.ringTex(R*3.20,R*5.40,3301,.30*B,1300),sp:.12}
+    ];
+    this.lensTex=this.ringTex(R*1.02,R*1.52,9109,2.1*B,900);
+    const pad=R*5.9;this.padCss=pad;
+    const px=Math.ceil(pad*2);
+    this.sA=document.createElement('canvas');this.sA.width=this.sA.height=px;
+    this.sB=document.createElement('canvas');this.sB.width=this.sB.height=px;
+    this.gA=this.sA.getContext('2d');this.gB=this.sB.getContext('2d');
+  },
+  paintDisc(g,time,squash,only){
+    const pad=this.padCss;
+    for(const r of this.rings){
+      const w=r.tex.width;
+      g.save();g.translate(pad,pad);g.scale(1,squash);g.rotate(time*r.sp);
+      g.globalCompositeOperation='lighter';g.drawImage(r.tex,-w/2,-w/2);g.restore();
+    }
+    if(only!=='flat'){
+      const w=this.lensTex.width;
+      for(const side of[-1,1]){
+        g.save();g.beginPath();
+        if(side<0)g.rect(0,0,pad*2,pad-this.R*.06);
+        else g.rect(0,pad+this.R*.06,pad*2,pad);
+        g.clip();g.translate(pad,pad);g.scale(1,.97*side);g.rotate(time*.5);
+        g.globalCompositeOperation='lighter';g.drawImage(this.lensTex,-w/2,-w/2);g.restore();
+      }
+    }
+  },
+  beam(g){
+    const pad=this.padCss;
+    g.globalCompositeOperation='source-atop';
+    let gr=g.createLinearGradient(0,0,pad*2,0);
+    gr.addColorStop(0,'rgba(255,255,255,.30)');gr.addColorStop(.42,'rgba(255,255,255,0)');
+    g.fillStyle=gr;g.fillRect(0,0,pad*2,pad*2);
+    gr=g.createLinearGradient(0,0,pad*2,0);
+    gr.addColorStop(.42,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.70)');
+    g.fillStyle=gr;g.fillRect(0,0,pad*2,pad*2);
+    g.globalCompositeOperation='source-over';
+  },
+  drawHole(ctx,time){
+    const R=this.R,cx=this.bx,cy=this.by,pad=this.padCss,squash=.13;
+    const gA=this.gA,gB=this.gB;
+    gA.setTransform(1,0,0,1,0,0);gA.clearRect(0,0,pad*2,pad*2);
+    this.paintDisc(gA,time,squash);this.beam(gA);
+    gB.setTransform(1,0,0,1,0,0);gB.clearRect(0,0,pad*2,pad*2);
+    gB.save();gB.beginPath();gB.rect(0,pad,pad*2,pad);gB.clip();
+    this.paintDisc(gB,time,squash,'flat');gB.restore();this.beam(gB);
+    const s=pad*2,tilt=-.24;
+    const place=(img,alpha,scale)=>{
+      ctx.save();ctx.translate(cx,cy);ctx.rotate(tilt);ctx.globalAlpha=alpha;
+      ctx.drawImage(img,-s*scale/2,-s*scale/2,s*scale,s*scale);ctx.restore();
+    };
+    ctx.globalCompositeOperation='lighter';
+    place(this.sA,.34,1.12);place(this.sA,1,1);
+    ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+    const sh=ctx.createRadialGradient(cx,cy,R*.6,cx,cy,R*1.012);
+    sh.addColorStop(0,'#000');sh.addColorStop(.9,'#000');sh.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sh;ctx.beginPath();ctx.arc(cx,cy,R*1.012,0,6.2832);ctx.fill();
+    const pr=ctx.createLinearGradient(cx-R,cy,cx+R,cy);
+    pr.addColorStop(0,'rgba(255,247,226,.95)');pr.addColorStop(.5,'rgba(255,214,150,.55)');pr.addColorStop(1,'rgba(255,190,120,.22)');
+    ctx.globalCompositeOperation='lighter';
+    ctx.strokeStyle=pr;ctx.lineWidth=Math.max(1,R*.014);
+    ctx.beginPath();ctx.arc(cx,cy,R*1.022,0,6.2832);ctx.stroke();
+    ctx.globalAlpha=.5;ctx.lineWidth=Math.max(2,R*.05);
+    ctx.beginPath();ctx.arc(cx,cy,R*1.035,0,6.2832);ctx.stroke();
+    ctx.globalAlpha=1;
+    ctx.globalCompositeOperation='lighter';place(this.sB,1,1);
+    ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  },
+  spawnMeteor(){
+    const rnd=Math.random,ang=.30*Math.PI+rnd()*.30;
+    this.meteors.push({x:rnd()*this.w*.8,y:rnd()*this.h*.6,
+      vx:Math.cos(ang)*(560+rnd()*380),vy:Math.abs(Math.sin(ang))*(320+rnd()*240),
+      life:0,dur:.7+rnd()*.5,len:90+rnd()*180,br:.4+rnd()*.4});
+  },
+  loop(){
+    requestAnimationFrame(()=>this.loop());
+    const ctx=this.ctx;
+    if(!ctx||!this.rings)return;
+    const t=(performance.now()-this.t0)/1000;
+    const dt=Math.min(.05,this.last?t-this.last:.016);this.last=t;
+    const speed=this.reduced?0:this.props.motionScale;
+    this.clock=(this.clock||0)+dt*speed;
+    const w=this.w,h=this.h;
+    ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
+    for(const s of this.stars){
+      s.x-=s.sp*dt*1.6*speed;
+      if(s.x<-2)s.x+=w+4;
+      const a=s.a*(.68+.32*Math.sin(this.clock*s.tw+s.ph));
+      ctx.fillStyle=`rgba(255,255,255,${a})`;
+      if(s.r<.75)ctx.fillRect(s.x,s.y,s.r*2,s.r*2);
+      else{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.2832);ctx.fill();}
+    }
+    this.drawHole(ctx,this.clock*this.props.spinSpeed*.20);
+    if(speed>0&&this.props.meteorRate>0){
+      this.nextMeteor-=dt;
+      if(this.nextMeteor<=0){this.spawnMeteor();this.nextMeteor=(9+Math.random()*14)/this.props.meteorRate;}
+    }
+    for(let i=this.meteors.length-1;i>=0;i--){
+      const m=this.meteors[i];m.life+=dt;
+      const p=m.life/m.dur;
+      if(p>=1){this.meteors.splice(i,1);continue;}
+      m.x+=m.vx*dt*speed;m.y+=m.vy*dt*speed;
+      const fade=Math.sin(p*Math.PI),mag=Math.hypot(m.vx,m.vy)||1;
+      const tx=m.x-m.vx/mag*m.len,ty=m.y-m.vy/mag*m.len;
+      const gr=ctx.createLinearGradient(m.x,m.y,tx,ty);
+      gr.addColorStop(0,`rgba(255,255,255,${.9*fade*m.br})`);gr.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.strokeStyle=gr;ctx.lineWidth=1.4;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(m.x,m.y);ctx.stroke();
+    }
+  }
+};
+SKY.init();
 
 /* ═══════════════ KONUM VERİTABANI ═══════════════ */
-/* Türkiye — 81 ilin tamamı [ad, enlem, boylam, bölge] */
 const TR_ILLER=[
 ["Adana",37.00,35.32,"Akdeniz"],["Adıyaman",37.76,38.28,"Güneydoğu Anadolu"],["Afyonkarahisar",38.76,30.54,"Ege"],
 ["Ağrı",39.72,43.05,"Doğu Anadolu"],["Aksaray",38.37,34.03,"İç Anadolu"],["Amasya",40.65,35.83,"Karadeniz"],
@@ -233,10 +460,11 @@ const TR_ILLER=[
 ["Tunceli",39.11,39.55,"Doğu Anadolu"],["Uşak",38.68,29.41,"Ege"],["Van",38.49,43.38,"Doğu Anadolu"],
 ["Yalova",40.65,29.27,"Marmara"],["Yozgat",39.82,34.81,"İç Anadolu"],["Zonguldak",41.45,31.79,"Karadeniz"]
 ];
-/* Doğu Anadolu hızlı seçim listesi */
-const DOGU=TR_ILLER.filter(i=>i[3]==="Doğu Anadolu"||i[3]==="Güneydoğu Anadolu");
+/* Hızlı seçim çipleri: Doğu Anadolu illeri + Bursa, İstanbul, Ankara */
+const QUICK_CHIPS=["Erzurum","Van","Kars","Ağrı","Iğdır","Ardahan","Hakkari","Muş","Bitlis","Bingöl","Tunceli","Elazığ","Erzincan","Malatya","Bursa","İstanbul","Ankara"];
+/* Işık kirliliği tahmini için büyükşehirler (Bortle ~8) ve orta boy iller (~5); diğer Doğu illeri ~4 */
+const METRO_TR=["İstanbul","Ankara","İzmir","Bursa","Adana","Gaziantep","Antalya","Konya","Mersin","Kayseri","Diyarbakır","Kocaeli","Samsun"];
 
-/* Büyük ülkeler için il/eyalet/şehir listeleri [ad, enlem, boylam] */
 const PROVINCES={
 "US":[["New York",40.71,-74.01],["Los Angeles (Kaliforniya)",34.05,-118.24],["Chicago (Illinois)",41.88,-87.63],["Houston (Teksas)",29.76,-95.37],["Miami (Florida)",25.76,-80.19],["Seattle (Washington)",47.61,-122.33],["Denver (Kolorado)",39.74,-104.99],["Phoenix (Arizona)",33.45,-112.07]],
 "DE":[["Berlin",52.52,13.40],["Münih (Bavyera)",48.14,11.58],["Hamburg",53.55,9.99],["Frankfurt (Hessen)",50.11,8.68],["Köln (K. Ren-Vestfalya)",50.94,6.96],["Stuttgart",48.78,9.18]],
@@ -270,7 +498,6 @@ const PROVINCES={
 "ZA":[["Pretoria",-25.75,28.19],["Cape Town",-33.92,18.42],["Johannesburg",-26.20,28.05],["Durban",-29.86,31.03]]
 };
 
-/* Tüm ülkeler [Türkçe ad, ISO kodu, başkent enlem, boylam] */
 const COUNTRIES=[
 ["Türkiye","TR",39.93,32.86],["Afganistan","AF",34.53,69.17],["Almanya","DE",52.52,13.40],["Amerika Birleşik Devletleri","US",38.90,-77.04],
 ["Andorra","AD",42.51,1.52],["Angola","AO",-8.84,13.23],["Antigua ve Barbuda","AG",17.12,-61.85],["Arjantin","AR",-34.60,-58.38],
@@ -323,22 +550,27 @@ const COUNTRIES=[
 ["Kıbrıs (Güney)","CY",35.17,33.36]
 ];
 
-/* ═══════════════ PANEL KURULUMU ═══════════════ */
+/* ═══════════════ PANEL + ÇİPLER ═══════════════ */
 const selCountry=document.getElementById('selCountry');
 const selProvince=document.getElementById('selProvince');
-const selQuick=document.getElementById('selQuick');
-let LOC=null; // {name, country, lat, lon}
+let LOC=null,lastWeather=null;
 
 COUNTRIES.forEach((c,i)=>{
   const o=document.createElement('option');o.value=i;o.textContent=c[0];
   if(c[1]==="TR")o.selected=true;
   selCountry.appendChild(o);
 });
-DOGU.forEach(il=>{
-  const o=document.createElement('option');o.value=il[0];o.textContent=`${il[0]} (${il[3]})`;
-  selQuick.appendChild(o);
+const chipsBox=document.getElementById('chips');
+QUICK_CHIPS.forEach(name=>{
+  const il=TR_ILLER.find(x=>x[0]===name);
+  const b=document.createElement('button');
+  b.className='chip';b.textContent=name;b.dataset.name=name;
+  b.onclick=()=>setLocation({name:il[0]+" ("+il[3]+")",city:il[0],country:"Türkiye",lat:il[1],lon:il[2]});
+  chipsBox.appendChild(b);
 });
-
+function markChip(city){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.name===city));
+}
 function fillProvinces(){
   const c=COUNTRIES[selCountry.value];
   selProvince.innerHTML="";
@@ -352,26 +584,16 @@ function fillProvinces(){
     selProvince.insertAdjacentHTML('beforeend','<option value="">Başkent kullanılacak (veya aşağıdan şehir ara)</option>');
   }
 }
-selCountry.addEventListener('change',()=>{fillProvinces();selQuick.value="";});
+selCountry.addEventListener('change',fillProvinces);
 fillProvinces();
 
-selQuick.addEventListener('change',()=>{
-  if(!selQuick.value)return;
-  const il=TR_ILLER.find(x=>x[0]===selQuick.value);
-  selCountry.value=COUNTRIES.findIndex(c=>c[1]==="TR");fillProvinces();
-  selProvince.value="tr:"+TR_ILLER.indexOf(il);
-  setLocation({name:il[0]+" ("+il[3]+")",country:"Türkiye",lat:il[1],lon:il[2]});
-});
-
 document.getElementById('btnGo').addEventListener('click',()=>{
-  const c=COUNTRIES[selCountry.value];
-  const pv=selProvince.value;
-  if(pv.startsWith("tr:")){const il=TR_ILLER[+pv.slice(3)];setLocation({name:il[0]+" ("+il[3]+")",country:"Türkiye",lat:il[1],lon:il[2]});}
-  else if(pv.startsWith("p:")){const p=PROVINCES[c[1]][+pv.slice(2)];setLocation({name:p[0],country:c[0],lat:p[1],lon:p[2]});}
-  else setLocation({name:c[0]+" (başkent bölgesi)",country:c[0],lat:c[2],lon:c[3]});
+  const c=COUNTRIES[selCountry.value],pv=selProvince.value;
+  if(pv.startsWith("tr:")){const il=TR_ILLER[+pv.slice(3)];setLocation({name:il[0]+" ("+il[3]+")",city:il[0],country:"Türkiye",lat:il[1],lon:il[2]});}
+  else if(pv.startsWith("p:")){const p=PROVINCES[c[1]][+pv.slice(2)];setLocation({name:p[0],city:p[0],country:c[0],lat:p[1],lon:p[2]});}
+  else setLocation({name:c[0]+" (başkent bölgesi)",city:c[0],country:c[0],lat:c[2],lon:c[3]});
 });
 
-/* Serbest arama — Open-Meteo geocoding (dünyadaki her yerleşim) */
 async function doSearch(){
   const q=document.getElementById('txtSearch').value.trim();
   const box=document.getElementById('results');
@@ -385,147 +607,176 @@ async function doSearch(){
     j.results.forEach(res=>{
       const b=document.createElement('button');
       b.textContent=`📍 ${res.name}${res.admin1?", "+res.admin1:""} — ${res.country||""}`;
-      b.onclick=()=>{box.style.display='none';setLocation({name:res.name+(res.admin1?" ("+res.admin1+")":""),country:res.country||"",lat:res.latitude,lon:res.longitude});};
+      b.onclick=()=>{box.style.display='none';setLocation({name:res.name+(res.admin1?" ("+res.admin1+")":""),city:res.name,country:res.country||"",lat:res.latitude,lon:res.longitude,small:(res.population||0)<200000});};
       box.appendChild(b);
     });
-  }catch(e){box.innerHTML='<div class="err">Arama şu an çalışmıyor — yukarıdaki ülke/il listelerinden seçim yapabilirsin.</div>';}
+  }catch(e){box.innerHTML='<div class="empty">Arama şu an çalışmıyor — yukarıdaki ülke/il listelerinden seçim yapabilirsin.</div>';}
 }
 document.getElementById('btnSearch').addEventListener('click',doSearch);
 document.getElementById('txtSearch').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+/* ═══════════════ SEVİYE AÇIKLAMALARI (UV / NEM / RÜZGAR / BASINÇ) ═══════════════ */
+function uvInfo(u){
+  if(u==null)return["—","c-blue","Veri yok",""];
+  if(u<3)return[u.toFixed(1),"c-ok","Düşük",
+    "Cilt için güvenli; koruma gerekmez. Gündüz açık hava aktiviteleri serbest."];
+  if(u<6)return[u.toFixed(1),"c-warn","Orta",
+    "Öğle saatlerinde şapka ve güneş kremi önerilir; korumasız ciltte ~45 dk'da kızarıklık başlayabilir."];
+  if(u<8)return[u.toFixed(1),"c-orange","Yüksek",
+    "SPF 30+ krem şart; korumasız ciltte 25-30 dk'da yanık. 11:00-16:00 arası gölgeyi tercih et."];
+  if(u<11)return[u.toFixed(1),"c-danger","Çok Yüksek",
+    "15-20 dk'da yanık riski. Uzun kollu giysi + şapka + krem; öğlen dışarıda uzun kalma."];
+  return[u.toFixed(1),"c-purple","Aşırı",
+    "10 dk'da bile cilt hasarı olabilir. Zorunlu değilse öğlen saatlerinde dışarı çıkma."];
+}
+function humInfo(h){
+  if(h==null)return["—","c-blue","Veri yok",""];
+  if(h<30)return["%"+h,"c-warn","Kuru",
+    "Cilt, dudak ve boğazda kuruluk yapabilir; bol su iç. Gece gözlemi için avantaj: lensler çiylenmez, gökyüzü berrak olur."];
+  if(h<=60)return["%"+h,"c-ok","Normal",
+    "Konforlu aralık. Vücut ısısı dengeli hissedilir; gözlem ve günlük yaşam için ideal."];
+  if(h<=80)return["%"+h,"c-orange","Nemli",
+    "Hava bunaltıcı hissedilir, terleme serinletmez. Gece teleskop/dürbün merceklerinde çiylenme başlayabilir."];
+  return["%"+h,"c-danger","Çok Nemli",
+    "Yapışkan, ağır hava; sıcakta bunalma ve yorgunluk artar. Optikler hızla çiylenir, gökyüzü şeffaflığı ciddi düşer."];
+}
+function windInfo(w){
+  if(w==null)return["—","c-blue","Veri yok",""];
+  const v=Math.round(w)+" km/s";
+  if(w<12)return[v,"c-ok","Sakin",
+    "Hissedilmez veya hafif esinti. Teleskop titremez — gözlem için en iyi koşul."];
+  if(w<29)return[v,"c-warn","Hafif Rüzgarlı",
+    "Yapraklar ve saçlar hareket eder; sorun yaratmaz ama uzun pozlama fotoğrafında hafif titreşim olabilir."];
+  if(w<50)return[v,"c-orange","Kuvvetli",
+    "Yürürken hissedilir şekilde iter, toz kaldırır. Teleskop sallanır; şemsiye ters dönebilir."];
+  return[v,"c-danger","Fırtınamsı",
+    "İnce dallar kırılabilir, dışarıda durmak zorlaşır. Açık hava gözlemi ve etkinlik önerilmez."];
+}
+function pressInfo(p){
+  if(p==null)return["—","c-blue","Veri yok",""];
+  const v=Math.round(p)+" hPa";
+  if(p>1020)return[v,"c-ok","Yüksek",
+    "Yüksek basınç genelde durgun ve açık hava demek — önümüzdeki saatler büyük ihtimalle bulutsuz geçer."];
+  if(p>=1000)return[v,"c-blue","Normal",
+    "Tipik aralık; hava mevcut seyrinde devam eder."];
+  return[v,"c-danger","Alçak",
+    "Alçak basınç yağış ve cephe geçişi habercisidir; bulutlanma ve rüzgar artabilir."];
+}
 
 /* ═══════════════ HAVA DURUMU ═══════════════ */
 const WMO={
 0:["Açık / Güneşli","☀️"],1:["Çoğunlukla açık","🌤️"],2:["Parçalı bulutlu","⛅"],3:["Kapalı / Bulutlu","☁️"],
 45:["Sisli","🌫️"],48:["Kırağılı sis","🌫️"],
 51:["Hafif çisenti","🌦️"],53:["Çisenti","🌦️"],55:["Yoğun çisenti","🌧️"],
-56:["Dondurucu çisenti","🌧️❄️"],57:["Yoğun dondurucu çisenti","🌧️❄️"],
+56:["Dondurucu çisenti","🌧️"],57:["Yoğun dondurucu çisenti","🌧️"],
 61:["Hafif yağmurlu","🌦️"],63:["Yağmurlu","🌧️"],65:["Şiddetli yağmurlu","🌧️"],
-66:["Dondurucu yağmur","🌧️❄️"],67:["Şiddetli dondurucu yağmur","🌧️❄️"],
+66:["Dondurucu yağmur","🌧️"],67:["Şiddetli dondurucu yağmur","🌧️"],
 71:["Hafif kar yağışlı","🌨️"],73:["Kar yağışlı","🌨️"],75:["Yoğun kar yağışlı","❄️"],77:["Kar taneleri","❄️"],
 80:["Hafif sağanak","🌦️"],81:["Sağanak yağış","🌧️"],82:["Şiddetli sağanak","⛈️"],
 85:["Hafif kar sağanağı","🌨️"],86:["Yoğun kar sağanağı","❄️"],
-95:["Gök gürültülü fırtına","⛈️"],96:["Fırtına + hafif dolu","⛈️🧊"],99:["Fırtına + şiddetli dolu","⛈️🧊"]
+95:["Gök gürültülü fırtına","⛈️"],96:["Fırtına + hafif dolu","⛈️"],99:["Fırtına + şiddetli dolu","⛈️"]
 };
 function wmo(code){return WMO[code]||["Bilinmiyor","❔"];}
-function uvInfo(u){
-  if(u==null)return["—","","Veri yok"];
-  if(u<3)return[u.toFixed(1),"uv-low","Düşük — güvenli"];
-  if(u<6)return[u.toFixed(1),"uv-mid","Orta — şapka önerilir"];
-  if(u<8)return[u.toFixed(1),"uv-high","Yüksek — krem sür"];
-  if(u<11)return[u.toFixed(1),"uv-xhigh","Çok yüksek — gölgede kal"];
-  return[u.toFixed(1),"uv-ext","Aşırı — dışarı çıkma saatlerine dikkat"];
-}
 const GUN=["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
 const AY=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 
-/* Basit tohumlu (seeded) rastgele sayı üreteci — aynı konum+gün için aynı sonucu verir */
 function seedFromStr(str){let h=0;for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0;}return h;}
-function mulberry32(seed){
-  return function(){seed|=0;seed=seed+0x6D2B79F5|0;
-    let t=Math.imul(seed^seed>>>15,1|seed);
-    t=t+Math.imul(t^t>>>7,61|t)^t;
-    return((t^t>>>14)>>>0)/4294967296;};
-}
-/* Konum + mevsime göre yaklaşık gün doğumu/batımı saati (basit gün uzunluğu modeli) */
 function estimateSunTimes(lat,dayOfYear){
   const decl=23.44*Math.sin((360/365*(dayOfYear-81))*Math.PI/180);
   let cosH=-Math.tan(lat*Math.PI/180)*Math.tan(decl*Math.PI/180);
   cosH=Math.max(-1,Math.min(1,cosH));
-  const H=Math.acos(cosH)*180/Math.PI;
-  const daylight=2*H/15;
+  const H=Math.acos(cosH)*180/Math.PI,daylight=2*H/15;
   const sr=12-daylight/2,ss=12+daylight/2;
   const fmt=h=>{h=((h%24)+24)%24;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return String(hh).padStart(2,'0')+":"+String(mm).padStart(2,'0');};
   return[fmt(sr),fmt(ss)];
 }
-/* Canlı API'ye ulaşılamazsa konuma/mevsime göre gerçekçi bir hava tahmini üretir (uygulamayı asla durdurmaz) */
+/* Canlı API'ye ulaşılamazsa konuma/mevsime göre gerçekçi tahmin üretir — uygulama asla durmaz */
 function generateFallbackWeather(loc){
   const today=new Date();
   const dayOfYear=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
-  const rnd=mulberry32(seedFromStr(`${loc.lat.toFixed(2)}_${loc.lon.toFixed(2)}_${today.toISOString().slice(0,10)}`));
+  const rnd=mulberry(seedFromStr(`${loc.lat.toFixed(2)}_${loc.lon.toFixed(2)}_${today.toISOString().slice(0,10)}`));
   const isNorth=loc.lat>=0;
   const peakDay=isNorth?200:200-182.5;
   const baseTemp=27-0.42*Math.abs(loc.lat);
   const amplitude=1.2+0.22*Math.abs(loc.lat);
   const seasonFactor=Math.cos(2*Math.PI*(dayOfYear-peakDay)/365);
-  const codes=[0,1,2,3,51,61,80,95];
-  const weights=[.22,.22,.2,.16,.08,.07,.04,.01];
+  const codes=[0,1,2,3,51,61,80,95],weights=[.22,.22,.2,.16,.08,.07,.04,.01];
   function pickCode(r){let acc=0;for(let i=0;i<codes.length;i++){acc+=weights[i];if(r<acc)return codes[i];}return 0;}
   const daily={time:[],weather_code:[],temperature_2m_max:[],temperature_2m_min:[],uv_index_max:[],relative_humidity_2m_mean:[],precipitation_probability_max:[],sunrise:[],sunset:[]};
   for(let i=0;i<7;i++){
     const dt=new Date(today);dt.setDate(dt.getDate()+i);
-    const ds=dt.toISOString().slice(0,10);
-    const doy=dayOfYear+i;
+    const ds=dt.toISOString().slice(0,10),doy=dayOfYear+i;
     const t=baseTemp+amplitude*Math.cos(2*Math.PI*(doy-peakDay)/365)+(rnd()-.5)*3;
     const code=pickCode(rnd());
-    // Ekvatora yakın bölgelerde UV yıl boyu yüksek ve neredeyse sabittir; sezonsal salınım yalnızca enleme göre büyür
     const uvBase=8-0.05*Math.abs(loc.lat);
     const uvAmplitude=3*Math.abs(loc.lat)/90;
     const uv=Math.max(0,Math.min(11,uvBase+uvAmplitude*seasonFactor+(rnd()-.5)*0.8));
     const [sr,ss]=estimateSunTimes(loc.lat,doy);
-    daily.time.push(ds);
-    daily.weather_code.push(code);
-    daily.temperature_2m_max.push(t+2+rnd()*2);
-    daily.temperature_2m_min.push(t-3-rnd()*2);
+    daily.time.push(ds);daily.weather_code.push(code);
+    daily.temperature_2m_max.push(t+2+rnd()*2);daily.temperature_2m_min.push(t-3-rnd()*2);
     daily.uv_index_max.push(uv);
     daily.relative_humidity_2m_mean.push(Math.round(40+rnd()*40+(code>=51?15:0)));
     daily.precipitation_probability_max.push(code>=61?Math.round(40+rnd()*50):code>=51?Math.round(10+rnd()*30):Math.round(rnd()*15));
-    daily.sunrise.push(ds+"T"+sr);
-    daily.sunset.push(ds+"T"+ss);
+    daily.sunrise.push(ds+"T"+sr);daily.sunset.push(ds+"T"+ss);
   }
   const cTemp=(daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2;
-  const current={
-    temperature_2m:cTemp,
-    apparent_temperature:cTemp+(rnd()-.5)*2,
+  return{current:{
+    temperature_2m:cTemp,apparent_temperature:cTemp+(rnd()-.5)*2,
     relative_humidity_2m:daily.relative_humidity_2m_mean[0],
-    weather_code:daily.weather_code[0],
-    wind_speed_10m:4+rnd()*22,
-    surface_pressure:1006+rnd()*18,
-    uv_index:daily.uv_index_max[0]
-  };
-  return{current,daily,simulated:true};
+    weather_code:daily.weather_code[0],wind_speed_10m:4+rnd()*22,
+    surface_pressure:1006+rnd()*18,uv_index:daily.uv_index_max[0]
+  },daily,simulated:true};
 }
 
+function metricCell(label,value,cls,lvl,fx){
+  return `<div class="metric">
+    <div class="lbl">${label}</div>
+    <div class="val ${cls}">${value}</div>
+    <div class="lvl ${cls}">${lvl}</div>
+    <div class="fx">${fx}</div>
+  </div>`;
+}
 function renderWeather(d,box){
-    const c=d.current,[desc,icon]=wmo(c.weather_code);
-    const [uvV,uvC,uvT]=uvInfo(c.uv_index);
-    const sr=d.daily.sunrise[0].slice(11,16),ss=d.daily.sunset[0].slice(11,16);
-    let html=d.simulated?`<div class="hint" style="margin-bottom:12px">⚠️ Canlı hava verisine şu an ulaşılamadı — bölge ve mevsime göre yaklaşık bir tahmin gösteriliyor.</div>`:``;
-    html+=`
-    <div class="now">
-      <div class="big-icon">${icon}</div>
-      <div>
-        <div class="temp">${Math.round(c.temperature_2m)}°C</div>
-        <div class="desc">${desc} · Hissedilen ${Math.round(c.apparent_temperature)}°C</div>
-      </div>
-    </div>
-    <div class="metrics">
-      <div class="metric"><div class="lbl">☀️ UV İndeksi</div><div class="val ${uvC}">${uvV}</div><div class="sub ${uvC}">${uvT}</div></div>
-      <div class="metric"><div class="lbl">💧 Nem</div><div class="val">%${c.relative_humidity_2m}</div><div class="sub">bağıl nem</div></div>
-      <div class="metric"><div class="lbl">💨 Rüzgar</div><div class="val">${Math.round(c.wind_speed_10m)} km/s</div><div class="sub">10 m yükseklik</div></div>
-      <div class="metric"><div class="lbl">🌡️ Basınç</div><div class="val">${Math.round(c.surface_pressure)} hPa</div><div class="sub">yüzey</div></div>
-      <div class="metric"><div class="lbl">🌅 Gün doğumu</div><div class="val">${sr}</div><div class="sub">yerel saat</div></div>
-      <div class="metric"><div class="lbl">🌇 Gün batımı</div><div class="val">${ss}</div><div class="sub">gözlem için ideal sonrası</div></div>
-    </div>
-    <div class="forecast">`;
-    for(let i=0;i<d.daily.time.length;i++){
-      const dt=new Date(d.daily.time[i]+"T12:00:00");
-      const [fd,fi]=wmo(d.daily.weather_code[i]);
-      const uv=d.daily.uv_index_max[i],[,fuC]=uvInfo(uv);
-      html+=`<div class="fday" title="${fd}">
-        <div class="d">${i===0?"Bugün":GUN[dt.getDay()]+" "+dt.getDate()}</div>
-        <div class="i">${fi}</div>
-        <div class="t">${Math.round(d.daily.temperature_2m_max[i])}° <span>/ ${Math.round(d.daily.temperature_2m_min[i])}°</span></div>
-        <div class="u">UV <b class="${fuC}">${uv!=null?uv.toFixed(0):"—"}</b> · 💧%${d.daily.relative_humidity_2m_mean?Math.round(d.daily.relative_humidity_2m_mean[i]):"—"}</div>
-        <div class="u">🌧️ %${d.daily.precipitation_probability_max[i]??0}</div>
-      </div>`;
-    }
-    html+=`</div>`;
-    box.className='';box.innerHTML=html;
+  const c=d.current,[desc,icon]=wmo(c.weather_code);
+  const uv=uvInfo(c.uv_index),hum=humInfo(c.relative_humidity_2m),win=windInfo(c.wind_speed_10m),prs=pressInfo(c.surface_pressure);
+  const sr=d.daily.sunrise[0].slice(11,16),ss=d.daily.sunset[0].slice(11,16);
+  let html=d.simulated?`<div class="sim-note">⚠️ Canlı hava verisine şu an ulaşılamadı — bölge ve mevsime göre yaklaşık bir tahmin gösteriliyor.</div>`:``;
+  html+=`
+  <div class="temp-row">
+    <span class="temp-big">${Math.round(c.temperature_2m)}</span>
+    <span class="temp-unit">°C</span>
+    <span style="font-size:2.2rem;margin-left:10px">${icon}</span>
+  </div>
+  <div class="sky-desc">${desc} · Hissedilen ${Math.round(c.apparent_temperature)}°C · Gece ${Math.round(d.daily.temperature_2m_min[0])}°C</div>
+  <div class="metrics">
+    ${metricCell("UV İndeksi",uv[0],uv[1],uv[2],uv[3])}
+    ${metricCell("Nem",hum[0],hum[1],hum[2],hum[3])}
+    ${metricCell("Rüzgar",win[0],win[1],win[2],win[3])}
+    ${metricCell("Basınç",prs[0],prs[1],prs[2],prs[3])}
+    ${metricCell("Gün Doğumu",sr,"c-blue","Yerel saat","Gözlem gecesi bu saatte biter; şafaktan ~1 saat önce en karanlık andır.")}
+    ${metricCell("Gün Batımı",ss,"c-blue","Yerel saat","Gerçek karanlık, gün batımından ~1,5 saat sonra başlar (astronomik alacakaranlık).")}
+  </div>
+  <div class="forecast">`;
+  for(let i=0;i<d.daily.time.length;i++){
+    const dt=new Date(d.daily.time[i]+"T12:00:00");
+    const [fd,fi]=wmo(d.daily.weather_code[i]);
+    const fuv=d.daily.uv_index_max[i],fu=uvInfo(fuv);
+    html+=`<div class="fday" title="${fd}">
+      <div class="d">${i===0?"Bugün":GUN[dt.getDay()]+" "+dt.getDate()}</div>
+      <div class="i">${fi}</div>
+      <div class="t">${Math.round(d.daily.temperature_2m_max[i])}° <span>/ ${Math.round(d.daily.temperature_2m_min[i])}°</span></div>
+      <div class="u">UV <b class="${fu[1]}">${fuv!=null?fuv.toFixed(0):"—"}</b> · 💧%${d.daily.relative_humidity_2m_mean?Math.round(d.daily.relative_humidity_2m_mean[i]):"—"}</div>
+      <div class="u">🌧️ %${d.daily.precipitation_probability_max[i]??0}</div>
+    </div>`;
+  }
+  html+=`</div>`;
+  box.className='';box.innerHTML=html;
 }
 
 async function loadWeather(loc){
   const box=document.getElementById('weatherBox');
   box.className='loading pulse';box.textContent='Hava verileri çekiliyor…';
+  let data=null;
   try{
     const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
       +`&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,uv_index`
@@ -533,22 +784,91 @@ async function loadWeather(loc){
       +`&timezone=auto&forecast_days=7`;
     let r=await fetch(url);let d=await r.json();
     if(!d.current){
-      // bazı sunucular günlük nem ortalamasını desteklemeyebilir — onsuz tekrar dene
       r=await fetch(url.replace(",relative_humidity_2m_mean",""));d=await r.json();
     }
     if(!d.current)throw new Error("veri yok");
-    renderWeather(d,box);
+    data=d;
   }catch(e){
-    // API'ye ulaşılamıyor — uygulamayı durdurmak yerine yaklaşık tahmine düş
-    renderWeather(generateFallbackWeather(loc),box);
+    data=generateFallbackWeather(loc);
   }
+  lastWeather=data;
+  renderWeather(data,box);
+  renderConditions(loc,data);
+}
+
+/* ═══════════════ GÖZLEM KOŞULLARI ═══════════════ */
+function bortleEstimate(loc){
+  if(loc.country==="Türkiye"){
+    if(METRO_TR.includes(loc.city))return 8;
+    const il=TR_ILLER.find(x=>x[0]===loc.city);
+    if(il&&(il[3]==="Doğu Anadolu"))return 4;
+    return 5;
+  }
+  if(loc.small)return 4;
+  return 7; // yurt dışında listeden seçilenler büyük şehirlerdir
+}
+function clarityFromWeather(d){
+  const code=d.current.weather_code,hum=d.current.relative_humidity_2m||50;
+  let base;
+  if(code===0)base=92;else if(code===1)base=78;else if(code===2)base=52;
+  else if(code===3)base=18;else if(code>=45&&code<=48)base=10;else base=8;
+  if(hum>50)base-=Math.round((hum-50)*.35);
+  return Math.max(2,Math.min(100,base));
+}
+function seeingEstimate(d){
+  const wind=d.current.wind_speed_10m||10;
+  return Math.max(10,Math.min(95,Math.round(92-wind*1.5)));
+}
+function condRow(name,valTxt,pct,grad,exp){
+  return `<div class="cond">
+    <div class="cond-top"><span class="n">${name}</span><span class="v">${valTxt}</span></div>
+    <div class="cond-bar"><div style="width:${pct}%;background:${grad}"></div></div>
+    <div class="cond-exp">${exp}</div>
+  </div>`;
+}
+function renderConditions(loc,d){
+  const box=document.getElementById('condBox');
+  const clarity=clarityFromWeather(d);
+  const seeing=seeingEstimate(d);
+  const bortle=bortleEstimate(loc);
+  const age=moonAge(new Date());
+  const moonIll=Math.round((1-Math.cos(2*Math.PI*age/SYNODIC))/2*100);
+
+  /* Gecelik toplam puan: 10'dan düş */
+  let score=10;
+  const code=d.current.weather_code;
+  if(code===1)score-=1;else if(code===2)score-=3;else if(code===3)score-=6;else if(code>=45)score-=8;
+  if(moonIll>80)score-=2;else if(moonIll>40)score-=1;
+  if((d.current.wind_speed_10m||0)>=29)score-=1;
+  if((d.current.relative_humidity_2m||0)>80)score-=1;
+  if(bortle>=7)score-=1;
+  score=Math.max(0,Math.min(10,score));
+  const verdict=score>=8?"Mükemmel gece — teleskopu kap, dışarı çık!":
+    score>=6?"İyi bir gözlem gecesi; parlak objeler ve gezegenler net görünür.":
+    score>=4?"Orta — parlak yıldızlar ve Ay izlenir, sönük objeler zor.":
+    "Zayıf — bu gece gözlem için uygun değil, yarınki tahmine bak.";
+  const scoreCls=score>=8?"c-ok":score>=6?"c-warn":score>=4?"c-orange":"c-danger";
+
+  box.className='';
+  box.innerHTML=
+    condRow("Gökyüzü berraklığı",clarity+"/100",clarity,"linear-gradient(90deg,#7c9cff,#b08cff)",
+      "Atmosferin ışığı ne kadar az yuttuğu. Bulut, nem ve toz azaldıkça artar; yüksekse sönük yıldızlar ve Samanyolu seçilebilir. Bulutluluk ve nem verisinden hesaplanır.")+
+    condRow("Görüş (seeing)",seeing+"/100",seeing,"linear-gradient(90deg,#7c9cff,#b08cff)",
+      "Havanın titreşim düzeyi. Rüzgar ve sıcak hava akımları yıldızları 'oynatır'; düşük seeing'de teleskopta gezegen detayları bulanıklaşır. Sakin, durgun gecelerde en iyidir.")+
+    condRow("Işık kirliliği","Bortle "+bortle+" (tahmini)",Math.max(6,100-bortle*11),"linear-gradient(90deg,#ffd166,#ff9f6e)",
+      "Bortle ölçeği 1-9: 1 = zifiri karanlık çöl göğü, 9 = şehir merkezi. 4 ve altı Samanyolu'nu çıplak gözle gösterir. Şehir büyüklüğüne göre yaklaşık tahmindir; şehirden 30-40 km uzaklaşmak 2-3 kademe kazandırır.")+
+    condRow("Ay aydınlanması","%"+moonIll,moonIll,"linear-gradient(90deg,#8fa4d8,#dfe4ff)",
+      "Ay ne kadar parlaksa gökyüzü o kadar 'yıkanır' ve sönük objeler kaybolur. Meteor yağmuru ve Samanyolu için %40 altı idealdir; %100 (dolunay) yalnızca Ay gözlemine uygundur.")+
+    `<div class="score-box">
+      <div class="score-num ${scoreCls}">${score}<span style="font-size:14px;color:var(--muted)">/10</span></div>
+      <div class="score-txt"><b style="color:var(--ink)">Bu gece gözleme değer mi?</b><br>${verdict}</div>
+    </div>`;
 }
 
 /* ═══════════════ ASTRONOMİ MOTORU ═══════════════ */
-/* Ay evreleri — Meeus yaklaşımı: yeni ay JD = 2451550.09766 + 29.530588861·k */
 const SYNODIC=29.530588861;
 function jdToDate(jd){return new Date((jd-2440587.5)*86400000);}
-function phaseDates(fromD,toD,phase){ // phase: 0=yeni ay, .25=ilk dördün, .5=dolunay, .75=son dördün
+function phaseDates(fromD,toD,phase){
   const out=[];
   const jd0=fromD.getTime()/86400000+2440587.5;
   let k=Math.floor((jd0-2451550.09766)/SYNODIC)+phase-2;
@@ -562,8 +882,11 @@ function phaseDates(fromD,toD,phase){ // phase: 0=yeni ay, .25=ilk dördün, .5=
 }
 function moonAge(d){
   const jd=d.getTime()/86400000+2440587.5;
-  let a=((jd-2451550.09766)%SYNODIC+SYNODIC)%SYNODIC;
-  return a;
+  return((jd-2451550.09766)%SYNODIC+SYNODIC)%SYNODIC;
+}
+function moonIllumAt(d){
+  const age=moonAge(d);
+  return Math.round((1-Math.cos(2*Math.PI*age/SYNODIC))/2*100);
 }
 function moonEmoji(age){
   const f=age/SYNODIC;
@@ -577,7 +900,6 @@ function moonName(age){
 }
 const DOLUNAY_ADLARI=["Kurt Ayı","Kar Ayı","Solucan Ayı","Pembe Ay","Çiçek Ayı","Çilek Ayı","Geyik Ayı","Mersin Balığı Ayı","Hasat Ayı","Avcı Ayı","Kunduz Ayı","Soğuk Ay"];
 
-/* Meteor yağmurları — yıllık takvim [ad, tepe ay(0-11), tepe gün, aktif başlangıç(ay,gün), aktif bitiş, ZHR, yarımküre(N/S/ALL), açıklama] */
 const SHOWERS=[
 ["Kuadrantid Meteor Yağmuru",0,4,[11,28],[0,12],110,"N","Yılın en güçlü yağmurlarından; tepe süresi kısadır (~6 saat). Kuzey yarımküreden izlenir."],
 ["Lirid Meteor Yağmuru",3,22,[3,14],[3,30],18,"N","Vega yıldızı yönünden; hızlı ve parlak meteorlar, bazen ateş topları."],
@@ -591,41 +913,82 @@ const SHOWERS=[
 ["Haziran Bootid Meteor Yağmuru",5,27,[5,22],[6,2],5,"N","Değişken bir yağmur; bazı yıllar sürpriz patlamalar yapar."]
 ];
 
-/* 2026 sabit olaylar [tarih, ad, ikon, açıklama, görünürlük fonksiyonu]
-   vis: (lat,lon) => 'yes'|'part'|'no', vtext: bölge açıklaması */
 const EVENTS_2026=[
-{d:"2026-01-10",n:"Jüpiter Karşı Konumda (Opozisyon)",i:"🪐",
+{d:"2026-01-10",n:"Jüpiter Karşı Konumda (Opozisyon)",type:"opposition",
  t:"Jüpiter, Dünya'ya yıl içindeki en yakın konumunda; tüm gece parlak biçimde gözlemlenebilir.",
- vis:()=> "yes",vt:"Tüm dünyadan görülebilir"},
-{d:"2026-02-17",n:"Halkalı Güneş Tutulması",i:"💍",
+ vis:()=>"yes",vt:"Tüm dünyadan görülebilir"},
+{d:"2026-02-17",n:"Halkalı Güneş Tutulması",type:"eclipse-sun-annular",
  t:"Ay, Güneş'in merkezini örterek 'ateş çemberi' oluşturur. Halkalı görünüm yalnızca Antarktika'dan izlenir.",
  vis:(la)=>la<-30?"part":"no",vt:"Antarktika (halkalı); Güney Amerika/Afrika'nın güney uçları (parçalı)"},
-{d:"2026-03-03",n:"Tam Ay Tutulması (Kanlı Ay)",i:"🌕🔴",
+{d:"2026-03-03",n:"Tam Ay Tutulması (Kanlı Ay)",type:"eclipse-moon-total",
  t:"Ay, Dünya'nın gölgesine tamamen girerek kızıl renge bürünür.",
  vis:(la,lo)=>(lo>60||lo<-60)?"yes":"no",vt:"Doğu Asya, Avustralya, Pasifik, Kuzey Amerika — Türkiye'den izlenemez"},
-{d:"2026-08-12",n:"TAM GÜNEŞ TUTULMASI",i:"🌑☀️",
+{d:"2026-08-12",n:"TAM GÜNEŞ TUTULMASI",type:"eclipse-sun-total",
  t:"2026'nın en büyük olayı! Tam tutulma kuşağı Grönland, İzlanda ve İspanya'dan geçer. Avrupa'nın büyük kısmı ile Türkiye'nin batısından gün batımına yakın PARÇALI olarak izlenebilir.",
  vis:(la,lo)=>{if(la>35&&la<70&&lo>-25&&lo<5)return"yes";if(la>30&&la<72&&lo>-60&&lo<32)return"part";return"no";},
  vt:"Tam: İzlanda, İspanya, Grönland · Parçalı: Avrupa, K. Afrika, Türkiye'nin batısı (gün batımında)"},
-{d:"2026-08-28",n:"Parçalı Ay Tutulması",i:"🌗",
+{d:"2026-08-28",n:"Parçalı Ay Tutulması",type:"eclipse-moon-partial",
  t:"Ay'ın önemli bir bölümü Dünya'nın gölgesinden geçer; çıplak gözle rahatça izlenir.",
  vis:(la,lo)=>(lo>-120&&lo<60)?"yes":"part",vt:"Amerika, Avrupa, Afrika ve Türkiye'nin tamamından görülebilir"},
-{d:"2026-10-03",n:"Satürn Karşı Konumda (Opozisyon)",i:"🪐",
+{d:"2026-10-03",n:"Satürn Karşı Konumda (Opozisyon)",type:"opposition",
  t:"Satürn ve halkaları yıl boyunca en parlak halinde; küçük bir teleskopla halkalar seçilebilir.",
  vis:()=>"yes",vt:"Tüm dünyadan görülebilir"},
-{d:"2026-11-24",n:"Süper Dolunay",i:"🌕✨",
+{d:"2026-11-24",n:"Süper Dolunay",type:"supermoon",
  t:"Dolunay, Ay'ın yörüngesindeki en yakın noktasına (perigee) denk gelir; normalden büyük ve parlak görünür.",
  vis:()=>"yes",vt:"Tüm dünyadan görülebilir"}
 ];
 
+/* Olay tipine göre "nasıl izlenir" rehberi */
+const HOWTO={
+"shower":"<b>Nasıl izlenir:</b> Teleskop gerekmez — en geniş görüş alanı çıplak gözdür. Şehir ışıklarından uzak, ufku açık bir yere git; sırt üstü uzan, gözlerinin karanlığa alışması için 20-30 dk bekle (telefon ekranına bakma!). En verimli saatler gece yarısından şafağa kadardır.",
+"eclipse-sun-total":"<b>Nasıl izlenir:</b> ⚠️ Güneş'e ASLA çıplak gözle veya normal güneş gözlüğüyle bakma — kalıcı göz hasarı yapar! Sertifikalı tutulma gözlüğü (ISO 12312-2) veya 14 numara kaynak camı şart. Teleskop/dürbünle bakmak için önüne özel güneş filtresi takılmalıdır. Yalnızca TAM örtülme anında (tam kuşaktaysan) filtre çıkarılabilir.",
+"eclipse-sun-annular":"<b>Nasıl izlenir:</b> ⚠️ Halkalı tutulmada Güneş hiçbir an tamamen örtülmez — baştan sona sertifikalı tutulma gözlüğü (ISO 12312-2) zorunludur. Çıplak gözle veya filtresiz optikle bakmak kalıcı göz hasarı yapar.",
+"eclipse-moon-total":"<b>Nasıl izlenir:</b> Tamamen güvenli — çıplak gözle rahatça izlenir, filtre gerekmez. Dürbün kızıl rengi ve kraterleri muhteşem gösterir. Ay'ın ufukta olacağı yöne (genelde doğu/güneydoğu) bakan açık bir nokta seç; tutulma saatini önceden kontrol et.",
+"eclipse-moon-partial":"<b>Nasıl izlenir:</b> Tamamen güvenli — çıplak gözle izlenir, filtre gerekmez. Dürbünle gölgenin Ay yüzeyinde ilerleyişini takip etmek çok etkileyicidir. Ufku açık bir yer yeterli.",
+"fullmoon":"<b>Nasıl izlenir:</b> Çıplak gözle veya dürbünle. Dolunayda gölgeler kaybolduğu için kraterler az kontrastlıdır — krater detayı istersen dolunaydan 2-3 gün önce/sonra terminatör (gölge sınırı) hattına dürbünle bak.",
+"newmoon":"<b>Nasıl izlenir:</b> Bu gece Ay'ı değil, Ay'sız gökyüzünü izle! Şehirden uzaklaşırsan Samanyolu'nu çıplak gözle görebilirsin. Derin gökyüzü objeleri (galaksiler, bulutsular) için dürbün/teleskopla en verimli gecedir.",
+"opposition":"<b>Nasıl izlenir:</b> Gezegen tüm gece gökyüzünde olur ve yıl içindeki en parlak halindedir. Çıplak gözle parlak bir 'yıldız' gibi görünür; dürbünle Jüpiter'in 4 büyük uydusu, küçük bir teleskopla Satürn'ün halkaları seçilebilir.",
+"supermoon":"<b>Nasıl izlenir:</b> Çıplak gözle — en etkileyici anı, Ay ufuktan doğarken yakala ('ay illüzyonu' onu dev gibi gösterir). Doğu ufku açık bir nokta seç; ay doğuş saatine bak."
+};
+
+/* 10 üzerinden gözlem değeri puanı */
+function scoreEvent(e){
+  let s;
+  const t=e.type||"";
+  if(t==="shower"){
+    s=e.zhr>=100?9:e.zhr>=40?7:e.zhr>=15?6:4;
+    const ill=moonIllumAt(e.date);
+    if(ill>75)s-=3;else if(ill>40)s-=1; // ay ışığı meteorları söndürür
+    if(e.vis==="part")s-=2;
+    if(e.vis==="no")s=Math.min(s,2);
+  }
+  else if(t==="eclipse-sun-total")s=e.vis==="yes"?10:e.vis==="part"?7:1;
+  else if(t==="eclipse-sun-annular")s=e.vis==="yes"?9:e.vis==="part"?6:1;
+  else if(t==="eclipse-moon-total")s=e.vis==="yes"?9:e.vis==="part"?6:1;
+  else if(t==="eclipse-moon-partial")s=e.vis==="yes"?8:e.vis==="part"?5:1;
+  else if(t==="fullmoon")s=6;
+  else if(t==="newmoon")s=7;
+  else if(t==="supermoon")s=7;
+  else if(t==="opposition")s=7;
+  else s=5;
+  return Math.max(1,Math.min(10,s));
+}
+function scoreLabel(s){
+  if(s>=9)return["Kaçırma!","c-ok"];
+  if(s>=7)return["Kesinlikle değer","c-ok"];
+  if(s>=5)return["İzlemeye değer","c-warn"];
+  if(s>=3)return["Meraklısına","c-orange"];
+  return["Bölgenden zayıf","c-danger"];
+}
+
 function fmtDate(d){return `${d.getDate()} ${AY[d.getMonth()]} ${d.getFullYear()}`;}
-function fmtShort(d){return `${d.getDate()} ${AY[d.getMonth()]}`;}
+function fmtShort(d){return `${String(d.getDate()).padStart(2,'0')} ${AY[d.getMonth()].slice(0,3).toUpperCase()}`;}
 function dayDiff(a,b){return Math.round((b-a)/86400000);}
 
 function showerEvents(loc,fromD,toD){
   const out=[];
-  const years=[fromD.getFullYear(),toD.getFullYear()];
-  for(const y of [...new Set(years)]){
+  const years=[...new Set([fromD.getFullYear(),toD.getFullYear()])];
+  for(const y of years){
     for(const s of SHOWERS){
       const peak=new Date(y,s[1],s[2]);
       if(peak<fromD||peak>toD)continue;
@@ -635,8 +998,9 @@ function showerEvents(loc,fromD,toD){
       if(hemi==="N"&&loc.lat>=-15&&loc.lat<10){v="part";vt="Bölgenden kısmen izlenebilir (radyant ufka yakın)";}
       if(hemi==="S"&&loc.lat>15){v="part";vt="Güney ağırlıklı yağmur — bölgenden düşük ufukta izlenir";}
       const act=`${s[3][1]} ${AY[s[3][0]]} – ${s[4][1]} ${AY[s[4][0]]}`;
-      out.push({date:peak,icon:"☄️",title:s[0],
-        desc:`${s[7]} Saatte ~${s[5]} meteor (ideal koşulda). Aktif dönem: ${act}. En iyi gözlem: şehir ışıklarından uzakta, gece yarısından sonra.`,
+      const ill=moonIllumAt(peak);
+      out.push({date:peak,title:s[0],type:"shower",zhr:s[5],
+        desc:`${s[7]} Saatte ~${s[5]} meteor (ideal koşulda). Aktif dönem: ${act}. Tepe gecesi Ay aydınlanması: %${ill}${ill>75?" — ay ışığı sönük meteorları bastırır":ill<40?" — karanlık gökyüzü, ideal!":""}.`,
         vis:v,vtext:vt});
     }
   }
@@ -645,13 +1009,13 @@ function showerEvents(loc,fromD,toD){
 function moonEvents(fromD,toD){
   const out=[];
   for(const dt of phaseDates(fromD,toD,0.5)){
-    out.push({date:dt,icon:"🌕",title:`Dolunay — "${DOLUNAY_ADLARI[dt.getMonth()]}"`,
-      desc:"Ay tam evrede; gece boyunca gökyüzünü aydınlatır. Ay kraterlerini dürbünle incelemek için güzel bir gece (ama meteor gözlemi için parlaklık dezavantaj).",
+    out.push({date:dt,title:`Dolunay — "${DOLUNAY_ADLARI[dt.getMonth()]}"`,type:"fullmoon",
+      desc:"Ay tam evrede; gece boyunca gökyüzünü aydınlatır. Ay gözlemi için güzel, derin gökyüzü ve meteor gözlemi içinse en parlak (dezavantajlı) gece.",
       vis:"yes",vtext:"Tüm dünyadan görülebilir"});
   }
   for(const dt of phaseDates(fromD,toD,0)){
-    out.push({date:dt,icon:"🌑",title:"Yeni Ay — En Karanlık Gece",
-      desc:"Ay görünmez; gökyüzü ay ışığından arınır. Samanyolu, galaksiler ve meteor gözlemi için AYIN EN İYİ gecesi!",
+    out.push({date:dt,title:"Yeni Ay — En Karanlık Gece",type:"newmoon",
+      desc:"Ay görünmez; gökyüzü ay ışığından arınır. Samanyolu, galaksiler ve meteor gözlemi için ayın en iyi gecesi.",
       vis:"yes",vtext:"Gözlem koşulu: tüm dünya"});
   }
   return out;
@@ -662,32 +1026,38 @@ function staticEvents(loc,fromD,toD){
     const dt=new Date(e.d+"T20:00:00");
     if(dt<fromD||dt>toD)continue;
     const v=e.vis(loc.lat,loc.lon);
-    out.push({date:dt,icon:e.i,title:e.n,desc:e.t,vis:v,
+    out.push({date:dt,title:e.n,type:e.type,desc:e.t,vis:v,
       vtext:(v==="yes"?"✓ Bölgenden görülebilir · ":v==="part"?"◑ Bölgenden kısmen görülebilir · ":"✗ Bölgenden görülemez · ")+e.vt});
   }
   return out;
 }
 function collectEvents(loc,fromD,toD){
-  return [...showerEvents(loc,fromD,toD),...moonEvents(fromD,toD),...staticEvents(loc,fromD,toD)]
+  return[...showerEvents(loc,fromD,toD),...moonEvents(fromD,toD),...staticEvents(loc,fromD,toD)]
     .sort((a,b)=>a.date-b.date);
 }
 
 function renderEvents(list,now,mode){
-  if(!list.length)return `<div class="empty">${mode==='today'?"Bugün bölgende kayda değer bir astronomik olay yok — ama yaklaşan olaylara göz at! 🔭":"Bu aralıkta kayıtlı olay bulunamadı."}</div>`;
+  if(!list.length)return `<div class="empty">${mode==='today'?"Bugün bölgende kayda değer bir astronomik olay yok — Yaklaşan sekmesine göz at! 🔭":"Bu aralıkta kayıtlı olay bulunamadı."}</div>`;
   return list.map(e=>{
     const dd=dayDiff(now,e.date);
-    let when=fmtDate(e.date);
-    if(mode==='future'&&dd>0)when+=` · ${dd} gün sonra`;
-    if(mode==='past'&&dd<0)when+=` · ${-dd} gün önce`;
-    if(dd===0)when+=" · BUGÜN 🎉";
+    let tag,tagCls;
+    if(dd===0){tag="bugün";tagCls="tag-today";}
+    else if(dd>0){tag=dd+" gün sonra";tagCls="tag-soon";}
+    else{tag=(-dd)+" gün önce";tagCls="tag-past";}
     const vc=e.vis==="yes"?"v-yes":e.vis==="part"?"v-part":"v-no";
+    const s=scoreEvent(e),[sl,sc]=scoreLabel(s);
+    const howto=HOWTO[e.type]||"";
     return `<div class="evt">
-      <div class="ico">${e.icon}</div>
+      <div class="date">${fmtShort(e.date)}<br><span style="opacity:.6">${e.date.getFullYear()}</span></div>
       <div>
-        <div class="tit">${e.title}</div>
-        <div class="dt">📅 ${when}</div>
-        <div class="dsc">${e.desc}</div>
+        <div class="name">${e.title}</div>
+        <div class="detail">${e.desc}</div>
+        ${howto?`<div class="howto">${howto}</div>`:""}
         <span class="visib ${vc}">${e.vtext}</span>
+      </div>
+      <div class="evt-right">
+        <span class="tag ${tagCls}">${tag}</span>
+        <div class="rating ${sc}">${s}/10<small>${sl}</small></div>
       </div>
     </div>`;
   }).join("");
@@ -702,19 +1072,17 @@ function renderAstro(loc){
   const monthAgo=new Date(now);monthAgo.setDate(monthAgo.getDate()-31);
   const future=new Date(now);future.setDate(future.getDate()+120);
 
-  /* Ay şeridi: bugünkü evre + sıradaki evreler */
   const age=moonAge(new Date());
   const nextFull=phaseDates(now,future,0.5)[0],nextNew=phaseDates(now,future,0)[0];
   const illum=Math.round((1-Math.cos(2*Math.PI*age/SYNODIC))/2*100);
   document.getElementById('moonStrip').innerHTML=`
-    <div class="moon-chip"><div class="e">${moonEmoji(age)}</div><div class="n">Bugün: ${moonName(age)} · %${illum} aydınlık</div></div>
+    <div class="moon-chip"><div class="e">${moonEmoji(age)}</div><div class="n">Bugün: ${moonName(age)} · %${illum}</div></div>
     <div class="moon-chip"><div class="e">🌕</div><div class="n">Sonraki dolunay: ${fmtShort(nextFull)}</div></div>
     <div class="moon-chip"><div class="e">🌑</div><div class="n">Sonraki yeni ay: ${fmtShort(nextNew)}</div></div>`;
 
   let list,mode=currentTab;
   if(mode==='today'){
     list=collectEvents(loc,t0,t1);
-    /* bugün aktif olan meteor yağmuru dönemlerini de göster */
     const y=now.getFullYear();
     for(const s of SHOWERS){
       let a=new Date(y,s[3][0],s[3][1]),b=new Date(y,s[4][0],s[4][1]);
@@ -722,8 +1090,9 @@ function renderAstro(loc){
       const peak=new Date(y,s[1],s[2]);
       if(now>=a&&now<=b&&dayDiff(now,peak)!==0){
         const dd=dayDiff(now,peak);
-        list.push({date:now,icon:"☄️",title:`${s[0]} şu an AKTİF`,
-          desc:`${s[7]} Tepe gecesi: ${fmtShort(peak)}${dd>0?` (${dd} gün sonra)`:dd<0?` (${-dd} gün önce geçti, hâlâ meteor düşüyor)`:""}.`,
+        const ill=moonIllumAt(now);
+        list.push({date:now,title:`${s[0]} şu an aktif`,type:"shower",zhr:s[5],
+          desc:`${s[7]} Tepe gecesi: ${fmtDate(peak)}${dd>0?` (${dd} gün sonra)`:` (${-dd} gün önce geçti, hâlâ meteor düşüyor)`}. Bu gece Ay aydınlanması: %${ill}.`,
           vis:s[6]==="N"&&loc.lat<-15?"no":"yes",
           vtext:s[6]==="N"&&loc.lat<-15?"Kuzey yarımküre ağırlıklı":"Bu gece bölgenden meteor görme şansın var"});
       }
@@ -745,10 +1114,13 @@ document.querySelectorAll('.tabs button').forEach(b=>{
 /* ═══════════════ ANA AKIŞ ═══════════════ */
 function setLocation(loc){
   LOC=loc;
-  const badge=document.getElementById('locBadge');
-  badge.style.display='block';
-  badge.innerHTML=`Seçili bölge: <b>${loc.name}</b>${loc.country&&!loc.name.includes(loc.country)?" — "+loc.country:""} <span style="color:var(--muted)">(${loc.lat.toFixed(2)}°, ${loc.lon.toFixed(2)}°)</span>`;
-  document.getElementById('content').style.display='grid';
+  markChip(loc.city);
+  document.getElementById('locBadge').textContent=`${loc.name}${loc.country&&!loc.name.includes(loc.country)?" — "+loc.country:""}`;
+  document.getElementById('wLoc').textContent=(loc.city||loc.name).toUpperCase();
+  document.getElementById('eLoc').textContent=(loc.city||loc.name).toUpperCase()+" · ±120 GÜN";
+  document.getElementById('content').style.display='block';
+  document.getElementById('condBox').className='loading pulse';
+  document.getElementById('condBox').textContent='Hesaplanıyor…';
   loadWeather(loc);
   renderAstro(loc);
   document.getElementById('content').scrollIntoView({behavior:'smooth',block:'start'});
