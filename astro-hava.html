@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GökRehber — Bölgesel Astronomi & Hava Durumu</title>
+<style>
+:root{
+  --bg:#070b1a; --bg2:#0d1330; --card:#121a3d; --card2:#182253;
+  --ink:#e8ecff; --muted:#9aa5d1; --accent:#7c9cff; --accent2:#ffd166;
+  --ok:#4ade80; --warn:#fbbf24; --danger:#f87171;
+  --line:rgba(124,156,255,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(ellipse at 20% -10%, #1a2456 0%, var(--bg) 55%);
+  color:var(--ink); min-height:100vh; overflow-x:hidden;
+}
+#stars{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 80px}
+header{text-align:center;padding:28px 0 10px}
+header h1{
+  font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;letter-spacing:.5px;
+  background:linear-gradient(90deg,#8fb0ff,#e3c8ff,#ffd166);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+header p{color:var(--muted);margin-top:6px;font-size:.95rem}
+
+/* ── Konum paneli ── */
+.panel{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line);border-radius:18px;
+  padding:18px;margin:22px 0;box-shadow:0 10px 40px rgba(0,0,0,.35);
+}
+.panel h2{font-size:1.05rem;margin-bottom:12px;color:#c9d4ff;display:flex;align-items:center;gap:8px}
+.panel-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px}
+@media(max-width:820px){.panel-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.panel-grid{grid-template-columns:1fr}}
+select,input[type=text]{
+  width:100%;padding:11px 12px;border-radius:10px;font-size:.95rem;
+  background:#0b1230;color:var(--ink);border:1px solid var(--line);outline:none;
+}
+select:focus,input:focus{border-color:var(--accent)}
+button.go{
+  padding:11px 22px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:.95rem;
+  background:linear-gradient(90deg,#5b7cfa,#7c9cff);color:#fff;transition:.2s;white-space:nowrap;
+}
+button.go:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.search-row{display:flex;gap:10px;margin-top:10px}
+.search-row input{flex:1}
+.search-results{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.search-results button{
+  text-align:left;padding:9px 12px;border-radius:9px;border:1px solid var(--line);
+  background:#0b1230;color:var(--ink);cursor:pointer;font-size:.9rem;
+}
+.search-results button:hover{border-color:var(--accent);background:#101941}
+.hint{color:var(--muted);font-size:.8rem;margin-top:8px}
+.loc-badge{
+  display:none;margin-top:14px;padding:10px 14px;border-radius:10px;font-size:.95rem;
+  background:rgba(124,156,255,.12);border:1px solid var(--line);
+}
+.loc-badge b{color:var(--accent2)}
+
+/* ── Kartlar ── */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:880px){.cards{grid-template-columns:1fr}}
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line);border-radius:18px;padding:20px;
+  box-shadow:0 10px 40px rgba(0,0,0,.35);
+}
+.card h2{font-size:1.1rem;color:#c9d4ff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.full{grid-column:1/-1}
+
+/* Hava durumu */
+.now{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.now .big-icon{font-size:4rem;line-height:1}
+.now .temp{font-size:3rem;font-weight:800}
+.now .desc{color:var(--muted);font-size:1.05rem;margin-top:2px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:16px}
+.metric{
+  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
+  padding:10px 12px;
+}
+.metric .lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.metric .val{font-size:1.15rem;font-weight:700;margin-top:3px}
+.metric .sub{font-size:.75rem;margin-top:2px}
+.uv-low{color:var(--ok)} .uv-mid{color:var(--warn)} .uv-high{color:#fb923c} .uv-xhigh{color:var(--danger)} .uv-ext{color:#c084fc}
+.forecast{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:16px}
+.fday{
+  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
+  padding:10px 6px;text-align:center;font-size:.82rem;
+}
+.fday .d{color:var(--muted);font-weight:600}
+.fday .i{font-size:1.7rem;margin:6px 0}
+.fday .t{font-weight:700}
+.fday .t span{color:var(--muted);font-weight:400}
+.fday .u{font-size:.72rem;margin-top:4px;color:var(--muted)}
+
+/* Astronomi */
+.evt{
+  display:flex;gap:14px;align-items:flex-start;
+  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;margin-bottom:10px;
+}
+.evt .ico{font-size:1.9rem;line-height:1.2}
+.evt .tit{font-weight:700;font-size:.98rem}
+.evt .dt{color:var(--accent2);font-size:.8rem;font-weight:600;margin-top:2px}
+.evt .dsc{color:var(--muted);font-size:.85rem;margin-top:4px;line-height:1.45}
+.evt .visib{display:inline-block;margin-top:6px;font-size:.72rem;padding:3px 9px;border-radius:99px}
+.v-yes{background:rgba(74,222,128,.15);color:var(--ok);border:1px solid rgba(74,222,128,.3)}
+.v-part{background:rgba(251,191,36,.15);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
+.v-no{background:rgba(248,113,113,.12);color:var(--danger);border:1px solid rgba(248,113,113,.3)}
+.empty{color:var(--muted);font-size:.9rem;padding:14px;text-align:center;background:rgba(10,16,44,.4);border-radius:12px;border:1px dashed var(--line)}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button{
+  padding:8px 16px;border-radius:99px;border:1px solid var(--line);cursor:pointer;
+  background:transparent;color:var(--muted);font-size:.85rem;font-weight:600;transition:.2s;
+}
+.tabs button.on{background:linear-gradient(90deg,#5b7cfa,#7c9cff);color:#fff;border-color:transparent}
+.moon-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.moon-chip{
+  background:rgba(10,16,44,.6);border:1px solid var(--line);border-radius:12px;
+  padding:8px 14px;text-align:center;font-size:.8rem;
+}
+.moon-chip .e{font-size:1.5rem}
+.moon-chip .n{color:var(--muted);margin-top:2px}
+.loading{text-align:center;color:var(--muted);padding:30px;font-size:.95rem}
+.err{color:var(--danger);text-align:center;padding:20px;font-size:.9rem}
+footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:40px;line-height:1.6}
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+#results{display:none}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<div class="wrap">
+  <header>
+    <h1>🔭 GökRehber</h1>
+    <p>Bölgene göre astronomik olaylar &amp; günlük hava durumu</p>
+  </header>
+
+  <!-- ── KONUM PANELİ ── -->
+  <section class="panel">
+    <h2>📍 Bölgeni Seç</h2>
+    <div class="panel-grid">
+      <select id="selCountry"></select>
+      <select id="selProvince"><option value="">— İl / Bölge seç —</option></select>
+      <select id="selQuick">
+        <option value="">⚡ Hızlı seçim (Doğu Anadolu)</option>
+      </select>
+      <button class="go" id="btnGo">Göster</button>
+    </div>
+    <div class="search-row">
+      <input type="text" id="txtSearch" placeholder="🔍 Listede yoksa şehir/ilçe ara… (ör. Doğubayazıt, Ahlat, Palu)">
+      <button class="go" id="btnSearch">Ara</button>
+    </div>
+    <div class="search-results" id="results"></div>
+    <p class="hint">Tüm ülkeler kayıtlıdır; Türkiye için 81 ilin tamamı listede. Arama kutusu dünyadaki her yerleşimi bulur.</p>
+    <div class="loc-badge" id="locBadge"></div>
+  </section>
+
+  <div class="cards" id="content" style="display:none">
+    <!-- ── HAVA DURUMU ── -->
+    <section class="card full">
+      <h2>⛅ Hava Durumu</h2>
+      <div id="weatherBox" class="loading pulse">Yükleniyor…</div>
+    </section>
+
+    <!-- ── ASTRONOMİ ── -->
+    <section class="card full">
+      <h2>🌌 Bölgendeki Astronomik Olaylar</h2>
+      <div class="moon-strip" id="moonStrip"></div>
+      <div class="tabs">
+        <button class="on" data-tab="today">☀️ Bugün</button>
+        <button data-tab="future">🔮 Yaklaşan Olaylar</button>
+        <button data-tab="past">📜 Son 1 Ay</button>
+      </div>
+      <div id="astroBox"></div>
+    </section>
+  </div>
+
+  <footer>
+    Hava verileri <b>Open-Meteo</b> açık API'sinden canlı çekilir · Astronomik takvim yerleşiktir ve ay evreleri anlık hesaplanır.<br>
+    Tutulma görünürlükleri bölgesel yaklaşık değerlendirmedir; kesin saatler için yerel gözlemevi kaynaklarına bakınız.
+  </footer>
+</div>
+
+<script>
+/* ═══════════════ YILDIZLI ARKA PLAN ═══════════════ */
+(function(){
+  const c=document.getElementById('stars'),x=c.getContext('2d');
+  let W,H,stars=[];
+  function init(){W=c.width=innerWidth;H=c.height=innerHeight;stars=[];
+    for(let i=0;i<Math.min(220,W*H/6000);i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.2,p:Math.random()*Math.PI*2,s:.01+Math.random()*.03});}
+  function draw(){x.clearRect(0,0,W,H);
+    for(const s of stars){s.p+=s.s;const a=.25+.75*(Math.sin(s.p)+1)/2;
+      x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fillStyle=`rgba(210,225,255,${a})`;x.fill();}
+    requestAnimationFrame(draw);}
+  addEventListener('resize',init);init();draw();
+})();
+
+/* ═══════════════ KONUM VERİTABANI ═══════════════ */
+/* Türkiye — 81 ilin tamamı [ad, enlem, boylam, bölge] */
+const TR_ILLER=[
+["Adana",37.00,35.32,"Akdeniz"],["Adıyaman",37.76,38.28,"Güneydoğu Anadolu"],["Afyonkarahisar",38.76,30.54,"Ege"],
+["Ağrı",39.72,43.05,"Doğu Anadolu"],["Aksaray",38.37,34.03,"İç Anadolu"],["Amasya",40.65,35.83,"Karadeniz"],
+["Ankara",39.93,32.86,"İç Anadolu"],["Antalya",36.90,30.70,"Akdeniz"],["Ardahan",41.11,42.70,"Doğu Anadolu"],
+["Artvin",41.18,41.82,"Karadeniz"],["Aydın",37.85,27.85,"Ege"],["Balıkesir",39.65,27.89,"Marmara"],
+["Bartın",41.63,32.34,"Karadeniz"],["Batman",37.88,41.13,"Güneydoğu Anadolu"],["Bayburt",40.26,40.23,"Karadeniz"],
+["Bilecik",40.15,29.98,"Marmara"],["Bingöl",38.88,40.50,"Doğu Anadolu"],["Bitlis",38.40,42.11,"Doğu Anadolu"],
+["Bolu",40.74,31.61,"Karadeniz"],["Burdur",37.72,30.29,"Akdeniz"],["Bursa",40.19,29.06,"Marmara"],
+["Çanakkale",40.15,26.41,"Marmara"],["Çankırı",40.60,33.62,"İç Anadolu"],["Çorum",40.55,34.95,"Karadeniz"],
+["Denizli",37.78,29.09,"Ege"],["Diyarbakır",37.91,40.24,"Güneydoğu Anadolu"],["Düzce",40.84,31.16,"Karadeniz"],
+["Edirne",41.68,26.56,"Marmara"],["Elazığ",38.68,39.22,"Doğu Anadolu"],["Erzincan",39.75,39.49,"Doğu Anadolu"],
+["Erzurum",39.90,41.27,"Doğu Anadolu"],["Eskişehir",39.78,30.52,"İç Anadolu"],["Gaziantep",37.07,37.38,"Güneydoğu Anadolu"],
+["Giresun",40.91,38.39,"Karadeniz"],["Gümüşhane",40.46,39.48,"Karadeniz"],["Hakkari",37.57,43.74,"Doğu Anadolu"],
+["Hatay",36.20,36.16,"Akdeniz"],["Iğdır",39.92,44.04,"Doğu Anadolu"],["Isparta",37.76,30.55,"Akdeniz"],
+["İstanbul",41.01,28.98,"Marmara"],["İzmir",38.42,27.14,"Ege"],["Kahramanmaraş",37.58,36.93,"Akdeniz"],
+["Karabük",41.20,32.62,"Karadeniz"],["Karaman",37.18,33.22,"İç Anadolu"],["Kars",40.60,43.10,"Doğu Anadolu"],
+["Kastamonu",41.38,33.78,"Karadeniz"],["Kayseri",38.73,35.49,"İç Anadolu"],["Kırıkkale",39.85,33.51,"İç Anadolu"],
+["Kırklareli",41.73,27.22,"Marmara"],["Kırşehir",39.15,34.16,"İç Anadolu"],["Kilis",36.72,37.12,"Güneydoğu Anadolu"],
+["Kocaeli",40.85,29.88,"Marmara"],["Konya",37.87,32.48,"İç Anadolu"],["Kütahya",39.42,29.98,"Ege"],
+["Malatya",38.35,38.31,"Doğu Anadolu"],["Manisa",38.61,27.43,"Ege"],["Mardin",37.31,40.74,"Güneydoğu Anadolu"],
+["Mersin",36.80,34.63,"Akdeniz"],["Muğla",37.22,28.36,"Ege"],["Muş",38.73,41.49,"Doğu Anadolu"],
+["Nevşehir",38.62,34.71,"İç Anadolu"],["Niğde",37.97,34.68,"İç Anadolu"],["Ordu",40.98,37.88,"Karadeniz"],
+["Osmaniye",37.07,36.25,"Akdeniz"],["Rize",41.02,40.52,"Karadeniz"],["Sakarya",40.77,30.40,"Marmara"],
+["Samsun",41.29,36.33,"Karadeniz"],["Siirt",37.93,41.94,"Güneydoğu Anadolu"],["Sinop",42.03,35.15,"Karadeniz"],
+["Sivas",39.75,37.02,"İç Anadolu"],["Şanlıurfa",37.16,38.79,"Güneydoğu Anadolu"],["Şırnak",37.52,42.46,"Güneydoğu Anadolu"],
+["Tekirdağ",40.98,27.51,"Marmara"],["Tokat",40.31,36.55,"Karadeniz"],["Trabzon",41.00,39.72,"Karadeniz"],
+["Tunceli",39.11,39.55,"Doğu Anadolu"],["Uşak",38.68,29.41,"Ege"],["Van",38.49,43.38,"Doğu Anadolu"],
+["Yalova",40.65,29.27,"Marmara"],["Yozgat",39.82,34.81,"İç Anadolu"],["Zonguldak",41.45,31.79,"Karadeniz"]
+];
+/* Doğu Anadolu hızlı seçim listesi */
+const DOGU=TR_ILLER.filter(i=>i[3]==="Doğu Anadolu"||i[3]==="Güneydoğu Anadolu");
+
+/* Büyük ülkeler için il/eyalet/şehir listeleri [ad, enlem, boylam] */
+const PROVINCES={
+"US":[["New York",40.71,-74.01],["Los Angeles (Kaliforniya)",34.05,-118.24],["Chicago (Illinois)",41.88,-87.63],["Houston (Teksas)",29.76,-95.37],["Miami (Florida)",25.76,-80.19],["Seattle (Washington)",47.61,-122.33],["Denver (Kolorado)",39.74,-104.99],["Phoenix (Arizona)",33.45,-112.07]],
+"DE":[["Berlin",52.52,13.40],["Münih (Bavyera)",48.14,11.58],["Hamburg",53.55,9.99],["Frankfurt (Hessen)",50.11,8.68],["Köln (K. Ren-Vestfalya)",50.94,6.96],["Stuttgart",48.78,9.18]],
+"FR":[["Paris",48.86,2.35],["Marsilya",43.30,5.37],["Lyon",45.76,4.84],["Toulouse",43.60,1.44],["Nice",43.70,7.27],["Strazburg",48.57,7.75]],
+"GB":[["Londra",51.51,-0.13],["Manchester",53.48,-2.24],["Birmingham",52.48,-1.90],["Edinburgh (İskoçya)",55.95,-3.19],["Cardiff (Galler)",51.48,-3.18],["Belfast (K. İrlanda)",54.60,-5.93]],
+"IT":[["Roma",41.90,12.50],["Milano",45.46,9.19],["Napoli",40.85,14.27],["Torino",45.07,7.69],["Venedik",45.44,12.34],["Palermo (Sicilya)",38.12,13.36]],
+"ES":[["Madrid",40.42,-3.70],["Barselona",41.39,2.17],["Valensiya",39.47,-0.38],["Sevilla",37.39,-5.99],["Bilbao",43.26,-2.93],["Zaragoza",41.65,-0.89]],
+"RU":[["Moskova",55.76,37.62],["St. Petersburg",59.93,30.34],["Novosibirsk",55.03,82.92],["Yekaterinburg",56.84,60.60],["Kazan",55.80,49.11],["Vladivostok",43.12,131.89]],
+"CN":[["Pekin",39.90,116.41],["Şanghay",31.23,121.47],["Guangzhou",23.13,113.26],["Chengdu",30.57,104.07],["Xi'an",34.34,108.94],["Urumçi",43.83,87.62]],
+"JP":[["Tokyo",35.68,139.69],["Osaka",34.69,135.50],["Kyoto",35.01,135.77],["Sapporo",43.06,141.35],["Fukuoka",33.59,130.40]],
+"IN":[["Yeni Delhi",28.61,77.21],["Mumbai",19.08,72.88],["Bangalore",12.97,77.59],["Kalküta",22.57,88.36],["Chennai",13.08,80.27]],
+"IR":[["Tahran",35.69,51.39],["Meşhed",36.30,59.60],["İsfahan",32.65,51.67],["Tebriz",38.08,46.29],["Şiraz",29.59,52.58],["Urmiye",37.55,45.08]],
+"AZ":[["Bakü",40.41,49.87],["Gence",40.68,46.36],["Nahçıvan",39.21,45.41],["Sumgayıt",40.59,49.67]],
+"GR":[["Atina",37.98,23.73],["Selanik",40.64,22.94],["Patras",38.25,21.73],["Girit (Kandiye)",35.34,25.13]],
+"EG":[["Kahire",30.04,31.24],["İskenderiye",31.20,29.92],["Luksor",25.69,32.64],["Asvan",24.09,32.90]],
+"BR":[["Brasília",-15.79,-47.88],["São Paulo",-23.55,-46.63],["Rio de Janeiro",-22.91,-43.17],["Salvador",-12.97,-38.50],["Manaus",-3.12,-60.02]],
+"AU":[["Canberra",-35.28,149.13],["Sidney",-33.87,151.21],["Melbourne",-37.81,144.96],["Perth",-31.95,115.86],["Brisbane",-27.47,153.03]],
+"CA":[["Ottawa",45.42,-75.70],["Toronto",43.65,-79.38],["Vancouver",49.28,-123.12],["Montreal",45.50,-73.57],["Calgary",51.05,-114.07]],
+"SA":[["Riyad",24.71,46.68],["Cidde",21.49,39.19],["Mekke",21.39,39.86],["Medine",24.52,39.57]],
+"IQ":[["Bağdat",33.32,44.36],["Basra",30.51,47.78],["Musul",36.34,43.13],["Erbil",36.19,44.01]],
+"SY":[["Şam",33.51,36.28],["Halep",36.20,37.13],["Lazkiye",35.52,35.79],["Humus",34.73,36.71]],
+"GE":[["Tiflis",41.72,44.79],["Batum",41.64,41.63],["Kutaisi",42.27,42.70]],
+"AM":[["Erivan",40.18,44.51],["Gümrü",40.79,43.85]],
+"BG":[["Sofya",42.70,23.32],["Filibe",42.14,24.75],["Varna",43.21,27.92]],
+"NL":[["Amsterdam",52.37,4.90],["Rotterdam",51.92,4.48],["Lahey",52.08,4.31]],
+"UA":[["Kiev",50.45,30.52],["Harkiv",49.99,36.23],["Odessa",46.48,30.73],["Lviv",49.84,24.03]],
+"MX":[["Mexico City",19.43,-99.13],["Guadalajara",20.66,-103.35],["Monterrey",25.69,-100.32],["Cancún",21.16,-86.85]],
+"ID":[["Cakarta",-6.21,106.85],["Surabaya",-7.26,112.75],["Bali (Denpasar)",-8.65,115.22]],
+"PK":[["İslamabad",33.69,73.06],["Karaçi",24.86,67.01],["Lahor",31.55,74.34]],
+"AR":[["Buenos Aires",-34.60,-58.38],["Córdoba",-31.42,-64.18],["Mendoza",-32.89,-68.83]],
+"ZA":[["Pretoria",-25.75,28.19],["Cape Town",-33.92,18.42],["Johannesburg",-26.20,28.05],["Durban",-29.86,31.03]]
+};
+
+/* Tüm ülkeler [Türkçe ad, ISO kodu, başkent enlem, boylam] */
+const COUNTRIES=[
+["Türkiye","TR",39.93,32.86],["Afganistan","AF",34.53,69.17],["Almanya","DE",52.52,13.40],["Amerika Birleşik Devletleri","US",38.90,-77.04],
+["Andorra","AD",42.51,1.52],["Angola","AO",-8.84,13.23],["Antigua ve Barbuda","AG",17.12,-61.85],["Arjantin","AR",-34.60,-58.38],
+["Arnavutluk","AL",41.33,19.82],["Avustralya","AU",-35.28,149.13],["Avusturya","AT",48.21,16.37],["Azerbaycan","AZ",40.41,49.87],
+["Bahamalar","BS",25.05,-77.35],["Bahreyn","BH",26.23,50.59],["Bangladeş","BD",23.81,90.41],["Barbados","BB",13.10,-59.62],
+["Belarus","BY",53.90,27.57],["Belçika","BE",50.85,4.35],["Belize","BZ",17.25,-88.77],["Benin","BJ",6.50,2.60],
+["Birleşik Arap Emirlikleri","AE",24.45,54.38],["Birleşik Krallık (İngiltere)","GB",51.51,-0.13],["Bolivya","BO",-16.49,-68.12],
+["Bosna-Hersek","BA",43.86,18.41],["Botsvana","BW",-24.63,25.92],["Brezilya","BR",-15.79,-47.88],["Brunei","BN",4.94,114.95],
+["Bulgaristan","BG",42.70,23.32],["Burkina Faso","BF",12.37,-1.53],["Burundi","BI",-3.36,29.36],["Butan","BT",27.47,89.64],
+["Cezayir","DZ",36.75,3.06],["Cibuti","DJ",11.59,43.15],["Çad","TD",12.13,15.06],["Çekya","CZ",50.08,14.44],
+["Çin","CN",39.90,116.41],["Danimarka","DK",55.68,12.57],["Doğu Timor","TL",-8.56,125.57],["Dominik Cumhuriyeti","DO",18.49,-69.93],
+["Dominika","DM",15.30,-61.39],["Ekvador","EC",-0.18,-78.47],["Ekvator Ginesi","GQ",3.75,8.78],["El Salvador","SV",13.69,-89.22],
+["Endonezya","ID",-6.21,106.85],["Eritre","ER",15.34,38.93],["Ermenistan","AM",40.18,44.51],["Estonya","EE",59.44,24.75],
+["Esvatini","SZ",-26.32,31.13],["Etiyopya","ET",9.03,38.74],["Fas","MA",34.02,-6.84],["Fiji","FJ",-18.14,178.44],
+["Fildişi Sahili","CI",6.85,-5.30],["Filipinler","PH",14.60,120.98],["Filistin","PS",31.90,35.20],["Finlandiya","FI",60.17,24.94],
+["Fransa","FR",48.86,2.35],["Gabon","GA",0.39,9.45],["Gambiya","GM",13.45,-16.58],["Gana","GH",5.60,-0.19],
+["Gine","GN",9.64,-13.58],["Gine-Bissau","GW",11.86,-15.60],["Grenada","GD",12.06,-61.75],["Guatemala","GT",14.63,-90.51],
+["Guyana","GY",6.80,-58.16],["Güney Afrika","ZA",-25.75,28.19],["Güney Kore","KR",37.57,126.98],["Güney Sudan","SS",4.86,31.58],
+["Gürcistan","GE",41.72,44.79],["Haiti","HT",18.54,-72.34],["Hindistan","IN",28.61,77.21],["Hırvatistan","HR",45.81,15.98],
+["Hollanda","NL",52.37,4.90],["Honduras","HN",14.07,-87.19],["Irak","IQ",33.32,44.36],["İran","IR",35.69,51.39],
+["İrlanda","IE",53.35,-6.26],["İspanya","ES",40.42,-3.70],["İsrail","IL",31.77,35.21],["İsveç","SE",59.33,18.06],
+["İsviçre","CH",46.95,7.44],["İtalya","IT",41.90,12.50],["İzlanda","IS",64.15,-21.94],["Jamaika","JM",18.00,-76.79],
+["Japonya","JP",35.68,139.69],["Kamboçya","KH",11.56,104.92],["Kamerun","CM",3.87,11.52],["Kanada","CA",45.42,-75.70],
+["Karadağ","ME",42.44,19.26],["Katar","QA",25.29,51.53],["Kazakistan","KZ",51.17,71.45],["Kenya","KE",-1.29,36.82],
+["Kırgızistan","KG",42.87,74.59],["Kiribati","KI",1.33,172.98],["Kolombiya","CO",4.71,-74.07],["Komorlar","KM",-11.70,43.26],
+["Kongo Cumhuriyeti","CG",-4.26,15.28],["Kongo Dem. Cum.","CD",-4.44,15.27],["Kosova","XK",42.66,21.17],["Kosta Rika","CR",9.93,-84.08],
+["Kuveyt","KW",29.38,47.99],["Kuzey Kore","KP",39.04,125.76],["Kuzey Makedonya","MK",42.00,21.43],["KKTC (Kuzey Kıbrıs)","CY-N",35.19,33.36],
+["Küba","CU",23.11,-82.37],["Laos","LA",17.98,102.63],["Lesotho","LS",-29.32,27.48],["Letonya","LV",56.95,24.11],
+["Liberya","LR",6.30,-10.80],["Libya","LY",32.89,13.19],["Lihtenştayn","LI",47.14,9.52],["Litvanya","LT",54.69,25.28],
+["Lübnan","LB",33.89,35.50],["Lüksemburg","LU",49.61,6.13],["Macaristan","HU",47.50,19.04],["Madagaskar","MG",-18.88,47.51],
+["Malavi","MW",-13.97,33.79],["Maldivler","MV",4.18,73.51],["Malezya","MY",3.14,101.69],["Mali","ML",12.64,-8.00],
+["Malta","MT",35.90,14.51],["Marshall Adaları","MH",7.09,171.38],["Meksika","MX",19.43,-99.13],["Mısır","EG",30.04,31.24],
+["Mikronezya","FM",6.92,158.16],["Moğolistan","MN",47.89,106.91],["Moldova","MD",47.01,28.86],["Monako","MC",43.73,7.42],
+["Moritanya","MR",18.08,-15.98],["Mauritius","MU",-20.16,57.50],["Mozambik","MZ",-25.97,32.57],["Myanmar","MM",19.75,96.10],
+["Namibya","NA",-22.56,17.08],["Nauru","NR",-0.55,166.92],["Nepal","NP",27.72,85.32],["Nijer","NE",13.51,2.11],
+["Nijerya","NG",9.06,7.50],["Nikaragua","NI",12.11,-86.24],["Norveç","NO",59.91,10.75],["Orta Afrika Cum.","CF",4.39,18.56],
+["Özbekistan","UZ",41.30,69.24],["Pakistan","PK",33.69,73.06],["Palau","PW",7.50,134.62],["Panama","PA",8.98,-79.52],
+["Papua Yeni Gine","PG",-9.44,147.18],["Paraguay","PY",-25.26,-57.58],["Peru","PE",-12.05,-77.04],["Polonya","PL",52.23,21.01],
+["Portekiz","PT",38.72,-9.14],["Romanya","RO",44.43,26.11],["Ruanda","RW",-1.94,30.06],["Rusya","RU",55.76,37.62],
+["Samoa","WS",-13.83,-171.77],["San Marino","SM",43.94,12.45],["Senegal","SN",14.72,-17.47],["Seyşeller","SC",-4.62,55.45],
+["Sırbistan","RS",44.79,20.45],["Sierra Leone","SL",8.47,-13.23],["Singapur","SG",1.35,103.82],["Slovakya","SK",48.15,17.11],
+["Slovenya","SI",46.05,14.51],["Solomon Adaları","SB",-9.43,159.95],["Somali","SO",2.05,45.32],["Sri Lanka","LK",6.93,79.85],
+["Sudan","SD",15.50,32.56],["Surinam","SR",5.85,-55.20],["Suriye","SY",33.51,36.28],["Suudi Arabistan","SA",24.71,46.68],
+["Şili","CL",-33.45,-70.67],["Tacikistan","TJ",38.56,68.79],["Tanzanya","TZ",-6.79,39.21],["Tayland","TH",13.76,100.50],
+["Tayvan","TW",25.03,121.57],["Togo","TG",6.13,1.22],["Tonga","TO",-21.14,-175.20],["Trinidad ve Tobago","TT",10.65,-61.51],
+["Tunus","TN",36.81,10.18],["Tuvalu","TV",-8.52,179.20],["Türkmenistan","TM",37.96,58.33],["Uganda","UG",0.35,32.58],
+["Ukrayna","UA",50.45,30.52],["Umman","OM",23.59,58.41],["Uruguay","UY",-34.90,-56.19],["Ürdün","JO",31.96,35.95],
+["Vanuatu","VU",-17.73,168.32],["Venezuela","VE",10.48,-66.90],["Vietnam","VN",21.03,105.85],["Yemen","YE",15.35,44.21],
+["Yeni Zelanda","NZ",-41.29,174.78],["Yunanistan","GR",37.98,23.73],["Zambiya","ZM",-15.39,28.32],["Zimbabve","ZW",-17.83,31.05],
+["Kıbrıs (Güney)","CY",35.17,33.36]
+];
+
+/* ═══════════════ PANEL KURULUMU ═══════════════ */
+const selCountry=document.getElementById('selCountry');
+const selProvince=document.getElementById('selProvince');
+const selQuick=document.getElementById('selQuick');
+let LOC=null; // {name, country, lat, lon}
+
+COUNTRIES.forEach((c,i)=>{
+  const o=document.createElement('option');o.value=i;o.textContent=c[0];
+  if(c[1]==="TR")o.selected=true;
+  selCountry.appendChild(o);
+});
+DOGU.forEach(il=>{
+  const o=document.createElement('option');o.value=il[0];o.textContent=`${il[0]} (${il[3]})`;
+  selQuick.appendChild(o);
+});
+
+function fillProvinces(){
+  const c=COUNTRIES[selCountry.value];
+  selProvince.innerHTML="";
+  if(c[1]==="TR"){
+    selProvince.insertAdjacentHTML('beforeend','<option value="">— İl seç (81 il) —</option>');
+    TR_ILLER.forEach((il,i)=>selProvince.insertAdjacentHTML('beforeend',`<option value="tr:${i}">${il[0]} — ${il[3]}</option>`));
+  }else if(PROVINCES[c[1]]){
+    selProvince.insertAdjacentHTML('beforeend','<option value="">— Bölge/şehir seç —</option>');
+    PROVINCES[c[1]].forEach((p,i)=>selProvince.insertAdjacentHTML('beforeend',`<option value="p:${i}">${p[0]}</option>`));
+  }else{
+    selProvince.insertAdjacentHTML('beforeend','<option value="">Başkent kullanılacak (veya aşağıdan şehir ara)</option>');
+  }
+}
+selCountry.addEventListener('change',()=>{fillProvinces();selQuick.value="";});
+fillProvinces();
+
+selQuick.addEventListener('change',()=>{
+  if(!selQuick.value)return;
+  const il=TR_ILLER.find(x=>x[0]===selQuick.value);
+  selCountry.value=COUNTRIES.findIndex(c=>c[1]==="TR");fillProvinces();
+  selProvince.value="tr:"+TR_ILLER.indexOf(il);
+  setLocation({name:il[0]+" ("+il[3]+")",country:"Türkiye",lat:il[1],lon:il[2]});
+});
+
+document.getElementById('btnGo').addEventListener('click',()=>{
+  const c=COUNTRIES[selCountry.value];
+  const pv=selProvince.value;
+  if(pv.startsWith("tr:")){const il=TR_ILLER[+pv.slice(3)];setLocation({name:il[0]+" ("+il[3]+")",country:"Türkiye",lat:il[1],lon:il[2]});}
+  else if(pv.startsWith("p:")){const p=PROVINCES[c[1]][+pv.slice(2)];setLocation({name:p[0],country:c[0],lat:p[1],lon:p[2]});}
+  else setLocation({name:c[0]+" (başkent bölgesi)",country:c[0],lat:c[2],lon:c[3]});
+});
+
+/* Serbest arama — Open-Meteo geocoding (dünyadaki her yerleşim) */
+async function doSearch(){
+  const q=document.getElementById('txtSearch').value.trim();
+  const box=document.getElementById('results');
+  if(q.length<2)return;
+  box.style.display='flex';box.innerHTML='<div class="loading pulse">Aranıyor…</div>';
+  try{
+    const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=tr&format=json`);
+    const j=await r.json();
+    if(!j.results||!j.results.length){box.innerHTML='<div class="empty">Sonuç bulunamadı.</div>';return;}
+    box.innerHTML="";
+    j.results.forEach(res=>{
+      const b=document.createElement('button');
+      b.textContent=`📍 ${res.name}${res.admin1?", "+res.admin1:""} — ${res.country||""}`;
+      b.onclick=()=>{box.style.display='none';setLocation({name:res.name+(res.admin1?" ("+res.admin1+")":""),country:res.country||"",lat:res.latitude,lon:res.longitude});};
+      box.appendChild(b);
+    });
+  }catch(e){box.innerHTML='<div class="err">Arama başarısız — internet bağlantısını kontrol et.</div>';}
+}
+document.getElementById('btnSearch').addEventListener('click',doSearch);
+document.getElementById('txtSearch').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+/* ═══════════════ HAVA DURUMU ═══════════════ */
+const WMO={
+0:["Açık / Güneşli","☀️"],1:["Çoğunlukla açık","🌤️"],2:["Parçalı bulutlu","⛅"],3:["Kapalı / Bulutlu","☁️"],
+45:["Sisli","🌫️"],48:["Kırağılı sis","🌫️"],
+51:["Hafif çisenti","🌦️"],53:["Çisenti","🌦️"],55:["Yoğun çisenti","🌧️"],
+56:["Dondurucu çisenti","🌧️❄️"],57:["Yoğun dondurucu çisenti","🌧️❄️"],
+61:["Hafif yağmurlu","🌦️"],63:["Yağmurlu","🌧️"],65:["Şiddetli yağmurlu","🌧️"],
+66:["Dondurucu yağmur","🌧️❄️"],67:["Şiddetli dondurucu yağmur","🌧️❄️"],
+71:["Hafif kar yağışlı","🌨️"],73:["Kar yağışlı","🌨️"],75:["Yoğun kar yağışlı","❄️"],77:["Kar taneleri","❄️"],
+80:["Hafif sağanak","🌦️"],81:["Sağanak yağış","🌧️"],82:["Şiddetli sağanak","⛈️"],
+85:["Hafif kar sağanağı","🌨️"],86:["Yoğun kar sağanağı","❄️"],
+95:["Gök gürültülü fırtına","⛈️"],96:["Fırtına + hafif dolu","⛈️🧊"],99:["Fırtına + şiddetli dolu","⛈️🧊"]
+};
+function wmo(code){return WMO[code]||["Bilinmiyor","❔"];}
+function uvInfo(u){
+  if(u==null)return["—","","Veri yok"];
+  if(u<3)return[u.toFixed(1),"uv-low","Düşük — güvenli"];
+  if(u<6)return[u.toFixed(1),"uv-mid","Orta — şapka önerilir"];
+  if(u<8)return[u.toFixed(1),"uv-high","Yüksek — krem sür"];
+  if(u<11)return[u.toFixed(1),"uv-xhigh","Çok yüksek — gölgede kal"];
+  return[u.toFixed(1),"uv-ext","Aşırı — dışarı çıkma saatlerine dikkat"];
+}
+const GUN=["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
+const AY=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+
+async function loadWeather(loc){
+  const box=document.getElementById('weatherBox');
+  box.className='loading pulse';box.textContent='Hava verileri çekiliyor…';
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
+      +`&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,uv_index`
+      +`&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,relative_humidity_2m_mean,precipitation_probability_max,sunrise,sunset`
+      +`&timezone=auto&forecast_days=7`;
+    let r=await fetch(url);let d=await r.json();
+    if(!d.current){
+      // bazı sunucular günlük nem ortalamasını desteklemeyebilir — onsuz tekrar dene
+      r=await fetch(url.replace(",relative_humidity_2m_mean",""));d=await r.json();
+    }
+    if(!d.current)throw new Error("veri yok");
+    const c=d.current,[desc,icon]=wmo(c.weather_code);
+    const [uvV,uvC,uvT]=uvInfo(c.uv_index);
+    const sr=d.daily.sunrise[0].slice(11,16),ss=d.daily.sunset[0].slice(11,16);
+    let html=`
+    <div class="now">
+      <div class="big-icon">${icon}</div>
+      <div>
+        <div class="temp">${Math.round(c.temperature_2m)}°C</div>
+        <div class="desc">${desc} · Hissedilen ${Math.round(c.apparent_temperature)}°C</div>
+      </div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="lbl">☀️ UV İndeksi</div><div class="val ${uvC}">${uvV}</div><div class="sub ${uvC}">${uvT}</div></div>
+      <div class="metric"><div class="lbl">💧 Nem</div><div class="val">%${c.relative_humidity_2m}</div><div class="sub">bağıl nem</div></div>
+      <div class="metric"><div class="lbl">💨 Rüzgar</div><div class="val">${Math.round(c.wind_speed_10m)} km/s</div><div class="sub">10 m yükseklik</div></div>
+      <div class="metric"><div class="lbl">🌡️ Basınç</div><div class="val">${Math.round(c.surface_pressure)} hPa</div><div class="sub">yüzey</div></div>
+      <div class="metric"><div class="lbl">🌅 Gün doğumu</div><div class="val">${sr}</div><div class="sub">yerel saat</div></div>
+      <div class="metric"><div class="lbl">🌇 Gün batımı</div><div class="val">${ss}</div><div class="sub">gözlem için ideal sonrası</div></div>
+    </div>
+    <div class="forecast">`;
+    for(let i=0;i<d.daily.time.length;i++){
+      const dt=new Date(d.daily.time[i]+"T12:00:00");
+      const [fd,fi]=wmo(d.daily.weather_code[i]);
+      const uv=d.daily.uv_index_max[i],[,fuC]=uvInfo(uv);
+      html+=`<div class="fday" title="${fd}">
+        <div class="d">${i===0?"Bugün":GUN[dt.getDay()]+" "+dt.getDate()}</div>
+        <div class="i">${fi}</div>
+        <div class="t">${Math.round(d.daily.temperature_2m_max[i])}° <span>/ ${Math.round(d.daily.temperature_2m_min[i])}°</span></div>
+        <div class="u">UV <b class="${fuC}">${uv!=null?uv.toFixed(0):"—"}</b> · 💧%${d.daily.relative_humidity_2m_mean?Math.round(d.daily.relative_humidity_2m_mean[i]):"—"}</div>
+        <div class="u">🌧️ %${d.daily.precipitation_probability_max[i]??0}</div>
+      </div>`;
+    }
+    html+=`</div>`;
+    box.className='';box.innerHTML=html;
+  }catch(e){
+    box.className='err';
+    box.textContent='Hava verileri alınamadı. İnternet bağlantısını kontrol edip tekrar dene.';
+  }
+}
+
+/* ═══════════════ ASTRONOMİ MOTORU ═══════════════ */
+/* Ay evreleri — Meeus yaklaşımı: yeni ay JD = 2451550.09766 + 29.530588861·k */
+const SYNODIC=29.530588861;
+function jdToDate(jd){return new Date((jd-2440587.5)*86400000);}
+function phaseDates(fromD,toD,phase){ // phase: 0=yeni ay, .25=ilk dördün, .5=dolunay, .75=son dördün
+  const out=[];
+  const jd0=fromD.getTime()/86400000+2440587.5;
+  let k=Math.floor((jd0-2451550.09766)/SYNODIC)+phase-2;
+  for(let i=0;i<8;i++){
+    const jd=2451550.09766+SYNODIC*(Math.floor(k)+phase);
+    const dt=jdToDate(jd);
+    if(dt>=fromD&&dt<=toD)out.push(dt);
+    k++;
+  }
+  return out;
+}
+function moonAge(d){
+  const jd=d.getTime()/86400000+2440587.5;
+  let a=((jd-2451550.09766)%SYNODIC+SYNODIC)%SYNODIC;
+  return a;
+}
+function moonEmoji(age){
+  const f=age/SYNODIC;
+  if(f<.03||f>.97)return"🌑";if(f<.22)return"🌒";if(f<.28)return"🌓";if(f<.47)return"🌔";
+  if(f<.53)return"🌕";if(f<.72)return"🌖";if(f<.78)return"🌗";return"🌘";
+}
+function moonName(age){
+  const f=age/SYNODIC;
+  if(f<.03||f>.97)return"Yeni Ay";if(f<.22)return"Hilal (büyüyen)";if(f<.28)return"İlk Dördün";if(f<.47)return"Şişkin Ay (büyüyen)";
+  if(f<.53)return"Dolunay";if(f<.72)return"Şişkin Ay (küçülen)";if(f<.78)return"Son Dördün";return"Hilal (küçülen)";
+}
+const DOLUNAY_ADLARI=["Kurt Ayı","Kar Ayı","Solucan Ayı","Pembe Ay","Çiçek Ayı","Çilek Ayı","Geyik Ayı","Mersin Balığı Ayı","Hasat Ayı","Avcı Ayı","Kunduz Ayı","Soğuk Ay"];
+
+/* Meteor yağmurları — yıllık takvim [ad, tepe ay(0-11), tepe gün, aktif başlangıç(ay,gün), aktif bitiş, ZHR, yarımküre(N/S/ALL), açıklama] */
+const SHOWERS=[
+["Kuadrantid Meteor Yağmuru",0,4,[11,28],[0,12],110,"N","Yılın en güçlü yağmurlarından; tepe süresi kısadır (~6 saat). Kuzey yarımküreden izlenir."],
+["Lirid Meteor Yağmuru",3,22,[3,14],[3,30],18,"N","Vega yıldızı yönünden; hızlı ve parlak meteorlar, bazen ateş topları."],
+["Eta Akuarid Meteor Yağmuru",4,6,[3,19],[4,28],50,"ALL","Halley Kuyruklu Yıldızı'nın kalıntıları; güney yarımkürede daha güçlü, kuzeyde şafak öncesi izlenir."],
+["Güney Delta Akuarid Meteor Yağmuru",6,30,[6,12],[7,23],25,"ALL","Tepe gecesi bol meteor; güney ufku açık olan her bölgeden izlenebilir. Gece yarısı sonrası en iyisi."],
+["Perseid Meteor Yağmuru",7,12,[6,17],[7,24],100,"N","Yılın en popüler yağmuru! Swift-Tuttle kuyruklu yıldızı kalıntıları; sıcak ağustos gecesinde saatte 100'e yakın meteor."],
+["Orionid Meteor Yağmuru",9,21,[9,2],[10,7],20,"ALL","Halley kalıntılarının ikinci geçişi; hızlı meteorlar, her iki yarımküreden görülür."],
+["Leonid Meteor Yağmuru",10,17,[10,6],[10,30],15,"ALL","33 yılda bir fırtınaya dönüşür; hızlı ve iz bırakan meteorlar."],
+["Geminid Meteor Yağmuru",11,14,[11,4],[11,20],150,"ALL","Yılın EN güçlü yağmuru; renkli ve yavaş meteorlar, akşam saatlerinden itibaren izlenebilir."],
+["Ursid Meteor Yağmuru",11,22,[11,17],[11,26],10,"N","Yılın son yağmuru; Kutup Yıldızı civarından, yalnızca kuzey yarımküre."],
+["Haziran Bootid Meteor Yağmuru",5,27,[5,22],[6,2],5,"N","Değişken bir yağmur; bazı yıllar sürpriz patlamalar yapar."]
+];
+
+/* 2026 sabit olaylar [tarih, ad, ikon, açıklama, görünürlük fonksiyonu]
+   vis: (lat,lon) => 'yes'|'part'|'no', vtext: bölge açıklaması */
+const EVENTS_2026=[
+{d:"2026-01-10",n:"Jüpiter Karşı Konumda (Opozisyon)",i:"🪐",
+ t:"Jüpiter, Dünya'ya yıl içindeki en yakın konumunda; tüm gece parlak biçimde gözlemlenebilir.",
+ vis:()=> "yes",vt:"Tüm dünyadan görülebilir"},
+{d:"2026-02-17",n:"Halkalı Güneş Tutulması",i:"💍",
+ t:"Ay, Güneş'in merkezini örterek 'ateş çemberi' oluşturur. Halkalı görünüm yalnızca Antarktika'dan izlenir.",
+ vis:(la)=>la<-30?"part":"no",vt:"Antarktika (halkalı); Güney Amerika/Afrika'nın güney uçları (parçalı)"},
+{d:"2026-03-03",n:"Tam Ay Tutulması (Kanlı Ay)",i:"🌕🔴",
+ t:"Ay, Dünya'nın gölgesine tamamen girerek kızıl renge bürünür.",
+ vis:(la,lo)=>(lo>60||lo<-60)?"yes":"no",vt:"Doğu Asya, Avustralya, Pasifik, Kuzey Amerika — Türkiye'den izlenemez"},
+{d:"2026-08-12",n:"TAM GÜNEŞ TUTULMASI",i:"🌑☀️",
+ t:"2026'nın en büyük olayı! Tam tutulma kuşağı Grönland, İzlanda ve İspanya'dan geçer. Avrupa'nın büyük kısmı ile Türkiye'nin batısından gün batımına yakın PARÇALI olarak izlenebilir.",
+ vis:(la,lo)=>{if(la>35&&la<70&&lo>-25&&lo<5)return"yes";if(la>30&&la<72&&lo>-60&&lo<32)return"part";return"no";},
+ vt:"Tam: İzlanda, İspanya, Grönland · Parçalı: Avrupa, K. Afrika, Türkiye'nin batısı (gün batımında)"},
+{d:"2026-08-28",n:"Parçalı Ay Tutulması",i:"🌗",
+ t:"Ay'ın önemli bir bölümü Dünya'nın gölgesinden geçer; çıplak gözle rahatça izlenir.",
+ vis:(la,lo)=>(lo>-120&&lo<60)?"yes":"part",vt:"Amerika, Avrupa, Afrika ve Türkiye'nin tamamından görülebilir"},
+{d:"2026-10-03",n:"Satürn Karşı Konumda (Opozisyon)",i:"🪐",
+ t:"Satürn ve halkaları yıl boyunca en parlak halinde; küçük bir teleskopla halkalar seçilebilir.",
+ vis:()=>"yes",vt:"Tüm dünyadan görülebilir"},
+{d:"2026-11-24",n:"Süper Dolunay",i:"🌕✨",
+ t:"Dolunay, Ay'ın yörüngesindeki en yakın noktasına (perigee) denk gelir; normalden büyük ve parlak görünür.",
+ vis:()=>"yes",vt:"Tüm dünyadan görülebilir"}
+];
+
+function fmtDate(d){return `${d.getDate()} ${AY[d.getMonth()]} ${d.getFullYear()}`;}
+function fmtShort(d){return `${d.getDate()} ${AY[d.getMonth()]}`;}
+function dayDiff(a,b){return Math.round((b-a)/86400000);}
+
+function showerEvents(loc,fromD,toD){
+  const out=[];
+  const years=[fromD.getFullYear(),toD.getFullYear()];
+  for(const y of [...new Set(years)]){
+    for(const s of SHOWERS){
+      const peak=new Date(y,s[1],s[2]);
+      if(peak<fromD||peak>toD)continue;
+      const hemi=s[6];
+      let v="yes",vt="Bölgenden izlenebilir";
+      if(hemi==="N"&&loc.lat<-15){v="no";vt="Ağırlıklı kuzey yarımküre yağmuru — bölgenden zayıf görünür";}
+      if(hemi==="N"&&loc.lat>=-15&&loc.lat<10){v="part";vt="Bölgenden kısmen izlenebilir (radyant ufka yakın)";}
+      if(hemi==="S"&&loc.lat>15){v="part";vt="Güney ağırlıklı yağmur — bölgenden düşük ufukta izlenir";}
+      const act=`${s[3][1]} ${AY[s[3][0]]} – ${s[4][1]} ${AY[s[4][0]]}`;
+      out.push({date:peak,icon:"☄️",title:s[0],
+        desc:`${s[7]} Saatte ~${s[5]} meteor (ideal koşulda). Aktif dönem: ${act}. En iyi gözlem: şehir ışıklarından uzakta, gece yarısından sonra.`,
+        vis:v,vtext:vt});
+    }
+  }
+  return out;
+}
+function moonEvents(fromD,toD){
+  const out=[];
+  for(const dt of phaseDates(fromD,toD,0.5)){
+    out.push({date:dt,icon:"🌕",title:`Dolunay — "${DOLUNAY_ADLARI[dt.getMonth()]}"`,
+      desc:"Ay tam evrede; gece boyunca gökyüzünü aydınlatır. Ay kraterlerini dürbünle incelemek için güzel bir gece (ama meteor gözlemi için parlaklık dezavantaj).",
+      vis:"yes",vtext:"Tüm dünyadan görülebilir"});
+  }
+  for(const dt of phaseDates(fromD,toD,0)){
+    out.push({date:dt,icon:"🌑",title:"Yeni Ay — En Karanlık Gece",
+      desc:"Ay görünmez; gökyüzü ay ışığından arınır. Samanyolu, galaksiler ve meteor gözlemi için AYIN EN İYİ gecesi!",
+      vis:"yes",vtext:"Gözlem koşulu: tüm dünya"});
+  }
+  return out;
+}
+function staticEvents(loc,fromD,toD){
+  const out=[];
+  for(const e of EVENTS_2026){
+    const dt=new Date(e.d+"T20:00:00");
+    if(dt<fromD||dt>toD)continue;
+    const v=e.vis(loc.lat,loc.lon);
+    out.push({date:dt,icon:e.i,title:e.n,desc:e.t,vis:v,
+      vtext:(v==="yes"?"✓ Bölgenden görülebilir · ":v==="part"?"◑ Bölgenden kısmen görülebilir · ":"✗ Bölgenden görülemez · ")+e.vt});
+  }
+  return out;
+}
+function collectEvents(loc,fromD,toD){
+  return [...showerEvents(loc,fromD,toD),...moonEvents(fromD,toD),...staticEvents(loc,fromD,toD)]
+    .sort((a,b)=>a.date-b.date);
+}
+
+function renderEvents(list,now,mode){
+  if(!list.length)return `<div class="empty">${mode==='today'?"Bugün bölgende kayda değer bir astronomik olay yok — ama yaklaşan olaylara göz at! 🔭":"Bu aralıkta kayıtlı olay bulunamadı."}</div>`;
+  return list.map(e=>{
+    const dd=dayDiff(now,e.date);
+    let when=fmtDate(e.date);
+    if(mode==='future'&&dd>0)when+=` · ${dd} gün sonra`;
+    if(mode==='past'&&dd<0)when+=` · ${-dd} gün önce`;
+    if(dd===0)when+=" · BUGÜN 🎉";
+    const vc=e.vis==="yes"?"v-yes":e.vis==="part"?"v-part":"v-no";
+    return `<div class="evt">
+      <div class="ico">${e.icon}</div>
+      <div>
+        <div class="tit">${e.title}</div>
+        <div class="dt">📅 ${when}</div>
+        <div class="dsc">${e.desc}</div>
+        <span class="visib ${vc}">${e.vtext}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+let currentTab='today';
+function renderAstro(loc){
+  const box=document.getElementById('astroBox');
+  const now=new Date();now.setHours(12,0,0,0);
+  const t0=new Date(now);t0.setHours(0,0,0,0);
+  const t1=new Date(now);t1.setHours(23,59,59,0);
+  const monthAgo=new Date(now);monthAgo.setDate(monthAgo.getDate()-31);
+  const future=new Date(now);future.setDate(future.getDate()+120);
+
+  /* Ay şeridi: bugünkü evre + sıradaki evreler */
+  const age=moonAge(new Date());
+  const nextFull=phaseDates(now,future,0.5)[0],nextNew=phaseDates(now,future,0)[0];
+  const illum=Math.round((1-Math.cos(2*Math.PI*age/SYNODIC))/2*100);
+  document.getElementById('moonStrip').innerHTML=`
+    <div class="moon-chip"><div class="e">${moonEmoji(age)}</div><div class="n">Bugün: ${moonName(age)} · %${illum} aydınlık</div></div>
+    <div class="moon-chip"><div class="e">🌕</div><div class="n">Sonraki dolunay: ${fmtShort(nextFull)}</div></div>
+    <div class="moon-chip"><div class="e">🌑</div><div class="n">Sonraki yeni ay: ${fmtShort(nextNew)}</div></div>`;
+
+  let list,mode=currentTab;
+  if(mode==='today'){
+    list=collectEvents(loc,t0,t1);
+    /* bugün aktif olan meteor yağmuru dönemlerini de göster */
+    const y=now.getFullYear();
+    for(const s of SHOWERS){
+      let a=new Date(y,s[3][0],s[3][1]),b=new Date(y,s[4][0],s[4][1]);
+      if(b<a)a=new Date(y-1,s[3][0],s[3][1]);
+      const peak=new Date(y,s[1],s[2]);
+      if(now>=a&&now<=b&&dayDiff(now,peak)!==0){
+        const dd=dayDiff(now,peak);
+        list.push({date:now,icon:"☄️",title:`${s[0]} şu an AKTİF`,
+          desc:`${s[7]} Tepe gecesi: ${fmtShort(peak)}${dd>0?` (${dd} gün sonra)`:dd<0?` (${-dd} gün önce geçti, hâlâ meteor düşüyor)`:""}.`,
+          vis:s[6]==="N"&&loc.lat<-15?"no":"yes",
+          vtext:s[6]==="N"&&loc.lat<-15?"Kuzey yarımküre ağırlıklı":"Bu gece bölgenden meteor görme şansın var"});
+      }
+    }
+  }
+  else if(mode==='future')list=collectEvents(loc,t1,future);
+  else list=collectEvents(loc,monthAgo,t0);
+  if(mode==='past')list.reverse();
+  box.innerHTML=renderEvents(list,now,mode);
+}
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');currentTab=b.dataset.tab;
+    if(LOC)renderAstro(LOC);
+  });
+});
+
+/* ═══════════════ ANA AKIŞ ═══════════════ */
+function setLocation(loc){
+  LOC=loc;
+  const badge=document.getElementById('locBadge');
+  badge.style.display='block';
+  badge.innerHTML=`Seçili bölge: <b>${loc.name}</b>${loc.country&&!loc.name.includes(loc.country)?" — "+loc.country:""} <span style="color:var(--muted)">(${loc.lat.toFixed(2)}°, ${loc.lon.toFixed(2)}°)</span>`;
+  document.getElementById('content').style.display='grid';
+  loadWeather(loc);
+  renderAstro(loc);
+  document.getElementById('content').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
