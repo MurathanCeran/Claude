@@ -183,7 +183,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:40px;lin
   </div>
 
   <footer>
-    Hava verileri <b>Open-Meteo</b> açık API'sinden canlı çekilir · Astronomik takvim yerleşiktir ve ay evreleri anlık hesaplanır.<br>
+    Hava verileri <b>Open-Meteo</b> açık API'sinden canlı çekilir; erişilemezse bölge/mevsime göre yaklaşık tahmine düşülür, uygulama her koşulda çalışır · Astronomik takvim yerleşiktir ve ay evreleri anlık hesaplanır.<br>
     Tutulma görünürlükleri bölgesel yaklaşık değerlendirmedir; kesin saatler için yerel gözlemevi kaynaklarına bakınız.
   </footer>
 </div>
@@ -388,7 +388,7 @@ async function doSearch(){
       b.onclick=()=>{box.style.display='none';setLocation({name:res.name+(res.admin1?" ("+res.admin1+")":""),country:res.country||"",lat:res.latitude,lon:res.longitude});};
       box.appendChild(b);
     });
-  }catch(e){box.innerHTML='<div class="err">Arama başarısız — internet bağlantısını kontrol et.</div>';}
+  }catch(e){box.innerHTML='<div class="err">Arama şu an çalışmıyor — yukarıdaki ülke/il listelerinden seçim yapabilirsin.</div>';}
 }
 document.getElementById('btnSearch').addEventListener('click',doSearch);
 document.getElementById('txtSearch').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
@@ -418,24 +418,79 @@ function uvInfo(u){
 const GUN=["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
 const AY=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 
-async function loadWeather(loc){
-  const box=document.getElementById('weatherBox');
-  box.className='loading pulse';box.textContent='Hava verileri çekiliyor…';
-  try{
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
-      +`&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,uv_index`
-      +`&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,relative_humidity_2m_mean,precipitation_probability_max,sunrise,sunset`
-      +`&timezone=auto&forecast_days=7`;
-    let r=await fetch(url);let d=await r.json();
-    if(!d.current){
-      // bazı sunucular günlük nem ortalamasını desteklemeyebilir — onsuz tekrar dene
-      r=await fetch(url.replace(",relative_humidity_2m_mean",""));d=await r.json();
-    }
-    if(!d.current)throw new Error("veri yok");
+/* Basit tohumlu (seeded) rastgele sayı üreteci — aynı konum+gün için aynı sonucu verir */
+function seedFromStr(str){let h=0;for(let i=0;i<str.length;i++){h=(h<<5)-h+str.charCodeAt(i);h|=0;}return h;}
+function mulberry32(seed){
+  return function(){seed|=0;seed=seed+0x6D2B79F5|0;
+    let t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;};
+}
+/* Konum + mevsime göre yaklaşık gün doğumu/batımı saati (basit gün uzunluğu modeli) */
+function estimateSunTimes(lat,dayOfYear){
+  const decl=23.44*Math.sin((360/365*(dayOfYear-81))*Math.PI/180);
+  let cosH=-Math.tan(lat*Math.PI/180)*Math.tan(decl*Math.PI/180);
+  cosH=Math.max(-1,Math.min(1,cosH));
+  const H=Math.acos(cosH)*180/Math.PI;
+  const daylight=2*H/15;
+  const sr=12-daylight/2,ss=12+daylight/2;
+  const fmt=h=>{h=((h%24)+24)%24;const hh=Math.floor(h),mm=Math.round((h-hh)*60);return String(hh).padStart(2,'0')+":"+String(mm).padStart(2,'0');};
+  return[fmt(sr),fmt(ss)];
+}
+/* Canlı API'ye ulaşılamazsa konuma/mevsime göre gerçekçi bir hava tahmini üretir (uygulamayı asla durdurmaz) */
+function generateFallbackWeather(loc){
+  const today=new Date();
+  const dayOfYear=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
+  const rnd=mulberry32(seedFromStr(`${loc.lat.toFixed(2)}_${loc.lon.toFixed(2)}_${today.toISOString().slice(0,10)}`));
+  const isNorth=loc.lat>=0;
+  const peakDay=isNorth?200:200-182.5;
+  const baseTemp=27-0.42*Math.abs(loc.lat);
+  const amplitude=1.2+0.22*Math.abs(loc.lat);
+  const seasonFactor=Math.cos(2*Math.PI*(dayOfYear-peakDay)/365);
+  const codes=[0,1,2,3,51,61,80,95];
+  const weights=[.22,.22,.2,.16,.08,.07,.04,.01];
+  function pickCode(r){let acc=0;for(let i=0;i<codes.length;i++){acc+=weights[i];if(r<acc)return codes[i];}return 0;}
+  const daily={time:[],weather_code:[],temperature_2m_max:[],temperature_2m_min:[],uv_index_max:[],relative_humidity_2m_mean:[],precipitation_probability_max:[],sunrise:[],sunset:[]};
+  for(let i=0;i<7;i++){
+    const dt=new Date(today);dt.setDate(dt.getDate()+i);
+    const ds=dt.toISOString().slice(0,10);
+    const doy=dayOfYear+i;
+    const t=baseTemp+amplitude*Math.cos(2*Math.PI*(doy-peakDay)/365)+(rnd()-.5)*3;
+    const code=pickCode(rnd());
+    // Ekvatora yakın bölgelerde UV yıl boyu yüksek ve neredeyse sabittir; sezonsal salınım yalnızca enleme göre büyür
+    const uvBase=8-0.05*Math.abs(loc.lat);
+    const uvAmplitude=3*Math.abs(loc.lat)/90;
+    const uv=Math.max(0,Math.min(11,uvBase+uvAmplitude*seasonFactor+(rnd()-.5)*0.8));
+    const [sr,ss]=estimateSunTimes(loc.lat,doy);
+    daily.time.push(ds);
+    daily.weather_code.push(code);
+    daily.temperature_2m_max.push(t+2+rnd()*2);
+    daily.temperature_2m_min.push(t-3-rnd()*2);
+    daily.uv_index_max.push(uv);
+    daily.relative_humidity_2m_mean.push(Math.round(40+rnd()*40+(code>=51?15:0)));
+    daily.precipitation_probability_max.push(code>=61?Math.round(40+rnd()*50):code>=51?Math.round(10+rnd()*30):Math.round(rnd()*15));
+    daily.sunrise.push(ds+"T"+sr);
+    daily.sunset.push(ds+"T"+ss);
+  }
+  const cTemp=(daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2;
+  const current={
+    temperature_2m:cTemp,
+    apparent_temperature:cTemp+(rnd()-.5)*2,
+    relative_humidity_2m:daily.relative_humidity_2m_mean[0],
+    weather_code:daily.weather_code[0],
+    wind_speed_10m:4+rnd()*22,
+    surface_pressure:1006+rnd()*18,
+    uv_index:daily.uv_index_max[0]
+  };
+  return{current,daily,simulated:true};
+}
+
+function renderWeather(d,box){
     const c=d.current,[desc,icon]=wmo(c.weather_code);
     const [uvV,uvC,uvT]=uvInfo(c.uv_index);
     const sr=d.daily.sunrise[0].slice(11,16),ss=d.daily.sunset[0].slice(11,16);
-    let html=`
+    let html=d.simulated?`<div class="hint" style="margin-bottom:12px">⚠️ Canlı hava verisine şu an ulaşılamadı — bölge ve mevsime göre yaklaşık bir tahmin gösteriliyor.</div>`:``;
+    html+=`
     <div class="now">
       <div class="big-icon">${icon}</div>
       <div>
@@ -466,9 +521,26 @@ async function loadWeather(loc){
     }
     html+=`</div>`;
     box.className='';box.innerHTML=html;
+}
+
+async function loadWeather(loc){
+  const box=document.getElementById('weatherBox');
+  box.className='loading pulse';box.textContent='Hava verileri çekiliyor…';
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
+      +`&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,surface_pressure,uv_index`
+      +`&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,relative_humidity_2m_mean,precipitation_probability_max,sunrise,sunset`
+      +`&timezone=auto&forecast_days=7`;
+    let r=await fetch(url);let d=await r.json();
+    if(!d.current){
+      // bazı sunucular günlük nem ortalamasını desteklemeyebilir — onsuz tekrar dene
+      r=await fetch(url.replace(",relative_humidity_2m_mean",""));d=await r.json();
+    }
+    if(!d.current)throw new Error("veri yok");
+    renderWeather(d,box);
   }catch(e){
-    box.className='err';
-    box.textContent='Hava verileri alınamadı. İnternet bağlantısını kontrol edip tekrar dene.';
+    // API'ye ulaşılamıyor — uygulamayı durdurmak yerine yaklaşık tahmine düş
+    renderWeather(generateFallbackWeather(loc),box);
   }
 }
 
