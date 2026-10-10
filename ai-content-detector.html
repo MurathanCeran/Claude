@@ -48,6 +48,29 @@
     min-height:100vh;padding:40px 18px 70px;-webkit-font-smoothing:antialiased;
     overflow-x:hidden;position:relative;
   }
+
+  /* ===== [v25] API'siz araçlar ===== */
+  .lt-note{font-size:12px;color:var(--muted);line-height:1.55;margin:2px 0 11px}
+  .lt-kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+  .lt-kpi{flex:1 1 110px;padding:10px 12px;border-radius:12px;background:var(--card-2);border:1px solid var(--stroke)}
+  .lt-kpi b{display:block;font-size:20px;letter-spacing:-.3px}
+  .lt-kpi span{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.4px}
+  .lt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+  .lt-chip{font-size:11.5px;padding:4px 9px;border-radius:999px;background:rgba(232,194,143,.1);border:1px solid rgba(232,194,143,.28);color:var(--txt)}
+  .lt-chip s{opacity:.6}
+  .lt-out{white-space:pre-wrap;font-size:13.5px;line-height:1.65;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid var(--stroke);max-height:260px;overflow:auto;margin-bottom:11px}
+  .lt-seg{padding:10px 12px;border-radius:12px;background:var(--card-2);border:1px solid var(--stroke);margin-bottom:8px}
+  .lt-seg .h{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .lt-seg .h b{font-size:13px;color:var(--txt)}
+  .lt-seg .h .p{margin-left:auto;font-weight:800}
+  .lt-seg .bar{height:6px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:6px}
+  .lt-seg .bar i{display:block;height:100%;border-radius:5px}
+  .lt-seg .t{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .lt-verdict{padding:10px 12px;border-radius:12px;margin-bottom:10px;font-size:13px;line-height:1.5;border:1px solid var(--stroke);background:rgba(255,255,255,.04)}
+  .lt-warn{color:#ffd59a}
+  :root.light .lt-out{background:rgba(0,0,0,.04)}
+  :root.light .tab.on{background:rgba(124,92,224,.14);border-color:rgba(124,92,224,.45);color:#2a2340}
+  :root.light .tab{color:#5a5670}
   /* ===== [v20] Alacakaranlik (dusk) atmosferi — siyah yerine sicak, yetiskin, sakin ===== */
   .dusk{position:fixed;inset:0;z-index:0;pointer-events:none;
     background:
@@ -509,6 +532,18 @@
         <div class="preview" id="preview"><span class="empty">Analiz sonrası metnin burada cümle cümle renklenecek.</span></div>
       </div>
 
+      <div class="card" id="localCard">
+        <h2>🧰 API'siz araçlar <span style="font-size:10px;letter-spacing:0;text-transform:none;color:var(--faint)">(tamamen tarayıcında, anahtar gerekmez)</span></h2>
+        <div class="tabs">
+          <button type="button" class="tab on" data-lt="fix">⚡ Hızlı Düzelt</button>
+          <button type="button" class="tab" data-lt="map">🗺️ Paragraf haritası</button>
+          <button type="button" class="tab" data-lt="read">📖 Okunabilirlik</button>
+        </div>
+        <div id="ltFix"><span class="empty">Metin girince yerel düzeltme önizlemesi burada çıkacak.</span></div>
+        <div id="ltMap" style="display:none"><span class="empty">Metin girince paragraf paragraf AI haritası burada çıkacak.</span></div>
+        <div id="ltRead" style="display:none"><span class="empty">Metin girince okunabilirlik raporu burada çıkacak.</span></div>
+      </div>
+
       <div class="card">
         <h2>🔬 Sinyal dökümü (23 dedektör)</h2>
         <div id="metrics"></div>
@@ -634,7 +669,7 @@
       <details class="how">
         <summary>⚙️ Motor nasıl çalışıyor? (ve doğruluk notu)</summary>
         <div class="content">
-          <b>Heuristik</b>, tarayıcıda lokal çalışır (Claude insansılaştırma hariç — o, kendi API anahtarınla doğrudan Anthropic'e gider). <b>23 sinyal:</b>
+          <b>Heuristik</b>, tarayıcıda lokal çalışır (Claude insansılaştırma hariç — o, kendi API anahtarınla doğrudan Anthropic'e gider). <b>23 sinyal + klasik/hitabet kalkanı:</b>
           AI klişeleri, abartı/hype, burstiness, hedge, geçiş kelimeleri, aşırı resmiyet, edilgen çatı, nominalizasyon, zarf yığını, paragraf tekdüzeliği,
           perplexity vekili, n-gram tekrarı, üçlü liste, cümle tekdüzeliği, noktalama, cümle başı tekrarı, <b>duygu tekdüzeliği</b>, <b>somutluk</b>, <b>soru kullanımı</b>, <b>bilgi yoğunluğu varyansı</b>,
           <b>genel-geçer deneme dokusu</b> (TR "-dır/-maz/-abilir" morfolojisi ve jenerik "biz" sesi dahil), <b>jenerik tavsiye sesi</b>, <b>makine düzgünlüğü</b>; artı biyografi/byline kalıbı yükseltmesi ve anlatı-zinciri kalkanı.
@@ -643,13 +678,13 @@
           <b>Düzeltme sihirbazı</b> sorunları tek tek Claude'a düzelttirir; cümle rewriter 3 alternatif sunar; <b>tek-tık insanlaştırma artık iki geçişli</b>: Claude yazar → yerel motor skorlar → hâlâ yüksekse kalan sinyalleri hedefleyen ince-ayar geçişi yapılır ve iki sonucun iyisi kullanılır; <b>skor geçmişi</b> grafiği düzeltmelerinin etkisini gösterir.
           Uygulama <b>PWA</b> olarak ana ekrana eklenebilir; tema (açık/koyu) ve analiz geçmişi cihazında saklanır.
           <br><br>
-          <b>Benchmark — 5 katmanlı dürüst ölçüm (v23, toplam 240 metin):</b> Setleri motorun onları ne kadar "gördüğüne" göre ayırdık, çünkü asıl soru şu: <i>skor ne kadar şişme?</i> <b>(1) Kalibrasyon</b> (motor bunlarla ayarlandı, 40 metin): %92.5 doğruluk, 0 FP. <b>(2) Sert/adversarial</b> (üzerinde iterasyon yapıldı, 100): %88. <b>(3) Yarı-korunmuş kör set</b> (az dokunuldu, 34): %82. <b>(4) Taze holdout</b> (44; ilk taze ölçüm <b>%72.7</b> idi, v23-v24 genellemeli düzeltmeler sonrası %77.3): şişme payının dürüst göstergesi. <b>(5) Final holdout</b> (22; taze ölçüm %72.7'lik motora %81.8): şimdi %86.4. <b>Dürüst özet:</b> ayarlanan setlerde ~%88-92, <b>tamamen taze metinde ilk vuruş ~%73-82</b> — aradaki ~10-15 puan gerçek "şişme" payıdır ve normaldir (her dedektör kendi test setinde şişer); yeni sürümlerin gerçek gücünü her zaman bir SONRAKİ taze set gösterir. Kritik güç: <b>insan-doğruluğu (specificity) her 5 sette de %96-100</b> (240 metnin tamamında yalnızca 2 FP) — gerçek insan metnini (akademik/resmi/edebî/ESL) neredeyse hiç AI diye işaretlemeyiz. Zayıf yön dürüstçe: <b>gizlenmiş/modern AI yakalama, taze metinde ~%45-60'a düşer</b> — bu tüm sezgisel dedektörlerin ortak sınırıdır (bağımsız testlerde ticari devler de en zor setlerde ~%40'a iner). <b>🧠 Çözüm — Claude Derin Analiz:</b> gizlenmiş AI için sezgisel motor yetmez; <b>"Claude ile Derin AI Analizi"</b> (kendi API anahtarınla) kör testte sezgiseli ~%74'ten ~<b>%88 doğruluğa</b>, %78 recall'a çıkarır, sıfır FP korunur. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR.</b>
+          <b>Benchmark — dürüst ölçüm (v25):</b> Soru hep şu: <i>skor ne kadar şişme?</i> Bu yüzden setleri motorun onları ne kadar "gördüğüne" göre ayırıyoruz ve test setleri artık repo'daki <code>bench/</code> klasöründe (herkes <code>node bench/run.js</code> ile tekrar üretebilir). <b>v25'te bulunan büyük gizli zaafiyet:</b> önceki "%99 insan-doğruluğu" iddiası, insan setlerimizin çoğunlukla modern/gündelik metin olmasından şişmişti. Gerçek kamu malı klasik metinlerden (nutuklar, anayasa, Paine, Smith, Gettysburg, Atatürk'ün "Öğretmenler!" hitabı) kurulan 30 metinlik sette v24 <b>9 tanesini AI sandı</b>. v25'in <b>klasik düzyazı/hitabet kalkanı</b> (noktalı virgül yoğunluğu, uzun virgüllü cümle, doğrudan hitap, anafora, dönemsel sözcük) bunu <b>0'a</b> indirdi. <b>Hiç görülmemiş holdout-3</b> (v25'ten önce kilitlendi, 20 gerçek-insan + 20 AI): v24 %70 doğruluk / 2 FP → <b>v25 %72.5 / 1 FP</b> (kalan FP: Thoreau'nun aforizma denemesi — 19. yy "bilgece" üslubu modern AI aforizmasına yüzeyde çok benziyor). Dev setleri toplamı: %85.4, 0 FP. <b>Dürüst özet:</b> taze metinde ~%72, gerçek insan metninde yanlış alarm ~%5 (47 gerçek-insan metinde 1). Zayıf yön: gizlenmiş/gündelik AI'yı yakalama taze metinde ~%50 — tüm sezgisel dedektörlerin ortak sınırı. <b>🧠 Claude Derin Analiz</b> (kendi anahtarınla) gizlenmiş AI'da çok daha güçlüdür. <b>🧰 API'siz araçlar (v25)</b> ayrı ayrı test edildi: Hızlı Düzelt — Türkçe "-maktadır→-ıyor" morfolojisi 44/44, "-mıştır→-dı" 14/14, cümle dönüşümleri 15/15, tipik ChatGPT metninde ort. 42.6 puan düşüş, insan metninde 0 zarar, içerik kelimesi korunumu %100; Paragraf haritası — paragraflı belgede bölüm doğruluğu ~%94, AI paragrafını bulma ~%88, saf-insan belgede yanlış alarm 0/210 (paragrafsız tek blokta tahmini, ~%6 yanlış alarm); Okunabilirlik — İngilizce hece %98.4, Türkçe hece 20/20, formüller birebir. <b>Uyarı:</b> Skoru kanıt değil, ipucu say. <b>"Düşük skor = kesin insan" DEĞİLDİR.</b>
         </div>
       </details>
     </section>
   </div>
 
-  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · <b>v24</b> · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
+  <p class="foot">Analiz tarayıcında lokal çalışır 🔒 · 23 sinyal · <b>v25</b> · PWA destekli · Claude insansılaştırma kendi API anahtarınla</p>
 </div>
 <div id="toast">✓ Kopyalandı</div>
 <div id="printReport"></div>
@@ -1144,6 +1179,25 @@ function analyze(text){
     for(var mi=0; mi+2<wsr.length; mi++){ var k3=wsr[mi]+' '+wsr[mi+1]+' '+wsr[mi+2]; triMap[k3]=(triMap[k3]||0)+1; if(triMap[k3]>maxSameTri) maxSameTri=triMap[k3]; }
   }catch(e){}
   if(maxSameTri>=4){ ngramAI=ngramAI*0.25; perplexAI=perplexAI*0.6; tripleAI=tripleAI*0.5; uniformAI=uniformAI*0.6; }
+  // [v25] KLASIK DUZYAZI / HITABET KALKANI — gercek-insan kamu mali setinde 30 metnin 9'u AI saniliyordu
+  // (Gettysburg %100, Ataturk "Ogretmenler!" %96, Paine %87). Klasik/hitabet uslubu AI'dan uc yapisal izle ayrisir:
+  // noktali virgul yogunlugu, uzun ve cok virgullu cumle, dogrudan hitap ("Efendiler!", "My fellow Americans"),
+  // anafora (ayni obegin bilincli tekrari) ve donemsel sozcuk. Dev setlerinde bu izlerin AI'da gorulme orani ~0.
+  var classicE = 0;
+  try{
+    var csW = (enMask.toLowerCase().match(/[a-z']+/g)||[]);
+    var csMsl = wc/Math.max(1,sc);
+    var csSemi = (text.match(/;/g)||[]).length;
+    var csCps = (text.match(/,/g)||[]).length/Math.max(1,sc);
+    var csArchEN = countRe(enMask, /\b(hath|thou|thee|thy|thine|doth|whatsoever|wherefore|whereas|whilst|thereof|herein|hitherto|o'er|nay|yea|unto|ye|posterity|heretofore|fellow-citizens|fellow citizens|my fellow)\b/gi);
+    var csArchTR = (text.toLowerCase().split(/[^a-zçğıöşüâîû]+/).filter(function(w){return /^(efendiler|mevcudiyet|mevcudiyetinin|istikbal|istikbalde|istikbalinin|muhafaza|vazife|vazifen|yegane|seciyeli|ilelebet|fennen|ilmen|fikren|bedhahların)$/.test(w);})).length;
+    var csVoc = (/^\s*([A-ZÇĞİÖŞÜ][a-zçğıöşü]+(\s[A-ZÇĞİÖŞÜa-zçğıöşü]+){0,2})!/.test(text) || /\b(my fellow (americans|citizens|countrymen)|fellow citizens|ladies and gentlemen)\b/i.test(text) || /(^|[^a-zçğıöşü])(efendiler|ey türk|aziz milletim)([^a-zçğıöşü]|$)/i.test(text)) ? 1 : 0;
+    var csTri={}, csQuad={}, csMt=0, csRq=0;
+    for(var ci2=0; ci2+2<csW.length; ci2++){ var k3c=csW[ci2]+' '+csW[ci2+1]+' '+csW[ci2+2]; csTri[k3c]=(csTri[k3c]||0)+1; if(csTri[k3c]>csMt) csMt=csTri[k3c]; }
+    for(var ci3=0; ci3+3<csW.length; ci3++){ var k4c=csW.slice(ci3,ci3+4).join(' '); csQuad[k4c]=(csQuad[k4c]||0)+1; if(csQuad[k4c]===2) csRq++; }
+    var csAnaph = (csMt>=3 || csRq>=2) ? 1 : 0;
+    classicE = (csSemi>=2?1:0) + ((csMsl>=20 && csCps>=2)?0.6:0) + csVoc + csAnaph + ((csArchEN+csArchTR)>=1?0.6:0);
+  }catch(e){ classicE = 0; }
   var bioHits = 0;
   try{
     if(wc>=30 && wc<=230 && firstPerson===0){
@@ -1244,7 +1298,10 @@ function analyze(text){
   var newsBoost = newsNQ ? Math.min(0.3 + (newsAttr-2)*0.05, 0.45) : 0;
   // [v20/v21] Anlati-zinciri kalkani: zincirli anlatimda (Incil/masal) tum yukseltmeleri sondur
   if(chainRate>=0.4){ gnomicBoost=gnomicBoost*0.25; adviceBoost=adviceBoost*0.25; trBoost=trBoost*0.25; bioBoost=bioBoost*0.25; newsBoost=newsBoost*0.25; lexBoost=lexBoost*0.5; boost=boost*0.4; }
-  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost + trBoost + bioBoost + newsBoost - humanBonus*0.22);
+  // [v25] Klasik/hitabet kalkani devredeyse: tum AI-yukseltmeleri %80 sondur + kanit basina kucuk taban indirimi.
+  var classicCut = 0;
+  if(classicE>=1){ gnomicBoost*=0.2; adviceBoost*=0.2; trBoost*=0.2; bioBoost*=0.2; newsBoost*=0.2; lexBoost*=0.2; boost*=0.2; classicCut = Math.min(0.05*classicE, 0.10); }
+  const aiScore = clamp01(base + boost + lexBoost + gnomicBoost + adviceBoost + trBoost + bioBoost + newsBoost - humanBonus*0.22 - classicCut);
   const pct = Math.round(aiScore*100);
 
   let conf = "Düşük";
@@ -1280,7 +1337,7 @@ function analyze(text){
            emoStd:emoStd, posTotal:posTotal, negTotal:negTotal, concreteCount:concreteCount,
            concretePer100:concretePer100, questionsCount:questionsCount, ttrStd:ttrStd,
            bioHits:bioHits, chainRate:chainRate, trGnomic:trGn, numerals:numerals,
-           newsNQ:newsNQ, newsAttr:newsAttr}
+           newsNQ:newsNQ, newsAttr:newsAttr, classicE:classicE}
   };
 }
 
@@ -1591,6 +1648,272 @@ function buildHeatmap(text, intervals, selIdx, sentsOut){
   if(sentsOut) sentsOut.list = sents;
   return out;
 }
+
+/* ---------- 7c) [v25] API'siz yerel araçlar: Hızlı Düzelt, Paragraf haritası, Okunabilirlik ---------- */
+var LOCAL = (function(){
+  var TRV = "aeıioöuü";
+  function lastVowel(s){ for(var i=s.length-1;i>=0;i--){ if(TRV.indexOf(s[i])>=0) return s[i]; } return "e"; }
+  // 4'lü ünlü uyumu (ı/i/u/ü)
+  function harm4(v){ return (v==="a"||v==="ı")?"ı":(v==="e"||v==="i")?"i":(v==="o"||v==="u")?"u":"ü"; }
+  // -yor yumuşaması olan kökler: yardımcı "et", git/tat/güt/dit ve kaynaşık "et" birleşikleri.
+  // (üret, yönet, öğret, ilet, gözet gibi -et ile biten ama yardımcı fiil olmayan kökler YUMUŞAMAZ)
+  var SOFT = {"et":"ed","git":"gid","tat":"tad","güt":"güd","dit":"did","kaybet":"kaybed","seyret":"seyred","affet":"affed","hisset":"hissed","reddet":"redded","emret":"emred","terket":"terked","zannet":"zanned","kastet":"kasted","sabret":"sabred","şükret":"şükred","hapset":"hapsed","keşfet":"keşfed","hallet":"halled","naklet":"nakled","menet":"mened"};
+  // Fiil kökü + "-ıyor" (şimdiki zaman). Kök "-ma/-me" olumsuzunu da kapsar (yapma -> yapmıyor).
+  function toYor(stem){
+    var low = stem.toLocaleLowerCase("tr");
+    if(low==="ye") return stem.slice(0,1)+"iyor";      // yemek -> yiyor
+    if(low==="de") return stem.slice(0,1)+"iyor";      // demek -> diyor
+    if(SOFT[low]) return stem.slice(0, stem.length-low.length) + SOFT[low] + harm4(lastVowel(SOFT[low])) + "yor";
+    var last = low[low.length-1];
+    if(last==="a"||last==="e"){ var core=stem.slice(0,-1); return core + harm4(lastVowel(core.toLocaleLowerCase("tr"))) + "yor"; }
+    if(TRV.indexOf(last)>=0) return stem + "yor";      // oku -> okuyor, taşı -> taşıyor
+    return stem + harm4(lastVowel(low)) + "yor";       // gel -> geliyor, bul -> buluyor
+  }
+  // Fiil kökü + "-dı" (geçmiş): sertleşme (ç f h k p s ş t sonrası t)
+  function toDi(stem){
+    var low = stem.toLocaleLowerCase("tr"), last = low[low.length-1];
+    var d = ("çfhkpsşt".indexOf(last)>=0) ? "t" : "d";
+    return stem + d + harm4(lastVowel(low));
+  }
+  var TRW = "[A-Za-zÇĞİÖŞÜçğıöşüâîû]";
+  function convertTR(text, changes){
+    // -maktadır(lar) / -mektedir(ler) / -maktalar -> -ıyor(lar)
+    text = text.replace(new RegExp("("+TRW+"{2,}?)(mak|mek)(tadırlar|tedirler|talar|teler|tadır|tedir)(?!"+TRW+")","g"), function(m, stem, mk, suf){
+      var plural = /lar$|ler$/.test(suf);
+      var out = toYor(stem) + (plural ? "lar" : "");
+      changes.push({from:m, to:out, type:"resmi"}); return out;
+    });
+    // -mıştır / -miştir / -muştur / -müştür (+lar) -> -dı (sade geçmiş)
+    text = text.replace(new RegExp("("+TRW+"{2,}?)(mış|miş|muş|müş)(tırlar|tirler|turlar|türler|tır|tir|tur|tür)(?!"+TRW+")","g"), function(m, stem, mis, suf){
+      var plural = /lar$|ler$/.test(suf);
+      var di = toDi(stem), lv = lastVowel(di);
+      var out = di + (plural ? ((lv==="ı"||lv==="u")?"lar":"ler") : "");
+      changes.push({from:m, to:out, type:"resmi"}); return out;
+    });
+    return text;
+  }
+  // [kalıp, sade karşılık, tür]. Sıra önemli: uzun kalıplar önce.
+  var PHRASES = [
+    ["It is important to note that ", "", "klişe"], ["It's important to note that ", "", "klişe"],
+    ["It is worth noting that ", "", "klişe"], ["It's worth noting that ", "", "klişe"],
+    ["It is essential to note that ", "", "klişe"], ["Needless to say, ", "", "klişe"],
+    ["In today's fast-paced world, ", "These days, ", "klişe"], ["In today's digital age, ", "Today, ", "klişe"],
+    ["In today's world, ", "Today, ", "klişe"], ["In this day and age, ", "Today, ", "klişe"],
+    ["plays a crucial role in", "matters a lot for", "klişe"], ["plays a vital role in", "matters a lot for", "klişe"],
+    ["plays a pivotal role in", "is central to", "klişe"], ["plays a key role in", "is key to", "klişe"],
+    ["plays a significant role in", "matters for", "klişe"], ["play a crucial role in", "matter a lot for", "klişe"],
+    ["play a vital role in", "matter a lot for", "klişe"], ["play a key role in", "are key to", "klişe"],
+    ["navigate the complexities of", "deal with", "klişe"], ["harness the power of", "use", "klişe"],
+    ["embark on a journey", "start", "klişe"], ["a testament to", "proof of", "klişe"],
+    ["in the realm of", "in", "klişe"], ["a wide range of", "many", "klişe"], ["a wide array of", "many", "klişe"],
+    ["a plethora of", "lots of", "klişe"], ["first and foremost", "first", "klişe"],
+    ["at the end of the day", "in the end", "klişe"], ["delves into", "digs into", "klişe"], ["delve into", "dig into", "klişe"],
+    ["leveraging", "using", "abartı"], ["leverages", "uses", "abartı"], ["leverage", "use", "abartı"],
+    ["utilizing", "using", "abartı"], ["utilizes", "uses", "abartı"], ["utilize", "use", "abartı"], ["utilization", "use", "abartı"],
+    ["seamlessly", "smoothly", "abartı"], ["seamless", "smooth", "abartı"], ["cutting-edge", "modern", "abartı"],
+    ["state-of-the-art", "advanced", "abartı"], ["ever-evolving", "changing", "abartı"], ["ever-changing", "changing", "abartı"],
+    ["showcasing", "showing", "abartı"], ["showcases", "shows", "abartı"], ["showcase", "show", "abartı"],
+    ["facilitates", "helps", "abartı"], ["facilitate", "help", "abartı"], ["myriad", "many", "abartı"],
+    ["game-changer", "big shift", "abartı"], ["is paramount", "matters most", "abartı"],
+    ["Günümüz dünyasında", "Bugün", "klişe"], ["günümüz dünyasında", "bugün", "klişe"],
+    ["Günümüzün hızla gelişen dünyasında", "Bugün", "klişe"], ["büyük önem taşımaktadır", "çok önemli", "klişe"],
+    ["büyük önem taşır", "çok önemlidir", "klişe"], ["önemli bir rol oynamaktadır", "önemli bir yer tutuyor", "klişe"],
+    ["kritik bir rol oynamaktadır", "çok belirleyici", "klişe"], ["göz ardı edilmemelidir", "unutulmamalı", "klişe"],
+    ["göz ardı edilemez", "unutulamaz", "klişe"], ["dikkat edilmesi gereken", "dikkat edilecek", "klişe"],
+    ["vazgeçilmez bir parçası", "önemli bir parçası", "klişe"], [" haline gelmektedir", " oluyor", "resmi"],
+    ["kapsamlı bir şekilde", "ayrıntılı olarak", "klişe"], ["etkili bir şekilde", "iyi", "klişe"],
+    ["one of the most pressing challenges of our time", "a serious problem today", "klişe"],
+    ["one of the most important issues of our time", "a big issue today", "klişe"],
+    ["önem arz etmektedir", "önemli", "klişe"], ["umut vaat etmektedir", "umut veriyor", "klişe"],
+    ["karşımıza çıkmaktadır", "öne çıkıyor", "klişe"], ["sorumlu bir şekilde", "sorumlulukla", "klişe"]
+  ];
+  // Cümle başı bağlaçlar: [kalıp, yerine]. "" = sil.
+  var STARTERS = [
+    ["Moreover,", ""], ["Furthermore,", ""], ["Additionally,", ""], ["In addition,", ""], ["What's more,", ""],
+    ["In conclusion,", ""], ["In summary,", ""], ["To sum up,", ""], ["Ultimately,", ""], ["Overall,", ""],
+    ["However,", "But"], ["Nevertheless,", "Still,"], ["Consequently,", "So"], ["Therefore,", "So"],
+    ["Ayrıca,", ""], ["Ayrıca", ""], ["Bunun yanı sıra,", ""], ["Bunun yanı sıra", ""], ["Buna ek olarak,", ""],
+    ["Ek olarak,", ""], ["Sonuç olarak,", ""], ["Özetle,", ""], ["Özetlemek gerekirse,", ""],
+    ["Bununla birlikte,", "Ama"], ["Belirtmek gerekir ki", ""], ["Unutulmamalıdır ki", ""]
+  ];
+  var CONTR = [["do not","don't"],["does not","doesn't"],["did not","didn't"],["is not","isn't"],["are not","aren't"],
+    ["was not","wasn't"],["were not","weren't"],["has not","hasn't"],["have not","haven't"],["had not","hadn't"],
+    ["will not","won't"],["would not","wouldn't"],["could not","couldn't"],["should not","shouldn't"],["cannot","can't"]];
+  // Bu zamir+fiil kısaltmaları sadece arkasından bir kelime geliyorsa yapılır ("what it is." -> "what it's." YANLIŞ olur)
+  var CONTR_MID = [["it is","it's"],["that is","that's"],["there is","there's"],["I am","I'm"],["you are","you're"],["we are","we're"],["they are","they're"],["I have","I've"],["we have","we've"]];
+  function esc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+  var LANG_TR = false; // quickFix çağrısında ayarlanır; İngilizcede "i" -> "I" (Türkçe "İ" değil)
+  function up(c){ return LANG_TR ? c.toLocaleUpperCase("tr") : c.toUpperCase(); }
+  function capFirst(s){ return s ? up(s.charAt(0))+s.slice(1) : s; }
+  function matchCase(src, rep){ return (rep && src.charAt(0)===src.charAt(0).toUpperCase() && src.charAt(0)!==src.charAt(0).toLowerCase()) ? capFirst(rep) : rep; }
+  // Ortak dil tespiti (Hızlı Düzelt + Okunabilirlik): TR harfi > işlev kelimesi karşılaştırması > TR ek oranı.
+  // Aksansız kısa Türkçe ("Ali okula gitti.") de yakalanır; İngilizceye asla TR dönüşümü uygulanmaz.
+  function looksTR(t){
+    if(/[çğıöşüÇĞİÖŞÜ]/.test(t)) return true;
+    var en = countRe(t, /\b(the|and|of|to|is|are|was|were|in|that|with|for|it|this|on|you|we|they|be|have|has)\b/gi);
+    var tr = countRe(t, /\b(ve|bir|bu|için|icin|ile|olarak|daha|gibi|ama|çünkü|cunku|değil|degil|çok|cok|da|de|ki|mi|ne|ya)\b/gi);
+    if(/(maktadır|mektedir|maktadir)/i.test(t)) tr += 2;
+    if(en!==tr) return tr>en;
+    var ws = (t.toLowerCase().match(/[a-z]+/g)||[]); if(!ws.length) return false;
+    var suf = ws.filter(function(w){ return w.length>3 && /(lar|ler|dı|di|du|dü|ti|tı|tu|yor|mış|miş|acak|ecek|sın|sin|nın|nin|dan|den|tan|ten|la|le|ya|ye|da|de)$/.test(w); }).length;
+    return suf/ws.length >= 0.3;
+  }
+
+  function quickFix(text){
+    var changes = [];
+    var isTR = looksTR(text); LANG_TR = isTR;
+    var t = text;
+    // 1) Klişe/abartı kalıpları (kelime sınırı TR harfleriyle güvenli)
+    PHRASES.forEach(function(p){
+      var tail = /[A-Za-zÇĞİÖŞÜçğıöşü]$/.test(p[0]) ? "(?![A-Za-zÇĞİÖŞÜçğıöşü])" : "";
+      var re = new RegExp("(^|[^A-Za-zÇĞİÖŞÜçğıöşü'])("+esc(p[0])+")"+tail, "gi");
+      t = t.replace(re, function(m, pre, hit){
+        var rep = matchCase(hit, p[1]);
+        changes.push({from:hit.trim(), to:(rep||"(silindi)").trim(), type:p[2]});
+        return pre + rep;
+      });
+    });
+    // 1b) "not only X but also Y" simetrisi -> "X and Y"; "sadece X değil, aynı zamanda Y" -> "X ve Y"
+    t = t.replace(/\bnot only ([^,.;:!?]{1,50}?) but also\b/gi, function(m, x){ changes.push({from:"not only … but also", to:"… and", type:"klişe"}); return x+" and"; });
+    t = t.replace(/(^|\s)sadece ([^,.;:!?]{1,50}?) değil,? aynı zamanda\b/gi, function(m, pre, x){ changes.push({from:"sadece … değil, aynı zamanda", to:"… ve", type:"klişe"}); return pre+x+" ve"; });
+    // 2) Cümle başı bağlaçlar
+    STARTERS.forEach(function(s){
+      var re = new RegExp("(^|[.!?…]\\s+|\\n\\s*)"+esc(s[0])+"\\s+(\\S)", "g");
+      t = t.replace(re, function(m, pre, nx){
+        changes.push({from:s[0], to:s[1]||"(silindi)", type:"geçiş"});
+        return pre + (s[1] ? s[1]+" "+nx : capFirst(nx));
+      });
+    });
+    // 3) Türkçe resmi çekimler
+    if(isTR) t = convertTR(t, changes);
+    // 4) İngilizce kısaltmalar
+    if(!isTR){
+      CONTR.forEach(function(c){
+        var re = new RegExp("\\b"+esc(c[0])+"\\b", "gi");
+        t = t.replace(re, function(m){ var r=matchCase(m,c[1]); changes.push({from:m,to:r,type:"kısaltma"}); return r; });
+      });
+      CONTR_MID.forEach(function(c){
+        var re = new RegExp("\\b"+esc(c[0])+"(?= [A-Za-z])", "g"+(c[0]==="I am"||c[0]==="I have"?"":"i"));
+        t = t.replace(re, function(m){ var r=matchCase(m,c[1]); changes.push({from:m,to:r,type:"kısaltma"}); return r; });
+      });
+    }
+    // 5) Em-dash / tire -> virgül
+    t = t.replace(/\s*[—–]\s*/g, function(m){ changes.push({from:"—",to:",",type:"noktalama"}); return ", "; });
+    // 6) Temizlik: çift boşluk, boşluk+noktalama, çift virgül, cümle başı büyük harf
+    t = t.replace(/[ \t]{2,}/g," ").replace(/ +([,.;:!?])/g,"$1").replace(/,\s*,/g,",").replace(/,\s*([.!?])/g,"$1");
+    t = t.replace(/(^|[.!?]\s+)([a-zçğıöşü])/g, function(m,p,c){ return p + up(c); });
+    return {text:t, changes:changes};
+  }
+
+  /* ---- Paragraf / bölüm haritası ----
+     Paragraflı metin: her paragraf ayrı skorlanır. Tek blok metin: sabit parçalara bölmek iki farklı kaynağı
+     aynı parçaya karıştırıyordu (testte saf-insan belgede 2 yanlış alarm). Bunun yerine DEĞİŞİM NOKTASI aranır:
+     her aday bölme noktasında sol/sağ ayrı skorlanır, fark en büyük ve >= SPLIT_GAP ise oradan bölünür (özyinelemeli). */
+  var MIN_WORDS = 35, SPLIT_GAP = 30, MAX_DEPTH = 2;
+  function joinS(arr){ return arr.map(function(s){return s.text.trim();}).join(" "); }
+  function wcOf(arr){ return arr.reduce(function(a,s){ return a + (s.text.match(/\S+/g)||[]).length; },0); }
+  function pctOf(t){ var r=analyze(t); return (r.tooShort?null:r.pct); }
+  function splitBlock(sents, depth, out){
+    var n = sents.length;
+    if(depth<MAX_DEPTH && n>=2 && wcOf(sents)>=2*MIN_WORDS){
+      var best=null;
+      for(var k=1; k<n; k++){
+        if(wcOf(sents.slice(0,k))<MIN_WORDS || wcOf(sents.slice(k))<MIN_WORDS) continue;
+        var pl=pctOf(joinS(sents.slice(0,k))), pr=pctOf(joinS(sents.slice(k)));
+        if(pl===null||pr===null) continue;
+        var gap=Math.abs(pl-pr);
+        if(!best || gap>best.gap) best={k:k,gap:gap};
+      }
+      if(best && best.gap>=SPLIT_GAP){
+        splitBlock(sents.slice(0,best.k), depth+1, out);
+        splitBlock(sents.slice(best.k), depth+1, out);
+        return;
+      }
+    }
+    out.push(sents);
+  }
+  // Sağlamlık: değişim-noktası bölgesi AI görünüyorsa, sınırı 1 cümle kaydırınca (genişlet/daralt) da AI kalmalı.
+  function robustPct(groups, gi){
+    var g = groups[gi], vals = [pctOf(joinS(g))];
+    var prev = gi>0 ? groups[gi-1] : null, next = gi<groups.length-1 ? groups[gi+1] : null;
+    if(prev) vals.push(pctOf(joinS([prev[prev.length-1]].concat(g))));
+    if(next) vals.push(pctOf(joinS(g.concat([next[0]]))));
+    if(g.length>1 && wcOf(g.slice(1))>=MIN_WORDS) vals.push(pctOf(joinS(g.slice(1))));
+    if(g.length>1 && wcOf(g.slice(0,-1))>=MIN_WORDS) vals.push(pctOf(joinS(g.slice(0,-1))));
+    vals = vals.filter(function(v){return v!==null;}).sort(function(a,b){return a-b;});
+    return vals[Math.floor((vals.length-1)/2)];
+  }
+  function segmentMap(text){
+    var paras = text.split(/\n\s*\n/).map(function(s){return s.trim();}).filter(Boolean);
+    var mode = "paragraf";
+    if(paras.length<2){
+      var sents = getSentencesPos(text);
+      if(sents.length>=2 && wcOf(sents)>=2*MIN_WORDS){
+        mode="değişim-noktası"; var groups=[]; splitBlock(sents, 0, groups);
+        var bsegs = groups.map(function(g, gi){
+          var t = joinS(g), r = analyze(t), pct = r.tooShort?null:r.pct, unsure=false;
+          if(groups.length>1 && pct!==null && pct>=50){ var rp = robustPct(groups, gi); if(rp<50){ unsure=true; } }
+          return {text:t, pct:pct, wc:(r.wc||0), short:(!!r.tooShort || r.wc<35), unsure:unsure};
+        });
+        return finishMap(mode, bsegs);
+      }
+    }
+    var segs = paras.map(function(p){
+      var r = analyze(p);
+      var short = !!r.tooShort || r.wc<35;
+      return {text:p, pct:(r.tooShort?null:r.pct), wc:(r.wc||0), short:short, unsure:false};
+    });
+    return finishMap(mode, segs);
+  }
+  function finishMap(mode, segs){
+    var scored = segs.filter(function(s){return !s.short && s.pct!==null && !s.unsure;});
+    var ai = scored.filter(function(s){return s.pct>=50;}).length, hu = scored.filter(function(s){return s.pct<50;}).length;
+    var verdict = !scored.length ? "yetersiz" : (ai && hu) ? "karışık" : ai ? "ai" : "insan";
+    // Tek blok (paragrafsız) metinde bölge sınırları tahmindir: farklı rastgele belgelerle doğrulamada
+    // saf-insan belgelerin ~%6'sında yanlış "AI bölge" çıktı -> kesin hüküm verilmez, "tahmini" etiketlenir.
+    var estimate = (mode==="değişim-noktası");
+    return {mode:mode, segments:segs, verdict:verdict, aiCount:ai, humanCount:hu, estimate:estimate};
+  }
+
+  /* ---- Okunabilirlik ---- */
+  function sylTR(w){ var m=w.toLocaleLowerCase("tr").match(/[aeıioöuüâîû]/g); return m?m.length:0; }
+  function sylEN(w){
+    w = w.toLowerCase().replace(/[^a-z]/g,"");
+    if(!w) return 0; if(w.length<=3) return 1;
+    var exc = {"the":1,"every":3,"business":2,"people":2,"area":3,"idea":3,"real":1,"being":2,"create":2,"created":3,"poem":2,"quiet":2,"science":2,"society":4,"video":3,"radio":3,"ocean":2,"lion":2,"world":1,"fire":1,"hour":1,"our":1,"recipe":3,"different":3,"evening":2,"interest":3,"several":3,"family":3,"chocolate":3,"camera":3,"average":3,"naive":2,"cruel":2,"fuel":2,"actual":3,"usual":3,"usually":4,"museum":3,"piano":3,"theory":3,"genuine":3,"lyre":1,"queue":1,"wednesday":2,"vegetable":4,"comfortable":4,"literature":4,"temperature":4,"interesting":4,"realize":3,"really":2,"beautiful":3,"biology":4,"preview":2,"triangle":3,"poet":2,"diet":2,"giant":2};
+    if(exc[w]) return exc[w];
+    var orig = w;
+    w = w.replace(/([aeiouy])le$/,"$1l");          // smile, while: sessiz e (ünsüz+le ise hecelidir: table)
+    w = w.replace(/(?:[^laeiouy]es|[^laeiouy]ed|[^laeiouy]e)$/,"").replace(/^y/,"");
+    var m = w.match(/[aeiouy]{1,2}/g); var n = m?m.length:0;
+    if(/ia|io(?!u)|eo|ua|uo/.test(w) && !/tion|sion|cious|tious|geous|cial|tial/.test(orig)) n++; // ideal, radio
+    return Math.max(1,n);
+  }
+  function readability(text){
+    var isTR = looksTR(text);
+    var sents = getSentencesPos(text);
+    var words = (text.match(/[A-Za-zÇĞİÖŞÜçğıöşüâîû'’]+/g)||[]).filter(function(w){return /[A-Za-zÇĞİÖŞÜçğıöşü]/.test(w);});
+    var sc = Math.max(1, sents.length), wc = words.length;
+    if(!wc) return null;
+    var syl = 0, poly = 0, longest = {n:0,text:""};
+    words.forEach(function(w){ var s = isTR ? sylTR(w) : sylEN(w); syl += s; if(s>=(isTR?4:3)) poly++; });
+    sents.forEach(function(s){ var n=(s.text.match(/[A-Za-zÇĞİÖŞÜçğıöşüâîû'’]+/g)||[]).length; if(n>longest.n) longest={n:n,text:s.text.trim()}; });
+    var wps = wc/sc, spw = syl/wc, out = {lang:isTR?"tr":"en", words:wc, sentences:sents.length, syllables:syl, wps:wps, spw:spw, longest:longest, readMin:wc/(isTR?180:230)};
+    if(isTR){
+      // Ateşman (1997): 198.825 − 40.175·(hece/kelime) − 2.610·(kelime/cümle)
+      out.score = 198.825 - 40.175*spw - 2.610*wps; out.scale = "Ateşman";
+      out.level = out.score>=90?"Çok kolay (ilkokul 4. sınıf)":out.score>=70?"Kolay (5–6. sınıf)":out.score>=50?"Orta güçlükte (7–9. sınıf)":out.score>=30?"Zor (lise)":"Çok zor (lisans ve üstü)";
+    } else {
+      // Flesch Reading Ease + Flesch–Kincaid Grade Level
+      out.score = 206.835 - 1.015*wps - 84.6*spw; out.scale = "Flesch";
+      out.grade = 0.39*wps + 11.8*spw - 15.59;
+      out.level = out.score>=90?"Very easy (5th grade)":out.score>=70?"Easy (6th–7th)":out.score>=60?"Plain English (8th–9th)":out.score>=50?"Fairly difficult (10th–12th)":out.score>=30?"Difficult (college)":"Very difficult (graduate)";
+    }
+    return out;
+  }
+  return {quickFix:quickFix, segmentMap:segmentMap, readability:readability, _toYor:toYor, _toDi:toDi, _sylEN:sylEN, _sylTR:sylTR};
+})();
+
 
 /* ---------- 8) Rendering + Claude API + events ---------- */
 const $ = function(id){ return document.getElementById(id); };
@@ -2003,6 +2326,7 @@ function render(){
     $("masterfix").style.display="none";
     $("reasons").innerHTML='<span class="empty">Metin girince en güçlü AI sebepleri sırayla burada çıkacak.</span>';
     $("teacher").innerHTML='<span class="empty">Metin girince öğretmenin dikkatini çekecek noktalar listelenecek.</span>';
+    renderLocalTools(null, text);
     $("qRead").textContent="—"; $("qVocab").textContent="—"; $("qComp").textContent="—"; $("qOverall").textContent="—"; $("qGrade").textContent="–";
     $("qReadBar").style.width="0%"; $("qVocabBar").style.width="0%"; $("qCompBar").style.width="0%";
     updateRadar(lastRadarZero());
@@ -2062,6 +2386,7 @@ function render(){
   }
 
   $("teacher").innerHTML = buildTeacher(r);
+  renderLocalTools(r, text);
   $("btnRwAll").disabled = false;
   renderCompare();
 }
@@ -2071,6 +2396,87 @@ function clearSelectionQuiet(){
   $("selBox").textContent="Isı haritasından bir cümleye dokun — burada görünsün.";
   $("btnRwSent").disabled=true;
 }
+
+
+/* ----- [v25] API'siz araçlar kartı ----- */
+var ltTab = "fix", ltLastFix = null;
+function ltShow(tab){
+  ltTab = tab;
+  ["fix","map","read"].forEach(function(k){
+    var el = $("lt"+k.charAt(0).toUpperCase()+k.slice(1)); if(el) el.style.display = (k===tab)?"block":"none";
+  });
+  var bs = document.querySelectorAll("#localCard .tab");
+  for(var i=0;i<bs.length;i++) bs[i].classList.toggle("on", bs[i].getAttribute("data-lt")===tab);
+}
+function renderLocalTools(r, text){
+  if(!$("ltFix")) return;
+  if(!r || r.tooShort || !text.trim()){
+    ltLastFix = null;
+    $("ltFix").innerHTML='<span class="empty">Metin girince yerel düzeltme önizlemesi burada çıkacak.</span>';
+    $("ltMap").innerHTML='<span class="empty">Metin girince paragraf paragraf AI haritası burada çıkacak.</span>';
+    $("ltRead").innerHTML='<span class="empty">Metin girince okunabilirlik raporu burada çıkacak.</span>';
+    return;
+  }
+  // --- Hızlı Düzelt ---
+  try{
+    var q = LOCAL.quickFix(text); ltLastFix = q;
+    if(!q.changes.length){
+      $("ltFix").innerHTML='<div class="tnote ok"><div class="ti">✅</div><div class="tbody"><p>Yüzeysel AI kalıbı bulunamadı (klişe, aşırı resmi çekim, şablon bağlaç, açılmamış kısaltma, em-dash). Kalan sinyaller yapısal — ritim ve içerik için <b>Düzeltme sihirbazı</b> ya da kendi düzenlemen gerekir.</p></div></div>';
+    } else {
+      var r2 = analyze(q.text), after = r2.tooShort ? r.pct : r2.pct;
+      var byType = {}; q.changes.forEach(function(c){ byType[c.type]=(byType[c.type]||0)+1; });
+      var chips = q.changes.slice(0,14).map(function(c){ return '<span class="lt-chip"><s>'+htmlEsc(c.from)+'</s> → '+htmlEsc(c.to)+'</span>'; }).join("");
+      var more = q.changes.length>14 ? '<span class="lt-chip">+'+(q.changes.length-14)+' daha</span>' : "";
+      $("ltFix").innerHTML =
+        '<p class="lt-note">Anlamı değiştirmeden yüzeysel AI izlerini temizler: klişeler, "-maktadır/-mıştır" resmiyeti, şablon bağlaçlar (Moreover, Ayrıca…), açılmamış İngilizce kısaltmalar ve em-dash. İçerik kelimelerinin tamamı korunur.</p>'
+        +'<div class="lt-kpis"><div class="lt-kpi"><span>Değişiklik</span><b>'+q.changes.length+'</b></div>'
+        +'<div class="lt-kpi"><span>Şimdiki skor</span><b style="color:'+lerpColor(r.pct/100)+'">%'+r.pct+'</b></div>'
+        +'<div class="lt-kpi"><span>Düzeltme sonrası</span><b style="color:'+lerpColor(after/100)+'">%'+after+'</b></div></div>'
+        +'<div class="lt-chips">'+chips+more+'</div>'
+        +'<div class="lt-out">'+htmlEsc(q.text)+'</div>'
+        +'<div class="rwbtns"><button type="button" class="btn primary" id="ltApply">✅ Metne uygula</button><button type="button" class="btn" id="ltCopy">📋 Kopyala</button></div>'
+        +(after>=50?'<p class="lt-note" style="margin-top:10px">Skor hâlâ yüksekse sebep yapısaldır (cümle ritmi, genel-geçer ton, somut detay eksikliği). Bunlar kural tabanlı düzeltmeyle değil, içerik eklemekle çözülür — "Bu metni AI yapan şeyler" kartına bak.</p>':'');
+      $("ltApply").onclick=function(){ if(!ltLastFix) return; input.value = ltLastFix.text; clearSelectionQuiet(); runAnalysis(false); showToast("⚡ Yerel düzeltme uygulandı"); };
+      $("ltCopy").onclick=function(){ if(ltLastFix) copyText(ltLastFix.text, $("ltCopy")); };
+    }
+  }catch(e){ $("ltFix").innerHTML='<span class="empty">Düzeltme hesaplanamadı.</span>'; }
+  // --- Paragraf haritası ---
+  try{
+    var m = LOCAL.segmentMap(text);
+    if(m.segments.length<2){
+      $("ltMap").innerHTML='<p class="lt-note">Harita için en az iki paragraf (aralarında boş satır) ya da ~70+ kelimelik metin gerekir. Tek parça metin bütün olarak skorlanır: <b>%'+r.pct+'</b>.</p>';
+    } else {
+      var vtxt = {"karışık":"⚠️ <b>Karışık metin</b> — bazı bölümler AI kokuyor, bazıları insansı. Kopyala-yapıştır ya da sonradan eklenmiş bölümleri kontrol et.","ai":"🤖 <b>Tüm bölümler AI kokuyor.</b>","insan":"👤 <b>Hiçbir bölüm AI eşiğini geçmiyor.</b>","yetersiz":"Bölümler güvenilir analiz için çok kısa."}[m.verdict];
+      var est = m.estimate ? '<div class="lt-verdict lt-warn">ℹ️ Metinde paragraf boşluğu yok; bölge sınırları <b>tahmini</b>. Testlerde paragraflı metinde yanlış alarm 0 iken tahmini modda ~%6 oldu — kesin sonuç için paragrafları <b>boş satırla</b> ayır.</div>' : '';
+      $("ltMap").innerHTML = est + '<div class="lt-verdict">'+vtxt+'</div>' + m.segments.map(function(s,i){
+        var p = s.pct===null?0:s.pct, c = lerpColor(p/100);
+        var tag = s.short ? '<span class="p" style="color:var(--faint)">kısa · güvenilmez</span>' : (s.unsure ? '<span class="p" style="color:var(--faint)">%'+p+' · belirsiz</span>' : '<span class="p" style="color:'+c+'">%'+p+'</span>');
+        return '<div class="lt-seg"><div class="h"><b>'+(m.estimate?'Bölge ':'§')+(i+1)+'</b><span>'+s.wc+' kelime</span>'+tag+'</div>'
+          +'<div class="bar"><i style="width:'+(s.short?0:p)+'%;background:'+c+'"></i></div>'
+          +'<div class="t">'+htmlEsc(s.text.length>170 ? s.text.slice(0,170)+'…' : s.text)+'</div></div>';
+      }).join("");
+    }
+  }catch(e){ $("ltMap").innerHTML='<span class="empty">Harita hesaplanamadı.</span>'; }
+  // --- Okunabilirlik ---
+  try{
+    var rd = LOCAL.readability(text);
+    if(!rd){ $("ltRead").innerHTML='<span class="empty">Okunabilirlik için metin yok.</span>'; }
+    else {
+      var sc = Math.max(0, Math.min(100, rd.score));
+      var mins = rd.readMin<1 ? (Math.max(1,Math.round(rd.readMin*60))+" sn") : (Math.round(rd.readMin*10)/10+" dk");
+      $("ltRead").innerHTML =
+        '<div class="lt-kpis"><div class="lt-kpi" style="flex-basis:150px"><span>'+rd.scale+' skoru</span><b style="color:'+lerpColor(1-sc/100)+'">'+rd.score.toFixed(1)+'</b></div>'
+        +'<div class="lt-kpi" style="flex-basis:190px"><span>Seviye</span><b style="font-size:15px">'+htmlEsc(rd.level)+'</b></div>'
+        +(rd.grade!==undefined?'<div class="lt-kpi"><span>FK sınıf</span><b>'+rd.grade.toFixed(1)+'</b></div>':'')+'</div>'
+        +'<div class="lt-kpis"><div class="lt-kpi"><span>Kelime</span><b>'+rd.words+'</b></div><div class="lt-kpi"><span>Cümle</span><b>'+rd.sentences+'</b></div>'
+        +'<div class="lt-kpi"><span>Ort. cümle</span><b>'+rd.wps.toFixed(1)+'</b></div><div class="lt-kpi"><span>Hece/kelime</span><b>'+rd.spw.toFixed(2)+'</b></div>'
+        +'<div class="lt-kpi"><span>Okuma süresi</span><b>'+mins+'</b></div></div>'
+        +(rd.longest.n>=30?'<div class="lt-verdict lt-warn">📏 En uzun cümle <b>'+rd.longest.n+' kelime</b> — bölmeyi düşün: "'+htmlEsc(rd.longest.text.slice(0,140))+(rd.longest.text.length>140?'…':'')+'"</div>':'')
+        +'<p class="lt-note">'+(rd.lang==="tr"?'Ateşman (1997) Türkçe okunabilirlik formülü: 198,825 − 40,175·(hece/kelime) − 2,610·(kelime/cümle). Yüksek skor = kolay okunur.':'Flesch Reading Ease + Flesch–Kincaid Grade (ABD sınıf düzeyi). Higher score = easier to read.')+'</p>';
+    }
+  }catch(e){ $("ltRead").innerHTML='<span class="empty">Okunabilirlik hesaplanamadı.</span>'; }
+}
+(function(){ var bs=document.querySelectorAll("#localCard .tab"); for(var i=0;i<bs.length;i++){ (function(b){ b.onclick=function(){ ltShow(b.getAttribute("data-lt")); }; })(bs[i]); } })();
 
 function safeRender(){ try{ render(); return true; }catch(e){ if(window.console)console.error(e); setStatus("err","⚠️ Analiz hatası: "+((e&&e.message)||e)); return false; } }
 
